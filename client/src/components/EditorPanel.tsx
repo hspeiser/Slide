@@ -46,17 +46,7 @@ const highlightState = StateField.define<DecorationSet>({
 // Custom cursor style
 const customCursor = EditorView.theme({
   ".cm-cursor": {
-    borderLeftWidth: "3px",
-    borderLeftColor: "hsl(var(--editor-cursor))",
-    animation: "blink 1.2s step-end infinite",
-    height: "1.6rem !important",
-    minHeight: "1.6rem !important",
-    boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.9)",
-    position: "absolute",
-    background: "hsla(var(--editor-cursor) / 0.15)",
-    width: "4px",
-    borderTopRightRadius: "2px",
-    borderBottomRightRadius: "2px"
+    borderLeft: "2px solid hsl(var(--editor-cursor))"
   },
   "@keyframes blink": {
     "from, to": { opacity: 1 },
@@ -124,7 +114,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
       const startState = EditorState.create({
         doc: content,
         extensions: [
-          // Use only specific parts of basicSetup to avoid auto-indent
+          // Use BasicSetup for better defaults
+          basicSetup,
           EditorState.tabSize.of(2),
           EditorState.allowMultipleSelections.of(true),
           EditorView.lineWrapping,
@@ -172,7 +163,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
     const newState = EditorState.create({
       doc: editorViewRef.current.state.doc,
       extensions: [
-        // Use only specific parts of basicSetup to avoid auto-indent
+        // Use BasicSetup for better defaults
+        basicSetup,
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
         EditorView.lineWrapping,

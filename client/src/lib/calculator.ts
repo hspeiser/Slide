@@ -269,42 +269,28 @@ function handleUnitCalculation(
  * Pre-process expressions for complex number notation
  */
 function preProcessComplexNumbers(expression: string): string {
-  // First, handle special cases for the entire expression
+  // Quick pass-through if no 'i' in the expression
+  if (!expression.includes('i')) {
+    return expression;
+  }
+  
   let processedExpr = expression.trim();
   
-  // Special case 1: Just the letter i by itself
+  // Special case: Just i by itself
   if (processedExpr === 'i') {
-    return 'i'; // Now properly defined at initialization
+    return 'i';
   }
   
-  // Special case 2: Easy form like 10i (direct coefficient)
-  const directCoefficient = /^(-?\d+\.?\d*)i$/.exec(processedExpr);
-  if (directCoefficient) {
-    const [, num] = directCoefficient;
-    return `${num}*i`; // For 10i, becomes 10*i
-  }
+  // Special case for variable references with "i" in them (like "sin")
+  // We need to avoid transforming those, so we handle simple cases directly
   
-  // Special case 3: Form with space like "10 i"
-  const spaceCoefficient = /^(-?\d+\.?\d*)\s+i$/.exec(processedExpr);
-  if (spaceCoefficient) {
-    const [, num] = spaceCoefficient;
-    return `${num}*i`; // For "10 i", becomes 10*i
-  }
+  // For "10i" pattern - transform to "10*i"
+  processedExpr = processedExpr.replace(/(\d+\.?\d*)i\b/g, '$1*i');
   
-  // Special case 4: Explicit multiplication like "10*i" or "10 * i"
-  const multiplyCoefficient = /^(-?\d+\.?\d*)\s*\*\s*i$/.exec(processedExpr);
-  if (multiplyCoefficient) {
-    return processedExpr; // Already in correct form
-  }
+  // For "10 i" pattern with a space - transform to "10*i"
+  processedExpr = processedExpr.replace(/(\d+\.?\d*)\s+i\b/g, '$1*i');
   
-  // For general expressions, we do targeted replacements
-  
-  // Replace all numerical coefficients immediately followed by i (like "10i" in expressions)
-  processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)i\b/g, '$1*i');
-  
-  // Replace all "N i" patterns (number, space, then i) in expressions
-  processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)\s+i\b/g, '$1*i');
-  
+  // Handle patterns inside larger expressions
   return processedExpr;
 }
 
