@@ -1,5 +1,12 @@
 import * as math from 'mathjs';
 
+// Extend the ConfigOptions type to include the implicit option
+declare module 'mathjs' {
+  interface ConfigOptions {
+    implicit?: 'hide' | 'show';
+  }
+}
+
 // Unit mapping for better recognition
 const unitMap: Record<string, string> = {
   'in': 'inch',

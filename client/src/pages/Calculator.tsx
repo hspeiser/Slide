@@ -15,7 +15,7 @@ const Calculator = () => {
   const [angleMode, setAngleMode] = useState<'DEG' | 'RAD'>('DEG');
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [decimalPlaces, setDecimalPlaces] = useState(5);
+  const [decimalPlaces, setDecimalPlaces] = useState(3);
   const [highlightedLine, setHighlightedLine] = useState<number | null>(null);
   
   // Calculate results whenever content, angle mode, or decimal places change
@@ -228,14 +228,14 @@ const Calculator = () => {
       />
       
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <div className="md:w-2/3 flex-grow h-full">
+        <div className="w-full md:w-3/5 flex-1 h-full min-w-0">
           <EditorPanel 
             content={content} 
             onChange={setContent} 
             highlightedLine={highlightedLine}
           />
         </div>
-        <div className="md:w-1/3 h-full flex-shrink-0 md:max-w-xs lg:max-w-sm">
+        <div className="w-full md:w-2/5 h-full flex-shrink-0 min-w-0 overflow-hidden">
           <ResultPanel 
             results={results} 
             onHighlightLine={setHighlightedLine}

@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { X } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -9,19 +9,30 @@ interface HelpModalProps {
 const HelpModal = ({ onClose }: HelpModalProps) => {
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[hsl(var(--editor-line))] text-[hsl(var(--editor-text))] max-w-2xl w-full max-h-[80vh] overflow-auto rounded-md border-[hsl(var(--editor-selection))] shadow-md" aria-describedby="help-description">
-        <DialogHeader className="flex justify-between items-start">
-          <DialogTitle className="text-xl font-bold">Bitwise Calculator Help</DialogTitle>
-          <DialogClose asChild>
-            <Button variant="ghost" className="text-gray-400 hover:text-[hsl(var(--editor-text))]" onClick={onClose}>
-              <X className="h-5 w-5" />
+      <DialogContent 
+        className="bg-[hsl(var(--editor-bg))] border-[hsl(var(--editor-selection)/0.3)] 
+                  text-[hsl(var(--editor-text))] max-w-2xl w-full max-h-[80vh] 
+                  overflow-auto rounded-lg shadow-lg"
+      >
+        <DialogHeader className="space-y-1.5">
+          <div className="flex justify-between items-center">
+            <DialogTitle className="text-2xl font-bold">Calculator Help</DialogTitle>
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-8 w-8 rounded-full
+                      text-[hsl(var(--editor-text)/0.5)] hover:text-[hsl(var(--editor-text))]
+                      hover:bg-[hsl(var(--editor-selection)/0.15)]" 
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
             </Button>
-          </DialogClose>
+          </div>
+          <DialogDescription className="text-sm text-[hsl(var(--editor-text)/0.7)]">
+            Documentation for using the Bitwise Calculator
+          </DialogDescription>
         </DialogHeader>
-        
-        <p id="help-description" className="sr-only">
-          Documentation for using the Bitwise Calculator including operations, functions, variables and unit conversions.
-        </p>
         
         <div className="space-y-4">
           <div>

@@ -1,8 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogDescription } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import { X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
-import { Input } from './ui/input';
 import { useState } from 'react';
 import { Slider } from './ui/slider';
 
