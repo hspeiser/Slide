@@ -46,11 +46,17 @@ const highlightState = StateField.define<DecorationSet>({
 // Custom cursor style
 const customCursor = EditorView.theme({
   ".cm-cursor": {
-    borderLeftWidth: "2px",
+    borderLeftWidth: "3px",
     borderLeftColor: "hsl(var(--editor-cursor))",
     animation: "blink 1.2s step-end infinite",
-    height: "1.6rem",
-    boxShadow: "0 0 3px hsla(var(--editor-cursor) / 0.5)"
+    height: "1.6rem !important",
+    minHeight: "1.6rem !important",
+    boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.9)",
+    position: "absolute",
+    background: "hsla(var(--editor-cursor) / 0.15)",
+    width: "4px",
+    borderTopRightRadius: "2px",
+    borderBottomRightRadius: "2px"
   },
   "@keyframes blink": {
     "from, to": { opacity: 1 },

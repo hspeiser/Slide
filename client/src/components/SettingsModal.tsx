@@ -28,18 +28,13 @@ const SettingsModal = ({ onClose, decimalPlaces, onDecimalPlacesChange }: Settin
                   shadow-lg backdrop-blur-sm"
         aria-describedby="settings-description"
       >
-        <DialogHeader className="flex justify-between items-start space-y-1.5">
-          <div>
+        <DialogHeader className="space-y-1.5">
+          <div className="flex justify-between items-center">
             <DialogTitle className="text-2xl font-bold">Settings</DialogTitle>
-            <DialogDescription className="text-sm text-[hsl(var(--editor-text)/0.7)]">
-              Customize your calculator display preferences
-            </DialogDescription>
-          </div>
-          <DialogClose asChild>
             <Button 
               size="icon" 
               variant="ghost" 
-              className="h-8 w-8 rounded-full absolute right-4 top-4 
+              className="h-8 w-8 rounded-full
                         text-[hsl(var(--editor-text)/0.5)] hover:text-[hsl(var(--editor-text))]
                         hover:bg-[hsl(var(--editor-selection)/0.15)]" 
               onClick={onClose}
@@ -47,7 +42,10 @@ const SettingsModal = ({ onClose, decimalPlaces, onDecimalPlacesChange }: Settin
               <X className="h-4 w-4" />
               <span className="sr-only">Close</span>
             </Button>
-          </DialogClose>
+          </div>
+          <DialogDescription className="text-sm text-[hsl(var(--editor-text)/0.7)]">
+            Customize your calculator display preferences
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
