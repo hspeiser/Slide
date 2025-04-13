@@ -137,29 +137,9 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   position: relative;
 }
 
-/* Make cursor ALWAYS visible - even on empty lines! */
+/* Simple cursor style for CodeMirror */
 .cm-cursor {
-  z-index: 100 !important;
-  background: hsla(var(--editor-cursor) / 1) !important;
-  width: 3px !important;
-  border-left-width: 3px !important;
-  border-left-style: solid !important;
-  box-shadow: 0 0 10px 2px hsla(var(--editor-cursor) / 0.7) !important;
-  height: 1.5em !important; /* Force cursor to be tall enough, even on empty lines */
-  min-height: 1.5em !important;
-  max-height: 1.5em !important;
-  margin-top: 0 !important;
-  opacity: 1 !important;
-  position: relative !important;
-}
-
-/* Make cursor even more prominent when editor has focus */
-.cm-editor:focus-within .cm-cursor {
-  border-left-width: 4px !important;
-  width: 4px !important;
-  border-left-color: hsl(var(--editor-cursor)) !important;
-  box-shadow: 0 0 12px 4px hsla(var(--editor-cursor) / 0.9) !important;
-  background-color: hsla(var(--editor-cursor) / 1) !important;
+  border-left: 3px solid hsl(var(--editor-cursor)) !important;
 }
 
 /* Ensure consistent height and alignment for both input and output */
@@ -182,24 +162,9 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   align-items: center;
 }
 
-/* Special styling for empty lines - add a subtle background to ensure cursor is visible */
+/* Simple styling for empty lines in the editor */
 .editor-container .cm-line:empty {
-  background-color: hsla(var(--editor-active-line) / 0.4);
-  border-radius: 3px;
   min-height: 1.6rem;
-  position: relative;
-}
-
-/* Add a pseudo-element to make cursor more visible on empty lines */
-.cm-line:empty::after {
-  content: '';
-  display: block;
-  height: 1.6rem;
-  width: 4px;
-  position: absolute;
-  left: 6px;
-  background-color: transparent;
-  border-radius: 2px;
 }
 
 .cm-scroller {
@@ -213,11 +178,7 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   padding: 4px 0;
 }
 
-/* Animation keeps the cursor blinking properly */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
+/* Intentionally empty to remove duplicate animation */
 
 /* Active line highlight */
 .cm-activeLine {
@@ -355,31 +316,14 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   font-weight: bold;
 }
 
-/* Make sure the cursor is always visible when focused */
+/* Simple cursor style when editor is focused */
 .cm-editor:focus-within .cm-cursor {
   border-left-width: 4px !important;
-  box-shadow: 0 0 10px hsla(var(--editor-cursor) / 1) !important;
-  background-color: hsla(var(--editor-cursor) / 0.3) !important;
-  width: 4px !important;
   animation: blink 1.2s step-end infinite;
 }
 
-/* Make empty lines have a distinct background with a visible cursor area */
-.cm-content > div:empty {
-  background-color: hsla(var(--editor-active-line) / 0.4) !important;
-  min-height: 1.6rem !important;
-  border-radius: 4px;
-  position: relative !important;
-  display: block !important;
-}
-
-/* Add a placeholder character to empty lines to make cursor more visible */
-.cm-content > div:empty::before {
-  content: '';
-  display: inline-block;
-  width: 6px;
-  height: 1.6rem;
-  position: absolute;
-  left: 6px;
-  top: 0;
+/* Simple animation to make the cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }

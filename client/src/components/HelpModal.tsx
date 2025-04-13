@@ -66,28 +66,30 @@ x + y</code></pre>
           <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
             <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Comments</h3>
             <p className="mb-2">Add comments using <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">//</code>:</p>
-            <pre className="bg-[hsl(var(--editor-bg))] p-3 rounded-md border border-[hsl(var(--editor-selection)/0.3)] overflow-x-auto whitespace-pre-wrap"><code><span className="text-[hsl(var(--editor-comment))]">// This is a comment</span>
-<span className="text-[hsl(var(--editor-variable))]">x</span> = <span className="text-[hsl(var(--editor-number))]">5</span> <span className="text-[hsl(var(--editor-comment))]">// This is also a comment</span></code></pre>
+            <pre className="bg-[hsl(var(--editor-bg))] p-3 rounded-md border border-[hsl(var(--editor-selection)/0.3)]">
+<code className="text-[hsl(var(--editor-comment))]">// This is a comment</code>
+<code>x = 5 <span className="text-[hsl(var(--editor-comment))]">// This is also a comment</span></code></pre>
           </div>
           
           <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
             <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Engineering Features</h3>
             <p className="mb-3">Use either || symbol or parallel() function for circuit calculations:</p>
-            <pre className="bg-[hsl(var(--editor-bg))] p-3 rounded-md border border-[hsl(var(--editor-selection)/0.3)] mb-3 overflow-x-auto whitespace-pre-wrap"><code><span className="text-[hsl(var(--editor-comment))]">// Parallel resistors using || symbol (engineering notation)</span>
-<span className="text-[hsl(var(--editor-number))]">10</span> || <span className="text-[hsl(var(--editor-number))]">20</span>           <span className="text-[hsl(var(--editor-comment))]">// Result: 6.667 ohms</span>
-
-<span className="text-[hsl(var(--editor-comment))]">// Or using the parallel() function</span>
-<span className="text-[hsl(var(--editor-function))]">parallel</span>(<span className="text-[hsl(var(--editor-number))]">10</span>, <span className="text-[hsl(var(--editor-number))]">20</span>)   <span className="text-[hsl(var(--editor-comment))]">// Same result: 6.667 ohms</span>
-
-<span className="text-[hsl(var(--editor-comment))]">// Works with variables</span>
-<span className="text-[hsl(var(--editor-variable))]">r1</span> = <span className="text-[hsl(var(--editor-number))]">100</span>
-<span className="text-[hsl(var(--editor-variable))]">r2</span> = <span className="text-[hsl(var(--editor-number))]">200</span>
-<span className="text-[hsl(var(--editor-variable))]">r1</span> || <span className="text-[hsl(var(--editor-variable))]">r2</span>           <span className="text-[hsl(var(--editor-comment))]">// Result: 66.667 ohms</span>
-
-<span className="text-[hsl(var(--editor-comment))]">// Works with complex numbers (impedance)</span>
-<span className="text-[hsl(var(--editor-variable))]">z1</span> = <span className="text-[hsl(var(--editor-number))]">10</span> + <span className="text-[hsl(var(--editor-number))]">5</span>i
-<span className="text-[hsl(var(--editor-variable))]">z2</span> = <span className="text-[hsl(var(--editor-number))]">20</span> - <span className="text-[hsl(var(--editor-number))]">10</span>i
-<span className="text-[hsl(var(--editor-variable))]">z1</span> || <span className="text-[hsl(var(--editor-variable))]">z2</span>           <span className="text-[hsl(var(--editor-comment))]">// Parallel impedance calculation</span></code></pre>
+            <pre className="bg-[hsl(var(--editor-bg))] p-3 rounded-md border border-[hsl(var(--editor-selection)/0.3)] mb-3">
+<code className="block text-[hsl(var(--editor-comment))]">// Parallel resistors using || symbol (engineering notation)</code>
+<code className="block">10 || 20           <span className="text-[hsl(var(--editor-comment))]">// Result: 6.667 ohms</span></code>
+<code className="block"></code>
+<code className="block text-[hsl(var(--editor-comment))]">// Or using the parallel() function</code>
+<code className="block"><span className="text-[hsl(var(--editor-function))]">parallel</span>(10, 20)   <span className="text-[hsl(var(--editor-comment))]">// Same result: 6.667 ohms</span></code>
+<code className="block"></code>
+<code className="block text-[hsl(var(--editor-comment))]">// Works with variables</code>
+<code className="block">r1 = 100</code>
+<code className="block">r2 = 200</code>
+<code className="block">r1 || r2           <span className="text-[hsl(var(--editor-comment))]">// Result: 66.667 ohms</span></code>
+<code className="block"></code>
+<code className="block text-[hsl(var(--editor-comment))]">// Works with complex numbers (impedance)</code>
+<code className="block">z1 = 10 + 5i</code>
+<code className="block">z2 = 20 - 10i</code>
+<code className="block">z1 || z2           <span className="text-[hsl(var(--editor-comment))]">// Parallel impedance calculation</span></code></pre>
             <p className="text-sm text-[hsl(var(--editor-text)/0.8)]">Both methods calculate <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">1/(1/a + 1/b)</code>, which is the formula for resistors in parallel.</p>
           </div>
         </div>
