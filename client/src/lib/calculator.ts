@@ -84,73 +84,49 @@ export function evaluate(
   angleMode: 'DEG' | 'RAD' = 'DEG'
 ): { result: any; updatedVariables: Record<string, any> } {
   try {
-    // Skip comments
-    if (expression.trim().startsWith('//')) {
-      return { result: null, updatedVariables: {} };
+    // 1. Strip comments
+    const expr = expression.split('//')[0].trim();
+    if (!expr) return { result: null, updatedVariables: {} };
+    
+    // Create proper scope with trig functions for the right angle mode
+    const scope: Record<string, any> = { ...variables };
+    
+    // Add important constants and complex number support
+    scope.PI = PI;
+    scope.i = mathInstance.evaluate('complex(0, 1)');
+    
+    // Configure trig functions based on angle mode
+    if (angleMode === 'DEG') {
+      // DEG mode - functions take degrees as input
+      scope.sin = (x: number) => Math.sin(x * DEG_TO_RAD);
+      scope.cos = (x: number) => Math.cos(x * DEG_TO_RAD);
+      scope.tan = (x: number) => Math.tan(x * DEG_TO_RAD);
+      scope.asin = (x: number) => Math.asin(x) * RAD_TO_DEG;
+      scope.acos = (x: number) => Math.acos(x) * RAD_TO_DEG;
+      scope.atan = (x: number) => Math.atan(x) * RAD_TO_DEG;
     }
-
-    // Extract comment if any
-    const commentSplit = expression.split('//');
-    const actualExpression = commentSplit[0].trim();
     
-    if (!actualExpression) {
-      return { result: null, updatedVariables: {} };
+    // 2. Variable assignment?
+    const assign = expr.match(/^\s*([a-zA-Z_]\w*)\s*=\s*(.+)$/);
+    if (assign) {
+      const [, name, rhs] = assign;
+      const value = mathInstance.evaluate(rhs, scope);
+      return { result: value, updatedVariables: { [name]: value } };
     }
     
-    // Pre-process for special cases
-    let processedExpr = actualExpression;
-    let updatedVars = {};
-    
-    // First check for variable assignment
-    const assignmentMatch = actualExpression.match(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.+)$/);
-    if (assignmentMatch) {
-      const [, variableName, valueExpression] = assignmentMatch;
+    // 3. Unit conversion (only works if there's a space after the number)
+    if (expr.toLowerCase().includes(' to ')) {
       try {
-        const { result: value } = evaluateExpression(valueExpression, variables, angleMode);
-        if (value !== null && typeof value !== 'string') {
-          updatedVars = { [variableName]: value };
-          return { result: value, updatedVariables: updatedVars };
-        } else {
-          return { result: null, updatedVariables: {} };
-        }
-      } catch (error) {
-        return { result: null, updatedVariables: {} };
-      }
-    }
-    
-    // For unit conversion expressions
-    if (actualExpression.toLowerCase().includes(' to ')) {
-      try {
-        return handleUnitConversion(actualExpression, variables);
+        const result = mathInstance.evaluate(expr, scope);
+        return { result: result.toString(), updatedVariables: {} };
       } catch (error) {
         // Fall through to regular evaluation
       }
     }
     
-    // For unit variable attachment
-    const variableUnitMatch = actualExpression.match(/^([a-zA-Z][a-zA-Z0-9]*)\s+([a-zA-Z]+)$/);
-    if (variableUnitMatch && Object.keys(variables).includes(variableUnitMatch[1])) {
-      try {
-        return handleVariableUnit(variableUnitMatch, variables);
-      } catch (error) {
-        // Fall through to regular evaluation
-      }
-    }
-    
-    // For unit calculations
-    const unitPart = "([a-zA-Z][a-zA-Z0-9]*|\\d+\\.?\\d*)\\s*([a-zA-Z]+)";
-    const unitCalculationRegex = new RegExp(`${unitPart}\\s*([+\\-*/])\\s*${unitPart}`);
-    const unitCalculationMatch = actualExpression.match(unitCalculationRegex);
-    if (unitCalculationMatch) {
-      try {
-        return handleUnitCalculation(actualExpression, variables);
-      } catch (error) {
-        // Fall through to regular evaluation
-      }
-    }
-    
-    // For regular expressions
-    return evaluateExpression(actualExpression, variables, angleMode);
+    // 4. Plain evaluation – implicit multiplication now "just works"
+    const result = mathInstance.evaluate(expr, scope);
+    return { result, updatedVariables: {} };
   } catch (error) {
     // Return null for any top-level errors
     return { result: null, updatedVariables: {} };
@@ -158,207 +134,11 @@ export function evaluate(
 }
 
 /**
- * Core expression evaluation function
- */
-function evaluateExpression(
-  expression: string, 
-  variables: Record<string, any>, 
-  angleMode: 'DEG' | 'RAD'
-): { result: any; updatedVariables: Record<string, any> } {
-  try {
-    // Create math.js scope with variables
-    const scope: Record<string, any> = { ...variables };
-    
-    // Pre-process the expression for complex numbers
-    let processedExpr = preProcessComplexNumbers(expression);
-    
-    // Pre-process the expression for angle mode and trig functions
-    processedExpr = preProcessAngles(processedExpr, angleMode, scope);
-    
-    // Execute the calculation
-    const result = mathInstance.evaluate(processedExpr, scope);
-    
-    return { result, updatedVariables: {} };
-  } catch (error) {
-    // For any error, return null result
-    return { result: null, updatedVariables: {} };
-  }
-}
-
-/**
- * Handle unit conversion expressions (like "5 km to miles")
- */
-function handleUnitConversion(
-  expression: string,
-  variables: Record<string, any>
-): { result: any; updatedVariables: Record<string, any> } {
-  try {
-    // Replace 'in' with 'inch' to avoid conflicts
-    let processedExpr = expression.replace(/\bin\b/g, 'inch');
-    
-    // Extract value
-    const valueMatch = processedExpr.match(/[\d.]+/);
-    if (!valueMatch) return { result: null, updatedVariables: {} };
-    
-    // Try to evaluate with units
-    const result = mathInstance.evaluate(processedExpr, variables);
-    
-    // Format nicely
-    if (result && result.value !== undefined) {
-      // For unit conversion, use the formatted value and unit
-      return { 
-        result: `${math.format(result.value, { precision: 5 })} ${result.unit}`, 
-        updatedVariables: {} 
-      };
-    }
-    
-    return { result, updatedVariables: {} };
-  } catch (error) {
-    // No result for unit conversion errors
-    return { result: null, updatedVariables: {} };
-  }
-}
-
-/**
- * Handle variable with unit expressions (like "x kg")
- */
-function handleVariableUnit(
-  match: RegExpMatchArray,
-  variables: Record<string, any>
-): { result: any; updatedVariables: Record<string, any> } {
-  try {
-    const [, varName, unitName] = match;
-    const varValue = variables[varName];
-    
-    // Create unit value from the variable
-    let unitExpr = '';
-    
-    // Handle special cases for unit names
-    if (unitName.toLowerCase() === 'in') {
-      unitExpr = `${varValue} inch`;
-    } else {
-      unitExpr = `${varValue} ${unitName}`;
-    }
-    
-    const result = mathInstance.evaluate(unitExpr);
-    return { result, updatedVariables: {} };
-  } catch (error) {
-    return { result: null, updatedVariables: {} };
-  }
-}
-
-/**
- * Handle unit calculation expressions (like "5 m * 10 cm")
- */
-function handleUnitCalculation(
-  expression: string,
-  variables: Record<string, any>
-): { result: any; updatedVariables: Record<string, any> } {
-  try {
-    // Replace 'in' with 'inch' to avoid conflicts
-    let processedExpr = expression.replace(/\bin\b/g, 'inch');
-    
-    // Try to evaluate with units
-    const result = mathInstance.evaluate(processedExpr, variables);
-    
-    return { result, updatedVariables: {} };
-  } catch (error) {
-    return { result: null, updatedVariables: {} };
-  }
-}
-
-/**
- * Pre-process expressions for complex number notation and implicit multiplication
- */
-function preProcessComplexNumbers(expression: string): string {
-  // First, handle special cases for the entire expression
-  let processedExpr = expression.trim();
-  
-  // Convert any non-breaking spaces to regular spaces
-  processedExpr = processedExpr.replace(/\u00A0/g, ' ');
-  
-  // Special case for imaginary unit with coefficient (10i) - no longer needed
-  // The implicit: 'show' config will handle this automatically
-  
-  // Handle fixing complex number display issues
-  if (processedExpr.includes('i') && processedExpr.match(/\d+/)) {
-    // Add a comment to preserve the original expression for later display
-    processedExpr = processedExpr + " // originalExpr:" + processedExpr;
-  }
-  
-  return processedExpr;
-}
-
-/**
- * Pre-process expressions for angle mode and trig functions
- */
-function preProcessAngles(
-  expression: string, 
-  angleMode: 'DEG' | 'RAD',
-  scope: Record<string, any>
-): string {
-  // First, normalize spaces (reduce multiple spaces to single spaces)
-  // then handle spaces as implicit multiplication indicators where appropriate
-  let processedExpr = handleSpaces(expression);
-  
-  // Add degree/radian conversion helpers to scope
-  scope.deg2rad = (deg: number) => deg * DEG_TO_RAD;
-  scope.rad2deg = (rad: number) => rad * RAD_TO_DEG;
-  scope.PI = PI;
-  scope.complex = mathInstance.evaluate('complex');
-  scope.i = mathInstance.evaluate('complex(0,1)');
-  scope.j = mathInstance.evaluate('complex(0,1)'); // Also support j for imaginary unit
-  
-  // Add custom trig functions that handle the right angle mode
-  if (angleMode === 'DEG') {
-    // DEG mode - functions take degrees and return degrees
-    scope.sin = (x: number) => Math.sin(x * DEG_TO_RAD);
-    scope.cos = (x: number) => Math.cos(x * DEG_TO_RAD);
-    scope.tan = (x: number) => Math.tan(x * DEG_TO_RAD);
-    scope.asin = (x: number) => Math.asin(x) * RAD_TO_DEG;
-    scope.acos = (x: number) => Math.acos(x) * RAD_TO_DEG;
-    scope.atan = (x: number) => Math.atan(x) * RAD_TO_DEG;
-  } else {
-    // RAD mode - functions use radians directly
-    scope.sin = Math.sin;
-    scope.cos = Math.cos;
-    scope.tan = Math.tan;
-    scope.asin = Math.asin;
-    scope.acos = Math.acos;
-    scope.atan = Math.atan;
-  }
-  
-  // Add aliases for inverse trig functions
-  scope.arcsin = scope.asin;
-  scope.arccos = scope.acos;
-  scope.arctan = scope.atan;
-  
-  // Handle deg/rad notation in expressions
-  processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*deg/g, (_, num) => {
-    return angleMode === 'DEG' ? num : `(${num} * PI / 180)`;
-  });
-  
-  processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*rad/g, (_, num) => {
-    return angleMode === 'RAD' ? num : `(${num} * 180 / PI)`;
-  });
-  
-  return processedExpr;
-}
-
-/**
- * Handle spaces in expressions, ensuring proper formatting
+ * Handle spaces in expressions - convert any non-breaking spaces to regular spaces
  * With implicit multiplication enabled, we no longer need to manually convert spaces
  * to multiplication operators - mathjs handles this automatically
  */
 function handleSpaces(expression: string): string {
-  // Convert any non-breaking spaces to regular spaces first
-  let processedExpr = expression.replace(/\u00A0/g, ' ');
-  
-  // Then normalize any multiple spaces to single spaces
-  processedExpr = processedExpr.replace(/\s+/g, ' ').trim();
-  
-  // Ensure spaces around operators for better readability
-  processedExpr = processedExpr.replace(/\s*([+\-*/^=])\s*/g, ' $1 ');
-  
-  return processedExpr;
+  // Convert any non-breaking spaces to regular spaces and normalize spacing
+  return expression.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
 }
