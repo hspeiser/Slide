@@ -107,12 +107,12 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
   };
   
   return (
-    <div className="w-full md:w-48 lg:w-64 flex flex-col overflow-hidden result-panel">
+    <div className="w-full h-full flex flex-col overflow-hidden result-panel">
       <div 
         ref={panelRef}
-        className="flex-1 overflow-auto"
+        className="flex-1 overflow-auto h-full"
       >
-        <div className="p-4">
+        <div className="p-4 h-full">
           {/* Empty line at the top to match CodeMirror spacing */}
           <div className="h-[4px]"></div>
           
@@ -125,14 +125,14 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
               <div 
                 key={index} 
                 className={`result-line ${willWrap ? 'min-h-[3.2rem] h-auto' : 'min-h-[1.6rem] h-[1.6rem]'} 
-                  text-right overflow-x-auto px-4 ${
+                  flex justify-end items-center overflow-x-auto px-2 ${
                   copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
                 }`}
                 style={{ paddingTop: '0.15rem', paddingBottom: '0.15rem' }}
               >
                 {displayValue && (
                   <span 
-                    className={`result-value inline-block px-2 py-0.5 rounded-md cursor-pointer
+                    className={`result-value ml-auto px-2 py-0.5 rounded-md cursor-pointer
                               text-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result))] 
                               hover:text-[hsl(var(--editor-bg))] transition-all duration-200
                               ${willWrap ? 'multiline whitespace-pre-wrap' : 'whitespace-nowrap'}`}

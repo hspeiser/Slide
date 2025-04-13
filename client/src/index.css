@@ -276,6 +276,8 @@
   display: inline-flex;
   align-items: center;
   min-height: 1.6rem;
+  margin-left: auto; /* Pushes the result to the right */
+  text-align: right;
 }
 
 .result-value:hover {
@@ -296,6 +298,8 @@
   justify-content: flex-end;
   min-height: 1.6rem;
   height: 1.6rem;
+  width: 100%;
+  text-align: right;
 }
 
 /* For multiline results */

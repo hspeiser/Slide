@@ -312,10 +312,10 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
   }, [highlightedLine]);
   
   return (
-    <div className="flex-1 border-r border-gray-700 flex flex-col overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden h-full">
       <div 
         ref={editorRef} 
-        className="editor-container flex-1 overflow-auto p-4 focus:outline-none"
+        className="editor-container flex-1 h-full overflow-auto p-4 focus:outline-none"
       />
     </div>
   );

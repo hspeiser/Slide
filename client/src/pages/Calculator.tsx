@@ -228,14 +228,16 @@ const Calculator = () => {
       />
       
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <div className="w-full md:w-3/5 flex-1 h-full min-w-0">
+        {/* Input panel - takes 2/3 on wide screens, full width on mobile */}
+        <div className="w-full md:w-2/3 h-full md:h-full min-w-0 flex-grow relative order-1">
           <EditorPanel 
             content={content} 
             onChange={setContent} 
             highlightedLine={highlightedLine}
           />
         </div>
-        <div className="w-full md:w-2/5 h-full flex-shrink-0 min-w-0 overflow-hidden">
+        {/* Output panel - takes 1/3 on wide screens, full width on mobile */}
+        <div className="w-full md:w-1/3 h-full flex-shrink-0 min-w-[180px] overflow-hidden border-l border-[hsla(var(--editor-selection)/0.3)] md:order-2 order-2">
           <ResultPanel 
             results={results} 
             onHighlightLine={setHighlightedLine}
