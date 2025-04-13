@@ -157,11 +157,26 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
               animation: "blink 1.2s step-end infinite",
               height: "auto !important",  // let CodeMirror choose
               minHeight: "1.2em",
-              boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1)",
-              position: "absolute",
-              width: "3px",
+              boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1), 0 0 15px hsla(var(--editor-cursor) / 0.5)",
+              position: "relative",
+              width: "4px !important",
               borderTopRightRadius: "2px",
-              borderBottomRightRadius: "2px"
+              borderBottomRightRadius: "2px",
+              zIndex: "100 !important",
+              backgroundColor: "hsla(var(--editor-cursor) / 0.3)",
+            },
+            // Special background for empty lines
+            ".cm-line:empty::before": {
+              content: "' '",
+              position: "absolute",
+              left: 0,
+              right: 0,
+              top: 0,
+              bottom: 0,
+              backgroundColor: "hsla(var(--editor-active-line) / 0.25)",
+              borderRadius: "2px",
+              pointerEvents: "none",
+              zIndex: "0"
             },
             "@keyframes blink": {
               "from, to": { opacity: 1 },
@@ -226,11 +241,26 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             animation: "blink 1.2s step-end infinite",
             height: "auto !important",  // let CodeMirror choose
             minHeight: "1.2em",
-            boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1)",
-            position: "absolute",
-            width: "3px",
+            boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1), 0 0 15px hsla(var(--editor-cursor) / 0.5)",
+            position: "relative",
+            width: "4px !important",
             borderTopRightRadius: "2px",
-            borderBottomRightRadius: "2px"
+            borderBottomRightRadius: "2px",
+            zIndex: "100 !important",
+            backgroundColor: "hsla(var(--editor-cursor) / 0.3)",
+          },
+          // Special background for empty lines
+          ".cm-line:empty::before": {
+            content: "' '",
+            position: "absolute",
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            backgroundColor: "hsla(var(--editor-active-line) / 0.25)",
+            borderRadius: "2px",
+            pointerEvents: "none",
+            zIndex: "0"
           },
           "@keyframes blink": {
             "from, to": { opacity: 1 },

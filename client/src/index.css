@@ -122,21 +122,22 @@
   position: relative;
 }
 
-/* Make empty lines have a visible background to ensure cursor is always visible */
-.cm-line:empty::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background: hsla(var(--editor-bg) / 0.05);
-  pointer-events: none;
+/* Make sure cursor is extremely visible */
+.cm-cursor {
+  z-index: 100 !important;
+  background: hsla(var(--editor-cursor) / 0.3) !important;
+  width: 3px !important;
+  border-left-width: 3px !important;
+  border-left-style: solid !important;
 }
 
-/* Ensure cursor is always visible, especially on empty lines */
-.cm-cursor {
-  z-index: 10 !important;
+/* Make cursor even more prominent when editor has focus */
+.cm-editor:focus-within .cm-cursor {
+  border-left-width: 4px !important;
+  width: 4px !important;
+  border-left-color: hsl(var(--editor-cursor)) !important;
+  box-shadow: 0 0 10px 3px hsla(var(--editor-cursor) / 0.8) !important;
+  background-color: hsla(var(--editor-cursor) / 0.5) !important;
 }
 
 /* Ensure consistent height and alignment for both input and output */
@@ -157,6 +158,13 @@
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
+}
+
+/* Special styling for empty lines - add a subtle background */
+.editor-container .cm-line:empty {
+  background-color: hsla(var(--editor-active-line) / 0.25);
+  border-radius: 3px;
+  min-height: 1.6rem;
 }
 
 .cm-scroller {
