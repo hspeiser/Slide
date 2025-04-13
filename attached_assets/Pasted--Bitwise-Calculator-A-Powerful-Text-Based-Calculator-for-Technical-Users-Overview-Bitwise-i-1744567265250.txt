@@ -1,0 +1,138 @@
+### Bitwise Calculator: A Powerful Text-Based Calculator for Technical Users
+
+## Overview
+
+Bitwise is an elegant, text-based calculator designed for technical professionals who need more than just basic arithmetic. Inspired by applications like Numi, it combines the simplicity of a notepad with the power of a scientific calculator, creating a seamless workflow where calculations and documentation live side by side.
+
+## The Vision
+
+Bitwise aims to be the go-to calculation tool for engineers, developers, scientists, and students who regularly work with complex calculations. Unlike traditional calculators that only show one calculation at a time, Bitwise presents a document-like interface where you can build a narrative of calculations, maintaining context and history as you work through problems.
+
+## User Experience
+
+When you open Bitwise, you're greeted with a clean, distraction-free interface split into two panels:
+
+- **Left Panel**: A text editor where you type your calculations, notes, and variable assignments
+- **Right Panel**: Instant results that update as you type, aligned with each line of input
+
+
+The dark-themed interface (with light mode option) is designed for extended use, reducing eye strain during long calculation sessions. The monospaced font ensures perfect alignment of mathematical expressions and results.
+
+## Key Features
+
+### Natural Language Calculations
+
+Bitwise understands calculations written in a natural, intuitive syntax. You can write expressions like:
+
+```plaintext
+1.25 + 3.5
+90 + 144.25
+sin(90) + 3.5(sin(144.25))
+```
+
+And see the results instantly appear on the right side.
+
+### Variables and References
+
+You can define variables and reference them in subsequent calculations:
+
+```plaintext
+x = 10
+y = 20
+x + y
+x * y
+```
+
+This makes it easy to explore "what-if" scenarios by changing a variable and watching all dependent calculations update automatically.
+
+### Rich Mathematical Functions
+
+Bitwise supports a comprehensive set of mathematical operations:
+
+- **Basic arithmetic**: Addition, subtraction, multiplication, division
+- **Trigonometric functions**: sin, cos, tan with support for both degrees and radians
+- **Advanced math**: Square roots, logarithms, exponents, absolute values
+- **Special operators**: Like the parallel resistance operator (||) that calculates the equivalent resistance of parallel resistors
+
+
+### Unit Conversions
+
+The calculator handles unit conversions seamlessly:
+
+```plaintext
+5 km to miles
+150 lbs to kg
+2.5 hours to minutes
+```
+
+This eliminates the need to switch between different tools when working with mixed units.
+
+### Angle Mode Toggle
+
+For trigonometric calculations, you can switch between degrees and radians with a simple toggle in the status bar, making it flexible for different types of problems.
+
+## Use Cases
+
+### Engineering Calculations
+
+Engineers can use Bitwise to:
+
+- Calculate circuit parameters
+- Solve mechanics problems
+- Perform structural analysis calculations
+- Convert between different unit systems
+
+
+### Financial Planning
+
+Financial professionals can:
+
+- Calculate compound interest
+- Perform loan amortization
+- Analyze investment returns
+- Convert between currencies
+
+
+### Scientific Research
+
+Scientists can:
+
+- Process experimental data
+- Perform statistical calculations
+- Convert between different measurement units
+- Document calculation procedures
+
+
+### Education
+
+Students and educators can:
+
+- Solve homework problems
+- Explore mathematical concepts
+- Create step-by-step solution guides
+- Share calculation workflows
+
+
+## The Bitwise Difference
+
+What sets Bitwise apart from other calculators is its seamless blend of documentation and calculation. As you work, you're not just getting answers—you're building a living document that captures your thought process. This makes it invaluable for:
+
+- Documenting complex calculations for future reference
+- Sharing calculation workflows with colleagues
+- Exploring alternative scenarios by adjusting variables
+- Creating calculation templates for repeated tasks
+
+
+The calculator remembers your variables throughout your session, allowing you to build complex models step by step. The ability to include comments alongside calculations helps document assumptions and methodology.
+
+## Philosophy
+
+Bitwise embodies a philosophy that calculation should be:
+
+- **Transparent**: See all your steps and assumptions
+- **Contextual**: Understand calculations in their full context
+- **Fluid**: Easily modify inputs and see results update
+- **Documented**: Capture the why, not just the what of calculations
+
+
+By bringing together the best aspects of spreadsheets, programming, and calculators, Bitwise creates a unique tool that enhances productivity and clarity in technical work.
