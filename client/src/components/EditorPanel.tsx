@@ -61,9 +61,9 @@ const editorTheme = EditorView.theme({
   ".cm-line": {
     textShadow: "0 0 0.5px hsla(var(--editor-text) / 0.1)",
     minHeight: "1.6rem",
-    height: "1.6rem",
+    // Removed fixed height to allow content to expand properly
     paddingTop: "0.15rem",
-    paddingBottom: "0.15rem",
+    paddingBottom: "0.15rem", 
     display: "flex",
     alignItems: "center",
     whiteSpace: "pre",  // Preserve spaces exactly as typed
@@ -89,13 +89,16 @@ const editorTheme = EditorView.theme({
   ".cm-activeLine": {
     backgroundColor: "hsla(var(--editor-line) / 0.15)"
   },
-  // Make content area match the right panel
+  // Make content area match the right panel with proper overflow handling
   ".cm-content": {
-    padding: "4px 0"
+    padding: "4px 0",
+    whiteSpace: "nowrap"
   },
-  // Make scrollbar match design
+  // Make scrollbar match design and handle horizontal overflow
   ".cm-scroller": {
-    overflow: "auto"
+    overflow: "auto",
+    overflowX: "auto",
+    overflowY: "auto"
   }
 });
 
@@ -142,7 +145,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           // Custom minimal setup with only what we need
           EditorState.tabSize.of(2),
           EditorState.allowMultipleSelections.of(true),
-          EditorView.lineWrapping,
+          // Disable automatic line wrapping to prevent spaces causing new lines
+          // EditorView.lineWrapping,
           // Keep auto-brackets for parentheses but disable most other auto features
           javascript({ jsx: false }),
           // Hide gutters using CSS instead of direct configuration
@@ -230,7 +234,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         // Custom minimal setup with only what we need
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
-        EditorView.lineWrapping,
+        // Disable automatic line wrapping to prevent spaces causing new lines
+        // EditorView.lineWrapping,
         // Keep auto-brackets for parentheses but disable most other auto features
         javascript({ jsx: false }),
         // Hide gutters using CSS instead of direct configuration
