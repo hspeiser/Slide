@@ -12,8 +12,12 @@ import * as math from 'mathjs';
 const WELCOME_MESSAGE = `// Welcome to Bitwise
 // A powerful scientific calculator
 
-// Type your calculations below to get started
-// Example: sin(45 deg) or 10 || 20
+// QUICK TUTORIAL:
+// - Basic math: 2+3*4, (10-5)^2
+// - Variables: x = 10, y = 20, x+y
+// - Trig: sin(45 deg), tan(π/4 rad)
+// - Engineering: 10 || 20, parallel(5,10)
+// - Conversion: 100 km to miles, 212 °F to °C
 
 `;
 

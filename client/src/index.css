@@ -59,7 +59,7 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
     --editor-cursor: 180 80% 50%;
     --editor-line-num: 220 15% 50%;
     --editor-active-line: 225 15% 18%;
-    
+
     /* Syntax highlighting - Slightly softer colors */
     --editor-keyword: 210 70% 65%;
     --editor-function: 35 80% 70%;
@@ -73,36 +73,46 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 
   .light {
     /* Much more contrasted light mode with darker backgrounds */
-    --background: 210 25% 92%;  /* Darker app background */
-    --foreground: 222.2 40% 12%; /* Even darker text for better contrast */
-    --card: 210 30% 87%;         /* Darker card backgrounds */
-    --card-foreground: 222.2 40% 12%; 
+    --background: 210 25% 92%;
+    /* Darker app background */
+    --foreground: 222.2 40% 12%;
+    /* Even darker text for better contrast */
+    --card: 210 30% 87%;
+    /* Darker card backgrounds */
+    --card-foreground: 222.2 40% 12%;
     --popover: 210 30% 87%;
     --popover-foreground: 222.2 40% 12%;
-    --primary: 207 85% 40%;      /* Deeper blue for better visibility */
+    --primary: 207 85% 40%;
+    /* Deeper blue for better visibility */
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 25% 83%;    /* Significantly darker secondary */
+    --secondary: 210 25% 83%;
+    /* Significantly darker secondary */
     --secondary-foreground: 222.2 47.4% 10%;
     --muted: 210 25% 83%;
     --muted-foreground: 215.4 16.3% 40%;
     --accent: 210 25% 83%;
     --accent-foreground: 222.2 47.4% 10%;
-    --destructive: 0 70% 45%;    /* Deeper red */
+    --destructive: 0 70% 45%;
+    /* Deeper red */
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 76%;   /* Much darker border */
+    --border: 214.3 31.8% 76%;
+    /* Much darker border */
     --input: 214.3 31.8% 76%;
-    --ring: 221.2 83.2% 45%;     /* Deeper ring color */
+    --ring: 221.2 83.2% 45%;
+    /* Deeper ring color */
     --radius: 0.5rem;
 
     /* Editor light colors - Higher contrast design */
-    --editor-bg: 215 35% 86%;    /* Much darker editor background */
+    --editor-bg: 215 35% 86%;
+    /* Much darker editor background */
     --editor-line: 210 25% 80%;
-    --editor-text: 210 40% 12%;  /* Darker text for better contrast */
+    --editor-text: 210 40% 12%;
+    /* Darker text for better contrast */
     --editor-selection: 210 40% 75%;
     --editor-cursor: 210 90% 35%;
     --editor-line-num: 210 20% 50%;
     --editor-active-line: 215 35% 80%;
-    
+
     /* Syntax highlighting - Deeper colors for better contrast */
     --editor-keyword: 210 80% 40%;
     --editor-function: 35 70% 35%;
@@ -140,17 +150,29 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 /* Simple cursor fix using the 2px border approach - proven solution for all zoom levels */
 .cm-cursor {
   border-left: 2px solid hsl(var(--editor-cursor)) !important;
-  margin-left: -1px; /* keep it centered */
+  /* margin-left: -1px;   <-- remove this */
+  width: 0;
+  /* leave width 0; that’s fine */
   animation: cm-blink 1.06s steps(1) infinite;
 }
 
+
 @keyframes cm-blink {
-  0%, 50% { opacity: 1; }
-  50.1%, 100% { opacity: 0; }
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  50.1%,
+  100% {
+    opacity: 0;
+  }
 }
 
 /* Ensure consistent height and alignment for both input and output */
-.editor-container, .result-panel {
+.editor-container,
+.result-panel {
   font-size: 15px;
   line-height: 1.6;
   font-family: 'Fira Code', 'JetBrains Mono', monospace;
@@ -159,7 +181,8 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15) inset;
 }
 
-.editor-container .cm-line, .result-panel .result-line {
+.editor-container .cm-line,
+.result-panel .result-line {
   min-height: 1.6rem;
   height: 1.6rem;
   margin: 0.15rem 0;
@@ -216,9 +239,17 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 }
 
 @keyframes pulse {
-  0% { background-color: hsla(var(--editor-selection) / 0.2); }
-  50% { background-color: hsla(var(--editor-selection) / 0.4); }
-  100% { background-color: hsla(var(--editor-selection) / 0.2); }
+  0% {
+    background-color: hsla(var(--editor-selection) / 0.2);
+  }
+
+  50% {
+    background-color: hsla(var(--editor-selection) / 0.4);
+  }
+
+  100% {
+    background-color: hsla(var(--editor-selection) / 0.2);
+  }
 }
 
 /* Syntax highlighting with subtle glows */
@@ -228,7 +259,8 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   font-weight: 500;
 }
 
-.cm-builtin, .cm-function {
+.cm-builtin,
+.cm-function {
   color: hsl(var(--editor-function));
   text-shadow: 0 0 2px hsla(var(--editor-function) / 0.2);
 }
@@ -264,7 +296,8 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   display: inline-flex;
   align-items: center;
   min-height: 1.6rem;
-  margin-left: auto; /* Pushes the result to the right */
+  margin-left: auto;
+  /* Pushes the result to the right */
   text-align: right;
 }
 
@@ -297,7 +330,8 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 }
 
 /* Error highlighting */
-.cm-error, .error-text {
+.cm-error,
+.error-text {
   color: hsl(var(--editor-error));
   text-shadow: 0 0 3px hsla(var(--editor-error) / 0.2);
 }
@@ -326,5 +360,6 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 /* Make the cursor wider when focused */
 .cm-editor:focus-within .cm-cursor {
   border-left-width: 3px !important;
-  margin-left: -1.5px; /* keep it centered */
+  margin-left: -1.5px;
+  /* keep it centered */
 }
