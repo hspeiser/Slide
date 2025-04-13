@@ -11,12 +11,12 @@ const HelpModal = ({ onClose }: HelpModalProps) => {
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
         className="bg-[hsl(var(--editor-bg))] border-[hsl(var(--editor-selection)/0.3)] 
-                   text-[hsl(var(--editor-text))] max-w-2xl w-full max-h-[80vh] 
+                   text-[hsl(var(--editor-text))] max-w-3xl w-full max-h-[85vh] 
                    overflow-auto rounded-lg shadow-lg"
       >
-        <DialogHeader className="space-y-1.5">
+        <DialogHeader className="sticky top-0 z-10 bg-[hsl(var(--editor-bg))] pb-2 border-b border-[hsl(var(--editor-selection)/0.3)]">
           <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl font-bold">Calculator Help</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-[hsl(var(--editor-function))]">Calculator Help</DialogTitle>
             <Button 
               size="icon" 
               variant="ghost" 
@@ -30,76 +30,76 @@ const HelpModal = ({ onClose }: HelpModalProps) => {
             </Button>
           </div>
           <DialogDescription className="text-sm text-[hsl(var(--editor-text)/0.7)]">
-            Documentation for using the Bitwise Calculator
+            Documentation for using the scientific calculator
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Basic Operations</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Addition: <code>1 + 2</code></li>
-              <li>Subtraction: <code>5 - 3</code></li>
-              <li>Multiplication: <code>4 * 5</code> or <code>4 × 5</code></li>
-              <li>Division: <code>10 / 2</code></li>
-              <li>Exponents: <code>2^3</code> or <code>2**3</code></li>
-              <li>Parallel Resistors: <code>10 || 20</code> or <code>parallel(10, 20)</code> (calculates 1/(1/10 + 1/20))</li>
+        <div className="space-y-6 mt-4 px-1">
+          <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Basic Operations</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li className="whitespace-normal">Addition: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">1 + 2</code></li>
+              <li className="whitespace-normal">Subtraction: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">5 - 3</code></li>
+              <li className="whitespace-normal">Multiplication: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">4 * 5</code> or <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">4 × 5</code></li>
+              <li className="whitespace-normal">Division: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">10 / 2</code></li>
+              <li className="whitespace-normal">Exponents: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">2^3</code> or <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">2**3</code></li>
+              <li className="whitespace-normal">Parallel Resistors: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">10 || 20</code> or <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">parallel(10, 20)</code> (calculates 1/(1/10 + 1/20))</li>
             </ul>
           </div>
           
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Mathematical Functions</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Trigonometric: <code>sin(45)</code>, <code>cos(60)</code>, <code>tan(30)</code></li>
-              <li>Inverse trig: <code>arcsin(0.5)</code>, <code>arccos(0.5)</code>, <code>arctan(1)</code></li>
-              <li>Square root: <code>sqrt(16)</code></li>
-              <li>Logarithms: <code>log(100)</code>, <code>ln(10)</code></li>
+          <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Mathematical Functions</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li className="whitespace-normal">Trigonometric: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">sin(45)</code>, <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">cos(60)</code>, <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">tan(30)</code></li>
+              <li className="whitespace-normal">Inverse trig: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">arcsin(0.5)</code>, <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">arccos(0.5)</code>, <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">arctan(1)</code></li>
+              <li className="whitespace-normal">Square root: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">sqrt(16)</code></li>
+              <li className="whitespace-normal">Logarithms: <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">log(100)</code>, <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">ln(10)</code></li>
             </ul>
           </div>
           
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Variables</h3>
-            <p>Assign variables with <code>=</code> and use them in calculations:</p>
-            <pre className="bg-[hsl(var(--editor-bg))] p-2 rounded"><code>x = 10
+          <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Variables</h3>
+            <p className="mb-2">Assign variables with <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">=</code> and use them in calculations:</p>
+            <pre className="bg-[hsl(var(--editor-bg))] p-3 rounded-md border border-[hsl(var(--editor-selection)/0.3)] overflow-x-auto whitespace-pre-wrap"><code className="text-[hsl(var(--editor-variable))]">x = 10
 y = 20
 x + y</code></pre>
           </div>
           
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Unit Conversions</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              <li><code>5 km to miles</code></li>
-              <li><code>100 kg to lbs</code></li>
-              <li><code>32 °F to °C</code></li>
+          <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Unit Conversions</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              <li className="whitespace-normal"><code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">5 km to miles</code></li>
+              <li className="whitespace-normal"><code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">100 kg to lbs</code></li>
+              <li className="whitespace-normal"><code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">32 °F to °C</code></li>
             </ul>
           </div>
           
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Comments</h3>
-            <p>Add comments using <code>//</code>:</p>
-            <pre className="bg-[hsl(var(--editor-bg))] p-2 rounded"><code>// This is a comment
-x = 5 // This is also a comment</code></pre>
+          <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Comments</h3>
+            <p className="mb-2">Add comments using <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">//</code>:</p>
+            <pre className="bg-[hsl(var(--editor-bg))] p-3 rounded-md border border-[hsl(var(--editor-selection)/0.3)] overflow-x-auto whitespace-pre-wrap"><code><span className="text-[hsl(var(--editor-comment))]">// This is a comment</span>
+x = 5 <span className="text-[hsl(var(--editor-comment))]">// This is also a comment</span></code></pre>
           </div>
           
-          <div>
-            <h3 className="text-lg font-semibold mb-2">Engineering Features</h3>
-            <p className="mb-2">Use either || symbol or parallel() function for circuit calculations:</p>
-            <pre className="bg-[hsl(var(--editor-bg))] p-2 rounded mb-2"><code>// Parallel resistors using || symbol (engineering notation)
-10 || 20           // Result: 6.667 ohms
+          <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Engineering Features</h3>
+            <p className="mb-3">Use either || symbol or parallel() function for circuit calculations:</p>
+            <pre className="bg-[hsl(var(--editor-bg))] p-3 rounded-md border border-[hsl(var(--editor-selection)/0.3)] mb-3 overflow-x-auto whitespace-pre-wrap"><code><span className="text-[hsl(var(--editor-comment))]">// Parallel resistors using || symbol (engineering notation)</span>
+<span className="text-[hsl(var(--editor-number))]">10</span> || <span className="text-[hsl(var(--editor-number))]">20</span>           <span className="text-[hsl(var(--editor-comment))]">// Result: 6.667 ohms</span>
 
-// Or using the parallel() function
-parallel(10, 20)   // Same result: 6.667 ohms
+<span className="text-[hsl(var(--editor-comment))]">// Or using the parallel() function</span>
+<span className="text-[hsl(var(--editor-function))]">parallel</span>(<span className="text-[hsl(var(--editor-number))]">10</span>, <span className="text-[hsl(var(--editor-number))]">20</span>)   <span className="text-[hsl(var(--editor-comment))]">// Same result: 6.667 ohms</span>
 
-// Works with variables
-r1 = 100
-r2 = 200
-r1 || r2           // Result: 66.667 ohms
+<span className="text-[hsl(var(--editor-comment))]">// Works with variables</span>
+r1 = <span className="text-[hsl(var(--editor-number))]">100</span>
+r2 = <span className="text-[hsl(var(--editor-number))]">200</span>
+r1 || r2           <span className="text-[hsl(var(--editor-comment))]">// Result: 66.667 ohms</span>
 
-// Works with complex numbers (impedance)
-z1 = 10 + 5i
-z2 = 20 - 10i
-z1 || z2           // Parallel impedance calculation</code></pre>
-            <p className="text-sm text-[hsl(var(--editor-text)/0.7)]">Both methods calculate <code>1/(1/a + 1/b)</code>, which is the formula for resistors in parallel.</p>
+<span className="text-[hsl(var(--editor-comment))]">// Works with complex numbers (impedance)</span>
+z1 = <span className="text-[hsl(var(--editor-number))]">10</span> + <span className="text-[hsl(var(--editor-number))]">5</span>i
+z2 = <span className="text-[hsl(var(--editor-number))]">20</span> - <span className="text-[hsl(var(--editor-number))]">10</span>i
+z1 || z2           <span className="text-[hsl(var(--editor-comment))]">// Parallel impedance calculation</span></code></pre>
+            <p className="text-sm text-[hsl(var(--editor-text)/0.8)]">Both methods calculate <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">1/(1/a + 1/b)</code>, which is the formula for resistors in parallel.</p>
           </div>
         </div>
       </DialogContent>
