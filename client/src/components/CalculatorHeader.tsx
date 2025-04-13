@@ -6,9 +6,10 @@ interface CalculatorHeaderProps {
   angleMode: 'DEG' | 'RAD';
   toggleAngleMode: () => void;
   onShowHelp: () => void;
+  onShowSettings: () => void;
 }
 
-const CalculatorHeader = ({ angleMode, toggleAngleMode, onShowHelp }: CalculatorHeaderProps) => {
+const CalculatorHeader = ({ angleMode, toggleAngleMode, onShowHelp, onShowSettings }: CalculatorHeaderProps) => {
   const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
@@ -58,6 +59,7 @@ const CalculatorHeader = ({ angleMode, toggleAngleMode, onShowHelp }: Calculator
           variant="ghost" 
           size="icon"
           className="text-gray-400 hover:text-[hsl(var(--editor-text))]"
+          onClick={onShowSettings}
         >
           <Settings className="h-4 w-4" />
         </Button>

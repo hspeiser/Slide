@@ -4,7 +4,9 @@ import CalculatorFooter from "@/components/CalculatorFooter";
 import EditorPanel from "@/components/EditorPanel";
 import ResultPanel from "@/components/ResultPanel";
 import HelpModal from "@/components/HelpModal";
+import SettingsModal from "@/components/SettingsModal";
 import { evaluate } from "@/lib/calculator";
+import * as math from 'mathjs';
 
 const Calculator = () => {
   const [content, setContent] = useState('');
@@ -12,8 +14,10 @@ const Calculator = () => {
   const [variables, setVariables] = useState<Record<string, any>>({});
   const [angleMode, setAngleMode] = useState<'DEG' | 'RAD'>('DEG');
   const [showHelp, setShowHelp] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [decimalPlaces, setDecimalPlaces] = useState(5);
   
-  // Calculate results whenever content or angle mode changes
+  // Calculate results whenever content, angle mode, or decimal places change
   useEffect(() => {
     const lines = content.split('\n');
     const newResults: (string | null)[] = [];
@@ -33,8 +37,18 @@ const Calculator = () => {
         // Update variables with any new ones defined in this line
         Object.assign(newVariables, updatedVariables);
         
+        // Format the result with the specified decimal places
+        let formattedResult: string | null = null;
+        if (result !== null && result !== undefined) {
+          if (typeof result === 'number') {
+            formattedResult = math.format(result, { precision: decimalPlaces });
+          } else {
+            formattedResult = String(result);
+          }
+        }
+        
         // Add the result
-        newResults.push(result !== undefined ? String(result) : null);
+        newResults.push(formattedResult);
       } catch (error) {
         newResults.push(`Error: ${(error as Error).message}`);
       }
@@ -42,7 +56,7 @@ const Calculator = () => {
     
     setResults(newResults);
     setVariables(newVariables);
-  }, [content, angleMode]);
+  }, [content, angleMode, decimalPlaces]);
   
   const handleClear = () => {
     if (window.confirm('Are you sure you want to clear all calculations?')) {
@@ -81,6 +95,7 @@ const Calculator = () => {
         angleMode={angleMode}
         toggleAngleMode={toggleAngleMode}
         onShowHelp={() => setShowHelp(true)}
+        onShowSettings={() => setShowSettings(true)}
       />
       
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
@@ -96,6 +111,13 @@ const Calculator = () => {
       />
       
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+      {showSettings && (
+        <SettingsModal 
+          onClose={() => setShowSettings(false)} 
+          decimalPlaces={decimalPlaces}
+          onDecimalPlacesChange={setDecimalPlaces}
+        />
+      )}
     </div>
   );
 };

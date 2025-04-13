@@ -102,27 +102,33 @@ export function evaluate(
   
   // Regular expression evaluation
   try {
-    // Convert degrees to radians for trig functions if in DEG mode
+    // Handle angle mode for trigonometric functions
+    let processedExpression = actualExpression;
+    
     if (angleMode === 'DEG') {
+      // For degrees mode, we'll need to manually convert angles
+      // Look for trig functions and modify the expression
       const trigFunctions = ['sin', 'cos', 'tan', 'sec', 'csc', 'cot'];
       
       for (const func of trigFunctions) {
-        // Look for trig functions and convert their arguments
-        const regex = new RegExp(`${func}\\s*\\(([^)]+)\\)`, 'g');
-        actualExpression.replace(regex, (match, arg) => {
-          try {
-            // Convert the argument to radians for the calculation
-            const argValue = mathInstance.evaluate(arg, scope);
-            scope[`${arg}_rad`] = mathInstance.evaluate(`${argValue} deg to rad`);
-            return `${func}(${arg}_rad)`;
-          } catch {
-            return match;  // Keep original if conversion fails
-          }
-        });
+        // Check if the expression contains this trig function
+        if (processedExpression.includes(func + '(')) {
+          // Replace trig function calls with converted version
+          processedExpression = processedExpression.replace(
+            new RegExp(`${func}\\(([^)]+)\\)`, 'g'),
+            `${func}(${func === 'sin' || func === 'tan' || func === 'csc' || func === 'cot' ? '$1 * pi / 180' : '$1 * pi / 180'})`
+          );
+        }
       }
     }
+      
+    // Configure general math settings
+    mathInstance.config({
+      number: 'number',
+      precision: 14
+    });
     
-    const result = mathInstance.evaluate(actualExpression, scope);
+    const result = mathInstance.evaluate(processedExpression, scope);
     return { result, updatedVariables: {} };
   } catch (error) {
     return { 
