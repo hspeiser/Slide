@@ -67,7 +67,7 @@ x + y</code></pre>
             <h3 className="text-lg font-semibold mb-3 text-[hsl(var(--editor-keyword))]">Comments</h3>
             <p className="mb-2">Add comments using <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">//</code>:</p>
             <pre className="bg-[hsl(var(--editor-bg))] p-3 rounded-md border border-[hsl(var(--editor-selection)/0.3)] overflow-x-auto whitespace-pre-wrap"><code><span className="text-[hsl(var(--editor-comment))]">// This is a comment</span>
-x = 5 <span className="text-[hsl(var(--editor-comment))]">// This is also a comment</span></code></pre>
+<span className="text-[hsl(var(--editor-variable))]">x</span> = <span className="text-[hsl(var(--editor-number))]">5</span> <span className="text-[hsl(var(--editor-comment))]">// This is also a comment</span></code></pre>
           </div>
           
           <div className="bg-[hsl(var(--editor-selection)/0.15)] p-4 rounded-lg">
@@ -80,14 +80,14 @@ x = 5 <span className="text-[hsl(var(--editor-comment))]">// This is also a comm
 <span className="text-[hsl(var(--editor-function))]">parallel</span>(<span className="text-[hsl(var(--editor-number))]">10</span>, <span className="text-[hsl(var(--editor-number))]">20</span>)   <span className="text-[hsl(var(--editor-comment))]">// Same result: 6.667 ohms</span>
 
 <span className="text-[hsl(var(--editor-comment))]">// Works with variables</span>
-r1 = <span className="text-[hsl(var(--editor-number))]">100</span>
-r2 = <span className="text-[hsl(var(--editor-number))]">200</span>
-r1 || r2           <span className="text-[hsl(var(--editor-comment))]">// Result: 66.667 ohms</span>
+<span className="text-[hsl(var(--editor-variable))]">r1</span> = <span className="text-[hsl(var(--editor-number))]">100</span>
+<span className="text-[hsl(var(--editor-variable))]">r2</span> = <span className="text-[hsl(var(--editor-number))]">200</span>
+<span className="text-[hsl(var(--editor-variable))]">r1</span> || <span className="text-[hsl(var(--editor-variable))]">r2</span>           <span className="text-[hsl(var(--editor-comment))]">// Result: 66.667 ohms</span>
 
 <span className="text-[hsl(var(--editor-comment))]">// Works with complex numbers (impedance)</span>
-z1 = <span className="text-[hsl(var(--editor-number))]">10</span> + <span className="text-[hsl(var(--editor-number))]">5</span>i
-z2 = <span className="text-[hsl(var(--editor-number))]">20</span> - <span className="text-[hsl(var(--editor-number))]">10</span>i
-z1 || z2           <span className="text-[hsl(var(--editor-comment))]">// Parallel impedance calculation</span></code></pre>
+<span className="text-[hsl(var(--editor-variable))]">z1</span> = <span className="text-[hsl(var(--editor-number))]">10</span> + <span className="text-[hsl(var(--editor-number))]">5</span>i
+<span className="text-[hsl(var(--editor-variable))]">z2</span> = <span className="text-[hsl(var(--editor-number))]">20</span> - <span className="text-[hsl(var(--editor-number))]">10</span>i
+<span className="text-[hsl(var(--editor-variable))]">z1</span> || <span className="text-[hsl(var(--editor-variable))]">z2</span>           <span className="text-[hsl(var(--editor-comment))]">// Parallel impedance calculation</span></code></pre>
             <p className="text-sm text-[hsl(var(--editor-text)/0.8)]">Both methods calculate <code className="bg-[hsl(var(--editor-active-line))] px-1.5 py-0.5 rounded">1/(1/a + 1/b)</code>, which is the formula for resistors in parallel.</p>
           </div>
         </div>
