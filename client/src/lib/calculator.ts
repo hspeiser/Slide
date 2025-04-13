@@ -93,7 +93,32 @@ export function evaluate(
     
     // Add important constants and complex number support
     scope.PI = PI;
+    scope.pi = PI;
+    scope.e = Math.E;
     scope.i = mathInstance.evaluate('complex(0, 1)');
+    
+    // Add common math functions
+    scope.abs = Math.abs;
+    scope.sqrt = Math.sqrt;
+    scope.cbrt = Math.cbrt;
+    scope.exp = Math.exp;
+    scope.log = Math.log;
+    scope.log10 = Math.log10;
+    scope.log2 = Math.log2;
+    scope.pow = Math.pow;
+    scope.round = Math.round;
+    scope.floor = Math.floor;
+    scope.ceil = Math.ceil;
+    scope.max = Math.max;
+    scope.min = Math.min;
+    
+    // Hyperbolic functions
+    scope.sinh = Math.sinh;
+    scope.cosh = Math.cosh;
+    scope.tanh = Math.tanh;
+    scope.asinh = Math.asinh;
+    scope.acosh = Math.acosh;
+    scope.atanh = Math.atanh;
     
     // Configure trig functions based on angle mode
     if (angleMode === 'DEG') {
@@ -104,6 +129,26 @@ export function evaluate(
       scope.asin = (x: number) => Math.asin(x) * RAD_TO_DEG;
       scope.acos = (x: number) => Math.acos(x) * RAD_TO_DEG;
       scope.atan = (x: number) => Math.atan(x) * RAD_TO_DEG;
+      scope.atan2 = (y: number, x: number) => Math.atan2(y, x) * RAD_TO_DEG;
+      
+      // Add aliases for inverse trig functions
+      scope.arcsin = scope.asin;
+      scope.arccos = scope.acos;
+      scope.arctan = scope.atan;
+    } else {
+      // RAD mode - functions use radians directly
+      scope.sin = Math.sin;
+      scope.cos = Math.cos;
+      scope.tan = Math.tan;
+      scope.asin = Math.asin;
+      scope.acos = Math.acos;
+      scope.atan = Math.atan;
+      scope.atan2 = Math.atan2;
+      
+      // Add aliases for inverse trig functions
+      scope.arcsin = Math.asin;
+      scope.arccos = Math.acos;
+      scope.arctan = Math.atan;
     }
     
     // 2. Variable assignment?
