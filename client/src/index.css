@@ -212,6 +212,18 @@
   padding: 2px 4px;
   transition: all 0.15s ease;
   border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+/* Result line specific styling */
+.result-line {
+  padding: 0 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
 }
 
 /* Error highlighting */

@@ -39,7 +39,10 @@ const Calculator = () => {
           (line.split('(').length !== line.split(')').length) || // Unbalanced parentheses
           line.endsWith('+') || line.endsWith('-') || 
           line.endsWith('*') || line.endsWith('/') ||
-          line.endsWith('^') || line.endsWith('=')
+          line.endsWith('^') || line.endsWith('=') ||
+          line.endsWith(' ') || // Ending with a space indicates typing in progress
+          /\b(to|in)\s*$/i.test(line) || // Unit conversion operations in progress
+          /\d+\s*[a-z]+$/i.test(line) // Unit specification in progress
         );
         
         if (isIncompleteExpression) {
@@ -119,7 +122,11 @@ const Calculator = () => {
         const errorMessage = (error as Error).message.toLowerCase();
         const isTypingError = errorMessage.includes('unexpected') || 
                              errorMessage.includes('syntax') ||
-                             errorMessage.includes('unterminated');
+                             errorMessage.includes('unterminated') ||
+                             errorMessage.includes('unit') ||
+                             errorMessage.includes('convert') ||
+                             line.toLowerCase().includes(' to ') ||
+                             line.toLowerCase().includes(' in ');
                              
         if (isTypingError) {
           newResults.push(null);

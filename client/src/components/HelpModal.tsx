@@ -19,6 +19,10 @@ const HelpModal = ({ onClose }: HelpModalProps) => {
           </DialogClose>
         </DialogHeader>
         
+        <p id="help-description" className="sr-only">
+          Documentation for using the Bitwise Calculator including operations, functions, variables and unit conversions.
+        </p>
+        
         <div className="space-y-4">
           <div>
             <h3 className="text-lg font-semibold mb-2">Basic Operations</h3>
