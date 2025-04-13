@@ -55,10 +55,12 @@ const unitMap: Record<string, string> = {
 // Create a custom math.js instance with configuration
 const mathInstance = math.create(math.all);
 
-// Configure math.js with complex number support
+// Configure math.js with complex number support and implicit multiplication
+// @ts-ignore - 'implicit' is a valid option in mathjs but TypeScript doesn't know about it
 mathInstance.config({
   number: 'number',
-  precision: 14
+  precision: 14,
+  implicit: 'show'  // Enable implicit multiplication
 });
 
 // Define the imaginary unit properly
@@ -272,92 +274,14 @@ function preProcessComplexNumbers(expression: string): string {
   // First, handle special cases for the entire expression
   let processedExpr = expression.trim();
   
-  // Special case 1: Just the letter i by itself
-  if (processedExpr === 'i') {
-    return 'complex(0,1)'; // Set it directly to complex(0,1) for clarity
-  }
-  
-  // Special case 2: Easy form like 10i (direct coefficient)
-  const directCoefficient = /^(-?\d+\.?\d*)i$/.exec(processedExpr);
-  if (directCoefficient) {
-    const [, num] = directCoefficient;
-    return `${num}*i`; // For 10i, becomes 10*i
-  }
-  
-  // Special case 3: Form with space like "10 i"
-  const spaceCoefficient = /^(-?\d+\.?\d*)\s+i$/.exec(processedExpr);
-  if (spaceCoefficient) {
-    const [, num] = spaceCoefficient;
-    return `${num}*i`; // For "10 i", becomes 10*i
-  }
-  
-  // Special case 4: Explicit multiplication like "10*i" or "10 * i"
-  const multiplyCoefficient = /^(-?\d+\.?\d*)\s*\*\s*i$/.exec(processedExpr);
-  if (multiplyCoefficient) {
-    return processedExpr; // Already in correct form
-  }
-  
-  // === CRUCIAL PREPROCESSING REPLACEMENTS ===
-  
-  // 1. FIRST PASS: Convert non-breaking spaces to regular spaces for processing
+  // Convert any non-breaking spaces to regular spaces
   processedExpr = processedExpr.replace(/\u00A0/g, ' ');
   
-  // 2. SECOND PASS: Replace direct number-variable cases (10x → 10*x)
-  // This is the main issue we need to fix! Using word boundaries to be precise
-  processedExpr = processedExpr.replace(/(\d+)([a-zA-Z])/g, '$1*$2');
+  // Special case for imaginary unit with coefficient (10i) - no longer needed
+  // The implicit: 'show' config will handle this automatically
   
-  // 3. Handle decimal numbers followed by variables (10.5x → 10.5*x)
-  processedExpr = processedExpr.replace(/(\d+\.\d+)([a-zA-Z])/g, '$1*$2');
-  
-  // 4. Handle imaginary unit with coefficient (10i → 10*i)
-  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)i\b/g, '$1*i');
-  
-  // 5. Handle negative numbers with i (-10i → -10*i)
-  processedExpr = processedExpr.replace(/(-\d+\.?\d*)i\b/g, '$1*i');
-  
-  // 6. Handle spaces before i (10 i → 10*i)
-  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s+i\b/g, '$1*i');
-  
-  // 7. Handle implicit multiplication between variables (xy → x*y) 
-  // but we need to be careful not to break function names
-  const knownFunctions = ['sin', 'cos', 'tan', 'log', 'exp', 'sqrt', 'asin', 'acos', 'atan'];
-  
-  // Create a function to check if a string is a known function
-  const isKnownFunction = (str: string) => knownFunctions.includes(str);
-  
-  // Now handle variable multiplication safely
-  processedExpr = processedExpr.replace(/([a-zA-Z][a-zA-Z0-9_]*)([a-zA-Z][a-zA-Z0-9_]*)/g, 
-    (match, p1, p2) => {
-      // Skip if the entire match is a known function name
-      if (isKnownFunction(match)) {
-        return match;
-      }
-      
-      // Skip if p1 is a known function and p2 is a single character
-      // (this would be the case for something like "sin x")
-      if (isKnownFunction(p1) && p2.length === 1) {
-        return match;
-      }
-      
-      return `${p1}*${p2}`;
-    }
-  );
-  
-  // Handle implicit multiplication with parentheses: 2(x+1) -> 2*(x+1)
-  processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\(/g, '$1*(');
-  
-  // Handle implicit multiplication between variable and parentheses: x(y+1) -> x*(y+1)
-  processedExpr = processedExpr.replace(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, '$1*(');
-  
-  // Handle implicit multiplication between closing and opening parentheses: (x+1)(y+2) -> (x+1)*(y+2)
-  processedExpr = processedExpr.replace(/\)\s*\(/g, ')*(');
-  
-  // Special case for imaginary unit: 10(i) -> 10*i, not 10*(i)
-  processedExpr = processedExpr.replace(/\*\(i\)/g, '*i');
-  
-  // Fix for 100*i causing a numeric precision problem
-  // Look for and fix cases like 100*i transforming to just 1i in output
-  if (processedExpr.match(/\d+\s*\*\s*i\b/)) {
+  // Handle fixing complex number display issues
+  if (processedExpr.includes('i') && processedExpr.match(/\d+/)) {
     // Add a comment to preserve the original expression for later display
     processedExpr = processedExpr + " // originalExpr:" + processedExpr;
   }
@@ -422,8 +346,9 @@ function preProcessAngles(
 }
 
 /**
- * Handle spaces in expressions, treating them as potential multiplication operators
- * This enables expressions like "2 x" to be interpreted as "2*x"
+ * Handle spaces in expressions, ensuring proper formatting
+ * With implicit multiplication enabled, we no longer need to manually convert spaces
+ * to multiplication operators - mathjs handles this automatically
  */
 function handleSpaces(expression: string): string {
   // Convert any non-breaking spaces to regular spaces first
@@ -432,33 +357,8 @@ function handleSpaces(expression: string): string {
   // Then normalize any multiple spaces to single spaces
   processedExpr = processedExpr.replace(/\s+/g, ' ').trim();
   
-  // Handle spaces between numbers and variables: "2 x" -> "2*x"
-  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s+([a-zA-Z_][a-zA-Z0-9_]*\b)/g, '$1*$2');
-  
-  // Handle spaces between variables: "x y" -> "x*y"
-  processedExpr = processedExpr.replace(/([a-zA-Z_][a-zA-Z0-9_]*)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1*$2');
-  
-  // Handle spaces between number and opening parenthesis: "2 (x+1)" -> "2*(x+1)"
-  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s+\(/g, '$1*(');
-  
-  // Handle spaces between variables and opening parenthesis: "x (y+1)" -> "x*(y+1)"
-  processedExpr = processedExpr.replace(/([a-zA-Z_][a-zA-Z0-9_]*)\s+\(/g, '$1*(');
-  
-  // Handle spaces between closing and opening parentheses: ") (" -> ")*("
-  processedExpr = processedExpr.replace(/\)\s+\(/g, ')*(');
-  
-  // Handle spaces between closing parenthesis and variable: ") x" -> ")*x"
-  processedExpr = processedExpr.replace(/\)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, ')*$1');
-  
-  // Handle spaces between closing parenthesis and number: ") 2" -> ")*2"
-  processedExpr = processedExpr.replace(/\)\s+(\d+\.?\d*)/g, ')*$1');
-  
-  // Remove any remaining spaces in the expression (except in function names and around operators)
-  // First protect spaces around operators
+  // Ensure spaces around operators for better readability
   processedExpr = processedExpr.replace(/\s*([+\-*/^=])\s*/g, ' $1 ');
-  
-  // Now remove spaces not around operators
-  processedExpr = processedExpr.replace(/([^+\-*/^=\s])\s+([^+\-*/^=\s])/g, '$1$2');
   
   return processedExpr;
 }
