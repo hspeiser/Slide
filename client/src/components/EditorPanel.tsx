@@ -48,7 +48,9 @@ const customCursor = EditorView.theme({
   ".cm-cursor": {
     borderLeftWidth: "2px",
     borderLeftColor: "hsl(var(--editor-cursor))",
-    animation: "blink 1.2s step-end infinite"
+    animation: "blink 1.2s step-end infinite",
+    height: "1.6rem",
+    boxShadow: "0 0 3px hsla(var(--editor-cursor) / 0.5)"
   },
   "@keyframes blink": {
     "from, to": { opacity: 1 },
@@ -61,19 +63,27 @@ const customCursor = EditorView.theme({
   },
   // Better fonts
   "&": {
-    fontFamily: "'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace",
-    fontSize: "14px",
-    lineHeight: "1.5",
+    fontFamily: "'Fira Code', 'JetBrains Mono', 'Roboto Mono', monospace",
+    fontSize: "15px",
+    lineHeight: "1.6",
+    letterSpacing: "0.3px"
   },
   // Add a subtle glow to text
   ".cm-line": {
     textShadow: "0 0 0.5px hsla(var(--editor-text) / 0.1)",
+    minHeight: "1.6rem",
+    height: "1.6rem",
+    paddingTop: "0.15rem",
+    paddingBottom: "0.15rem",
+    display: "flex",
+    alignItems: "center"
   },
   // Add some vibrancy to the line numbers
   ".cm-gutterElement": {
     color: "hsla(var(--editor-line-num) / 0.8)",
     fontSize: "12px",
-    transition: "color 0.2s ease"
+    transition: "color 0.2s ease",
+    paddingTop: "0.15rem"
   },
   ".cm-activeLineGutter": {
     backgroundColor: "transparent",
@@ -83,6 +93,14 @@ const customCursor = EditorView.theme({
   // Active line subtle highlight
   ".cm-activeLine": {
     backgroundColor: "hsla(var(--editor-line) / 0.15)"
+  },
+  // Make content area match the right panel
+  ".cm-content": {
+    padding: "4px 0"
+  },
+  // Make scrollbar match design
+  ".cm-scroller": {
+    overflow: "auto"
   }
 });
 
@@ -156,12 +174,21 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         theme === 'dark' ? oneDark : [],
         highlightState,
         customCursor,
+        // Add history support for undo/redo
+        history(),
+        keymap.of([
+          ...defaultKeymap,
+          ...historyKeymap,
+          // Additional keybindings for undo/redo with higher precedence
+          { key: "Mod-z", run: undo, preventDefault: true },
+          { key: "Mod-y", run: redo, preventDefault: true },
+          { key: "Mod-Shift-z", run: redo, preventDefault: true },
+        ]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString());
           }
         }),
-        keymap.of(defaultKeymap),
       ],
     });
     

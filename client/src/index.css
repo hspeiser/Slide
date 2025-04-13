@@ -155,11 +155,14 @@
   border-left-width: 2px !important;
   border-left-color: hsl(var(--editor-cursor)) !important;
   animation: blink 1.2s step-end infinite;
-  transition: transform 0.08s ease !important;
+  transition: transform 0.05s cubic-bezier(0.23, 1, 0.32, 1) !important;
   border-radius: 1px;
   will-change: transform;
-  z-index: 10;
+  z-index: 20;
   position: relative;
+  height: 1.6rem !important;
+  margin-top: 0 !important;
+  box-shadow: 0 0 3px hsla(var(--editor-cursor) / 0.7);
 }
 
 @keyframes blink {

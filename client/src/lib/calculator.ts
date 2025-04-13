@@ -280,10 +280,15 @@ function preProcessComplexNumbers(expression: string): string {
     return `complex(0,${num})`;
   }
   
-  // 10 i case (space between number and i)
+  // 10 i case (space between number and i) - most permissive pattern
   if (/^\d+\.?\d*\s+i$/.test(processedExpr)) {
     const num = processedExpr.replace(/\s+i$/, '');
     return `complex(0,${num})`;
+  }
+  
+  // Match any number followed by spaces then i (anywhere in the expression)
+  if (/(\d+\.?\d*)\s+i/.test(processedExpr)) {
+    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s+i/g, 'complex(0,$1)');
   }
   
   // 10*i or 10 * i case
