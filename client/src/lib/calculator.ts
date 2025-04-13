@@ -127,16 +127,48 @@ export function evaluate(
     // This improved regex handles expressions with parentheses, variables, and numbers
     expr = expr.replace(/(\(.*?\)|\d+\.?\d*|\w+)\s*\|\|\s*(\(.*?\)|\d+\.?\d*|\w+)/g, "parallel($1, $2)");
     
-    // Handle special case for angle unit notation
-    if (angleMode === 'DEG') {
-      // Look for patterns like "sin 30 deg" or "tan 45 deg" and process them correctly
-      expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+deg\b/gi, (match, func, value) => {
+    // First, handle any values with explicit unit notation regardless of the current angle mode
+    
+    // Case 1: Look for "45 deg" style inputs without a function
+    if (expr.match(/^(\d+\.?\d*)\s+deg$/i)) {
+      // Just a degree value - keep it as is for DEG mode, or convert to RAD if in RAD mode
+      if (angleMode === 'RAD') {
+        expr = expr.replace(/^(\d+\.?\d*)\s+deg$/i, (match, value) => {
+          return `${value} * ${DEG_TO_RAD}`;
+        });
+      } else {
+        expr = expr.replace(/^(\d+\.?\d*)\s+deg$/i, '$1');
+      }
+    }
+    
+    // Case 2: Look for "45 rad" style inputs without a function
+    if (expr.match(/^(\d+\.?\d*)\s+rad$/i)) {
+      // Just a radian value - convert to DEG if in DEG mode, or keep as is for RAD mode
+      if (angleMode === 'DEG') {
+        expr = expr.replace(/^(\d+\.?\d*)\s+rad$/i, (match, value) => {
+          return `${value} * ${RAD_TO_DEG}`;
+        });
+      } else {
+        expr = expr.replace(/^(\d+\.?\d*)\s+rad$/i, '$1');
+      }
+    }
+    
+    // Handle case 3: Look for "sin 30 deg" pattern
+    expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+deg\b/gi, (match, func, value) => {
+      if (angleMode === 'DEG') {
+        // In DEG mode, we can just call the function directly as it expects degrees
         return `${func}(${value})`;
-      });
-      
-      // Handle special case for rad notation when in DEG mode
-      expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+rad\b/gi, (match, func, value) => {
-        // No conversion needed - just pass the radians value directly to Math functions
+      } else {
+        // In RAD mode, we need to convert degrees to radians first
+        return `${func}(${value} * ${DEG_TO_RAD})`;
+      }
+    });
+    
+    // Handle case 4: Look for "sin 30 rad" pattern
+    expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+rad\b/gi, (match, func, value) => {
+      if (angleMode === 'DEG') {
+        // In DEG mode, functions expect degrees but we have radians
+        // Use Math functions directly as they expect radians
         if (func.toLowerCase() === 'sin') return `Math.sin(${value})`;
         if (func.toLowerCase() === 'cos') return `Math.cos(${value})`;
         if (func.toLowerCase() === 'tan') return `Math.tan(${value})`;
@@ -144,14 +176,11 @@ export function evaluate(
         if (func.toLowerCase() === 'acos') return `Math.acos(${value}) * ${RAD_TO_DEG}`;
         if (func.toLowerCase() === 'atan') return `Math.atan(${value}) * ${RAD_TO_DEG}`;
         return `${func}(${value})`;
-      });
-    } else {
-      // In RAD mode, handle deg notation
-      expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+deg\b/gi, (match, func, value) => {
-        // Convert the degrees to radians since we're in RAD mode
-        return `${func}(${value} * ${DEG_TO_RAD})`;
-      });
-    }
+      } else {
+        // In RAD mode, we can just call the function directly
+        return `${func}(${value})`;
+      }
+    });
     
     if (!expr) return { result: null, updatedVariables: {} };
     
