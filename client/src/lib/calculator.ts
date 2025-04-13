@@ -102,26 +102,26 @@ export function evaluate(
   
   // Regular expression evaluation
   try {
-    // Handle angle mode for trigonometric functions
+    // Process expression based on angle mode
     let processedExpression = actualExpression;
     
+    // Define a custom function to handle degrees in our scope
     if (angleMode === 'DEG') {
-      // For degrees mode, we'll need to manually convert angles
-      // Look for trig functions and modify the expression
-      const trigFunctions = ['sin', 'cos', 'tan', 'sec', 'csc', 'cot'];
+      // Add degree conversion functions to scope
+      scope.deg2rad = (degrees: number) => degrees * Math.PI / 180;
       
-      for (const func of trigFunctions) {
-        // Check if the expression contains this trig function
-        if (processedExpression.includes(func + '(')) {
-          // Replace trig function calls with converted version
-          processedExpression = processedExpression.replace(
-            new RegExp(`${func}\\(([^)]+)\\)`, 'g'),
-            `${func}(${func === 'sin' || func === 'tan' || func === 'csc' || func === 'cot' ? '$1 * pi / 180' : '$1 * pi / 180'})`
-          );
-        }
-      }
+      // Define custom degree versions of trigonometric functions
+      scope.dsin = (degrees: number) => Math.sin(degrees * Math.PI / 180);
+      scope.dcos = (degrees: number) => Math.cos(degrees * Math.PI / 180);
+      scope.dtan = (degrees: number) => Math.tan(degrees * Math.PI / 180);
+      
+      // Replace standard trig functions with our degree versions
+      processedExpression = processedExpression
+        .replace(/sin\s*\(/g, 'dsin(')
+        .replace(/cos\s*\(/g, 'dcos(')
+        .replace(/tan\s*\(/g, 'dtan(');
     }
-      
+    
     // Configure general math settings
     mathInstance.config({
       number: 'number',
