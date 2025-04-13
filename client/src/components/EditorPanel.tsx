@@ -139,32 +139,34 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
       const startState = EditorState.create({
         doc: content,
         extensions: [
-          // Use more complete basicSetup for better editing capabilities
-          basicSetup,
+          // Custom minimal setup with only what we need
           EditorState.tabSize.of(2),
           EditorState.allowMultipleSelections.of(true),
           EditorView.lineWrapping,
-          javascript(),
+          // Keep auto-brackets for parentheses but disable most other auto features
+          javascript({ jsx: false }),
+          // Hide gutters using CSS instead of direct configuration
+          EditorView.theme({ 
+            ".cm-gutters": { display: "none" },
+            ".cm-content": { marginLeft: "4px" }
+          }),
           theme === 'dark' ? oneDark : [],
           highlightState,
           editorTheme,
           // Show spaces with visible dots
           showSpaces,
-          // Custom cursor styling
+          // Simpler, less glowy cursor with smooth transitions
           EditorView.theme({
             ".cm-cursor": {
-              borderLeftWidth: "3px",
+              borderLeftWidth: "2px",
               borderLeftColor: "hsl(var(--editor-cursor))",
-              animation: "blink 1.2s step-end infinite",
-              height: "auto !important",  // let CodeMirror choose
+              animation: "blink 1.2s ease-in-out infinite",
+              transition: "left 0.1s ease-out, top 0.1s ease-out",
+              height: "auto !important",
               minHeight: "1.2em",
-              boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1), 0 0 15px hsla(var(--editor-cursor) / 0.5)",
+              boxShadow: "0 0 3px hsla(var(--editor-cursor) / 0.4)",
               position: "relative",
-              width: "4px !important",
-              borderTopRightRadius: "2px",
-              borderBottomRightRadius: "2px",
-              zIndex: "100 !important",
-              backgroundColor: "hsla(var(--editor-cursor) / 0.3)",
+              zIndex: "10",
             },
             // Special background for empty lines
             ".cm-line:empty::before": {
@@ -180,8 +182,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
               zIndex: "0"
             },
             "@keyframes blink": {
-              "from, to": { opacity: 1 },
-              "50%": { opacity: 0.6 }
+              "0%, 100%": { opacity: 1 },
+              "50%": { opacity: 0.7 }
             }
           }),
           // Add history support for undo/redo
@@ -225,31 +227,33 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
     const newState = EditorState.create({
       doc: editorViewRef.current.state.doc,
       extensions: [
-        // Use more complete basicSetup for better editing capabilities
-        basicSetup,
+        // Custom minimal setup with only what we need
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
         EditorView.lineWrapping,
-        javascript(),
+        // Keep auto-brackets for parentheses but disable most other auto features
+        javascript({ jsx: false }),
+        // Hide gutters using CSS instead of direct configuration
+        EditorView.theme({ 
+          ".cm-gutters": { display: "none" },
+          ".cm-content": { marginLeft: "4px" }
+        }),
         theme === 'dark' ? oneDark : [],
         highlightState,
         // Show spaces with visible dots
         showSpaces,
-        // Custom cursor styling
+        // Simpler, less glowy cursor with smooth transitions
         EditorView.theme({
           ".cm-cursor": {
-            borderLeftWidth: "3px",
+            borderLeftWidth: "2px",
             borderLeftColor: "hsl(var(--editor-cursor))",
-            animation: "blink 1.2s step-end infinite",
-            height: "auto !important",  // let CodeMirror choose
+            animation: "blink 1.2s ease-in-out infinite",
+            transition: "left 0.1s ease-out, top 0.1s ease-out",
+            height: "auto !important",
             minHeight: "1.2em",
-            boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1), 0 0 15px hsla(var(--editor-cursor) / 0.5)",
+            boxShadow: "0 0 3px hsla(var(--editor-cursor) / 0.4)",
             position: "relative",
-            width: "4px !important",
-            borderTopRightRadius: "2px",
-            borderBottomRightRadius: "2px",
-            zIndex: "100 !important",
-            backgroundColor: "hsla(var(--editor-cursor) / 0.3)",
+            zIndex: "10",
           },
           // Special background for empty lines
           ".cm-line:empty::before": {
@@ -265,8 +269,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             zIndex: "0"
           },
           "@keyframes blink": {
-            "from, to": { opacity: 1 },
-            "50%": { opacity: 0.6 }
+            "0%, 100%": { opacity: 1 },
+            "50%": { opacity: 0.7 }
           }
         }),
         // Add history support for undo/redo
