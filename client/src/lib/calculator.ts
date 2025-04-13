@@ -62,7 +62,19 @@ mathInstance.config({
 });
 
 // Define the imaginary unit properly
-mathInstance.evaluate('i = complex(0, 1)');
+try {
+  mathInstance.evaluate('i = complex(0, 1)');
+  
+  // Add additional implicit multiplication support
+  mathInstance.import({
+    // This function ensures proper implicit multiplication behavior (like 2x, 5i)
+    implicit: function(a, b) {
+      return math.multiply(a, b);
+    }
+  }, { override: true });
+} catch (e) {
+  console.error("Error initializing complex number support", e);
+}
 
 // Some constants we need
 const PI = Math.PI;
@@ -174,7 +186,41 @@ function evaluateExpression(
     processedExpr = preProcessAngles(processedExpr, angleMode, scope);
     
     // Execute the calculation
-    const result = mathInstance.evaluate(processedExpr, scope);
+    let result;
+    
+    // Special handling for complex numbers to ensure all notations work
+    try {
+      result = mathInstance.evaluate(processedExpr, scope);
+    } catch (e) {
+      // If direct evaluation fails, try with forced implicit multiplication
+      try {
+        // Special case for single 'i' notation (directly complex number)
+        if (processedExpr === 'i') {
+          result = { re: 0, im: 1 };
+        } 
+        // Try with additional preprocessing for complex numbers (10i format)
+        else if (processedExpr.includes('i')) {
+          // Make sure all 'i' are preceded by '*' if they're preceded by a number
+          const fixedExpr = processedExpr.replace(/(\d+)(i)/g, '$1*$2');
+          result = mathInstance.evaluate(fixedExpr, scope);
+        } 
+        // Try with additional preprocessing for variable references (10x format)
+        else {
+          // Find all variable references
+          const varNames = Object.keys(scope).filter(key => typeof scope[key] !== 'function');
+          
+          // Create a regex pattern that matches any variable reference that's not preceded by an operator
+          const varPattern = new RegExp(`(\\d+)([${varNames.join('')}])`, 'g');
+          
+          // Replace "10x" with "10*x" for all variables
+          const fixedExpr = processedExpr.replace(varPattern, '$1*$2');
+          result = mathInstance.evaluate(fixedExpr, scope);
+        }
+      } catch (innerError) {
+        // If all recovery attempts fail, propagate the original error
+        throw e;
+      }
+    }
     
     return { result, updatedVariables: {} };
   } catch (error) {
@@ -277,27 +323,25 @@ function preProcessComplexNumbers(expression: string): string {
     return 'i'; // Now properly defined at initialization
   }
   
+  // Check for variable reference with direct multiplication (like "10x" where x is a variable)
+  // This pattern handles cases like "10x" by converting to "10*x"
+  processedExpr = processedExpr.replace(/(\d+)([a-zA-Z][a-zA-Z0-9]*)/g, '$1*$2');
+  
   // Special case 2: Easy form like 10i (direct coefficient)
-  const directCoefficient = /^(-?\d+\.?\d*)i$/.exec(processedExpr);
-  if (directCoefficient) {
-    const [, num] = directCoefficient;
-    return `${num}*i`; // For 10i, becomes 10*i
+  // This has to be done after the variable replacement to avoid conflicts
+  if (/^(-?\d+\.?\d*)i$/.test(processedExpr)) {
+    const numValue = parseFloat(processedExpr.replace(/i$/, ''));
+    return `${numValue}*i`; // For 10i, becomes 10*i
   }
   
   // Special case 3: Form with space like "10 i"
-  const spaceCoefficient = /^(-?\d+\.?\d*)\s+i$/.exec(processedExpr);
-  if (spaceCoefficient) {
-    const [, num] = spaceCoefficient;
-    return `${num}*i`; // For "10 i", becomes 10*i
+  if (/^(-?\d+\.?\d*)\s+i$/.test(processedExpr)) {
+    const match = processedExpr.match(/^(-?\d+\.?\d*)/);
+    if (match && match[0]) {
+      const numValue = parseFloat(match[0]);
+      return `${numValue}*i`; // For "10 i", becomes 10*i
+    }
   }
-  
-  // Special case 4: Explicit multiplication like "10*i" or "10 * i"
-  const multiplyCoefficient = /^(-?\d+\.?\d*)\s*\*\s*i$/.exec(processedExpr);
-  if (multiplyCoefficient) {
-    return processedExpr; // Already in correct form
-  }
-  
-  // For general expressions, we do targeted replacements
   
   // Replace all numerical coefficients immediately followed by i (like "10i" in expressions)
   processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)i\b/g, '$1*i');
@@ -322,8 +366,17 @@ function preProcessAngles(
   scope.deg2rad = (deg: number) => deg * DEG_TO_RAD;
   scope.rad2deg = (rad: number) => rad * RAD_TO_DEG;
   scope.PI = PI;
-  scope.complex = mathInstance.evaluate('complex');
-  scope.i = mathInstance.evaluate('complex(0,1)');
+  
+  // Ensure complex number support is properly available
+  try {
+    // Define the complex function and imaginary unit
+    scope.complex = mathInstance.evaluate('complex');
+    
+    // Explicitly define i in the scope to ensure it's available
+    scope.i = { re: 0, im: 1 };
+  } catch (error) {
+    console.error("Error setting up complex number support:", error);
+  }
   
   // Add custom trig functions that handle the right angle mode
   if (angleMode === 'DEG') {
