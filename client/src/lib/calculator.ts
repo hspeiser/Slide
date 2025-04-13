@@ -266,7 +266,7 @@ function handleUnitCalculation(
 }
 
 /**
- * Pre-process expressions for complex number notation
+ * Pre-process expressions for complex number notation and implicit multiplication
  */
 function preProcessComplexNumbers(expression: string): string {
   // First, handle special cases for the entire expression
@@ -305,6 +305,18 @@ function preProcessComplexNumbers(expression: string): string {
   // Replace all "N i" patterns (number, space, then i) in expressions
   processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)\s+i\b/g, '$1*i');
   
+  // Handle implicit multiplication of numbers with variables: 2x -> 2*x
+  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)([a-zA-Z_][a-zA-Z0-9_]*\b)/g, '$1*$2');
+  
+  // Handle implicit multiplication with parentheses: 2(x+1) -> 2*(x+1)
+  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s*\(/g, '$1*(');
+  
+  // Handle implicit multiplication between variable and parentheses: x(y+1) -> x*(y+1)
+  processedExpr = processedExpr.replace(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, '$1*(');
+  
+  // Handle implicit multiplication between closing and opening parentheses: (x+1)(y+2) -> (x+1)*(y+2)
+  processedExpr = processedExpr.replace(/\)\s*\(/g, ')*(');
+  
   return processedExpr;
 }
 
@@ -316,7 +328,9 @@ function preProcessAngles(
   angleMode: 'DEG' | 'RAD',
   scope: Record<string, any>
 ): string {
-  let processedExpr = expression;
+  // First, normalize spaces (reduce multiple spaces to single spaces)
+  // then handle spaces as implicit multiplication indicators where appropriate
+  let processedExpr = handleSpaces(expression);
   
   // Add degree/radian conversion helpers to scope
   scope.deg2rad = (deg: number) => deg * DEG_TO_RAD;
@@ -357,6 +371,45 @@ function preProcessAngles(
   processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*rad/g, (_, num) => {
     return angleMode === 'RAD' ? num : `(${num} * 180 / PI)`;
   });
+  
+  return processedExpr;
+}
+
+/**
+ * Handle spaces in expressions, treating them as potential multiplication operators
+ * This enables expressions like "2 x" to be interpreted as "2*x"
+ */
+function handleSpaces(expression: string): string {
+  // First normalize any multiple spaces to single spaces
+  let processedExpr = expression.replace(/\s+/g, ' ').trim();
+  
+  // Handle spaces between numbers and variables: "2 x" -> "2*x"
+  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s+([a-zA-Z_][a-zA-Z0-9_]*\b)/g, '$1*$2');
+  
+  // Handle spaces between variables: "x y" -> "x*y"
+  processedExpr = processedExpr.replace(/([a-zA-Z_][a-zA-Z0-9_]*)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1*$2');
+  
+  // Handle spaces between number and opening parenthesis: "2 (x+1)" -> "2*(x+1)"
+  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s+\(/g, '$1*(');
+  
+  // Handle spaces between variables and opening parenthesis: "x (y+1)" -> "x*(y+1)"
+  processedExpr = processedExpr.replace(/([a-zA-Z_][a-zA-Z0-9_]*)\s+\(/g, '$1*(');
+  
+  // Handle spaces between closing and opening parentheses: ") (" -> ")*("
+  processedExpr = processedExpr.replace(/\)\s+\(/g, ')*(');
+  
+  // Handle spaces between closing parenthesis and variable: ") x" -> ")*x"
+  processedExpr = processedExpr.replace(/\)\s+([a-zA-Z_][a-zA-Z0-9_]*)/g, ')*$1');
+  
+  // Handle spaces between closing parenthesis and number: ") 2" -> ")*2"
+  processedExpr = processedExpr.replace(/\)\s+(\d+\.?\d*)/g, ')*$1');
+  
+  // Remove any remaining spaces in the expression (except in function names and around operators)
+  // First protect spaces around operators
+  processedExpr = processedExpr.replace(/\s*([+\-*/^=])\s*/g, ' $1 ');
+  
+  // Now remove spaces not around operators
+  processedExpr = processedExpr.replace(/([^+\-*/^=\s])\s+([^+\-*/^=\s])/g, '$1$2');
   
   return processedExpr;
 }

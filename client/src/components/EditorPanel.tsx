@@ -43,25 +43,8 @@ const highlightState = StateField.define<DecorationSet>({
   provide: (field) => EditorView.decorations.from(field)
 });
 
-// Custom cursor style
-const customCursor = EditorView.theme({
-  ".cm-cursor": {
-    borderLeftWidth: "3px",
-    borderLeftColor: "hsl(var(--editor-cursor))",
-    animation: "blink 1.2s step-end infinite",
-    height: "1.6rem !important",
-    minHeight: "1.6rem !important",
-    boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.9)",
-    position: "absolute",
-    background: "hsla(var(--editor-cursor) / 0.15)",
-    width: "4px",
-    borderTopRightRadius: "2px",
-    borderBottomRightRadius: "2px"
-  },
-  "@keyframes blink": {
-    "from, to": { opacity: 1 },
-    "50%": { opacity: 0 }
-  },
+// Editor styling themes
+const editorTheme = EditorView.theme({
   // Highlighted line background
   ".highlighted-line": {
     backgroundColor: "hsla(var(--editor-selection) / 0.5)",
@@ -131,7 +114,27 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           javascript(),
           theme === 'dark' ? oneDark : [],
           highlightState,
-          customCursor,
+          editorTheme,
+          // Custom cursor styling
+          EditorView.theme({
+            ".cm-cursor": {
+              borderLeftWidth: "3px",
+              borderLeftColor: "hsl(var(--editor-cursor))",
+              animation: "blink 1.2s step-end infinite",
+              height: "1.6rem !important",
+              minHeight: "1.6rem !important",
+              boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.9)",
+              position: "absolute",
+              background: "hsla(var(--editor-cursor) / 0.15)",
+              width: "4px",
+              borderTopRightRadius: "2px",
+              borderBottomRightRadius: "2px"
+            },
+            "@keyframes blink": {
+              "from, to": { opacity: 1 },
+              "50%": { opacity: 0 }
+            }
+          }),
           // Add history support for undo/redo
           history(),
           keymap.of([
@@ -179,7 +182,26 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         javascript(),
         theme === 'dark' ? oneDark : [],
         highlightState,
-        customCursor,
+        // Custom cursor styling
+        EditorView.theme({
+          ".cm-cursor": {
+            borderLeftWidth: "3px",
+            borderLeftColor: "hsl(var(--editor-cursor))",
+            animation: "blink 1.2s step-end infinite",
+            height: "1.6rem !important",
+            minHeight: "1.6rem !important",
+            boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.9)",
+            position: "absolute",
+            background: "hsla(var(--editor-cursor) / 0.15)",
+            width: "4px",
+            borderTopRightRadius: "2px",
+            borderBottomRightRadius: "2px"
+          },
+          "@keyframes blink": {
+            "from, to": { opacity: 1 },
+            "50%": { opacity: 0 }
+          }
+        }),
         // Add history support for undo/redo
         history(),
         keymap.of([
