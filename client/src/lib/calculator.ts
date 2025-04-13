@@ -52,29 +52,46 @@ const unitMap: Record<string, string> = {
   'degrees': 'deg'
 };
 
-// Create a custom math.js instance with configuration
+// Create a completely fresh math.js instance with better configuration
 const mathInstance = math.create(math.all);
 
-// Configure math.js with complex number support
+// Configure math.js with explicit options for optimal calculator behavior
 mathInstance.config({
-  number: 'number',
-  precision: 14
+  number: 'number',    // Use JavaScript's number type
+  precision: 14,       // Higher precision for calculations
+  epsilon: 1e-12       // Smaller epsilon for more accurate floating point comparisons
 });
 
-// Define the imaginary unit properly
-try {
-  mathInstance.evaluate('i = complex(0, 1)');
-  
-  // Add additional implicit multiplication support
-  mathInstance.import({
-    // This function ensures proper implicit multiplication behavior (like 2x, 5i)
-    implicit: function(a: any, b: any): any {
-      return math.multiply(a, b);
+// Enable parser system with implicit multiplication handling
+mathInstance.import({
+  // Add our own custom implicit multiplication handler 
+  // that properly handles expressions like 5x or 2i
+  'multiply': function(a: any, b: any): any {
+    // Handle the special case of 5i where i is the imaginary unit
+    if (typeof a === 'number' && b && typeof b === 'object' && 
+        're' in b && 'im' in b && b.re === 0 && b.im === 1) {
+      return { re: 0, im: a }; // Return a properly formatted complex number
     }
-  }, { override: true });
-} catch (e) {
-  console.error("Error initializing complex number support", e);
-}
+    
+    // For all other cases, use the regular math.js multiply function
+    return math.multiply(a, b);
+  }
+}, { override: true });
+
+// Create a persistent parser to handle complex expressions
+const parser = mathInstance.parser();
+
+// Define the imaginary unit i on both the parser and core instance
+parser.evaluate('i = complex(0, 1)');
+mathInstance.evaluate('i = complex(0, 1)');
+
+// Create special handlers for common mathematical notations
+mathInstance.import({
+  // Handler for direct imaginary values like 5i
+  'processImaginary': function(num: number): any {
+    return { re: 0, im: num };
+  }
+}, { override: true });
 
 // Some constants we need
 const PI = Math.PI;
@@ -176,55 +193,108 @@ function evaluateExpression(
   angleMode: 'DEG' | 'RAD'
 ): { result: any; updatedVariables: Record<string, any> } {
   try {
-    // Create math.js scope with variables
-    const scope: Record<string, any> = { ...variables };
+    // Create a parser with context so variables persist
+    const localParser = mathInstance.parser();
     
-    // Pre-process the expression for complex numbers
-    let processedExpr = preProcessComplexNumbers(expression);
-    
-    // Pre-process the expression for angle mode and trig functions
-    processedExpr = preProcessAngles(processedExpr, angleMode, scope);
-    
-    // Execute the calculation
-    let result;
-    
-    // Special handling for complex numbers to ensure all notations work
-    try {
-      result = mathInstance.evaluate(processedExpr, scope);
-    } catch (e) {
-      // If direct evaluation fails, try with forced implicit multiplication
-      try {
-        // Special case for single 'i' notation (directly complex number)
-        if (processedExpr === 'i') {
-          result = { re: 0, im: 1 };
-        } 
-        // Try with additional preprocessing for complex numbers (10i format)
-        else if (processedExpr.includes('i')) {
-          // Make sure all 'i' are preceded by '*' if they're preceded by a number
-          const fixedExpr = processedExpr.replace(/(\d+)(i)/g, '$1*$2');
-          result = mathInstance.evaluate(fixedExpr, scope);
-        } 
-        // Try with additional preprocessing for variable references (10x format)
-        else {
-          // Find all variable references
-          const varNames = Object.keys(scope).filter(key => typeof scope[key] !== 'function');
-          
-          // Create a regex pattern that matches any variable reference that's not preceded by an operator
-          const varPattern = new RegExp(`(\\d+)([${varNames.join('')}])`, 'g');
-          
-          // Replace "10x" with "10*x" for all variables
-          const fixedExpr = processedExpr.replace(varPattern, '$1*$2');
-          result = mathInstance.evaluate(fixedExpr, scope);
-        }
-      } catch (innerError) {
-        // If all recovery attempts fail, propagate the original error
-        throw e;
-      }
+    // First set up the scope with all variables
+    for (const [key, value] of Object.entries(variables)) {
+      localParser.set(key, value);
     }
     
-    return { result, updatedVariables: {} };
+    // Make sure i is always properly defined
+    localParser.set('i', { re: 0, im: 1 });
+    
+    // Pre-process for angle mode and other special functions
+    const scope: Record<string, any> = {};
+    
+    // Add these to both scope and parser
+    scope.PI = PI;
+    localParser.set('PI', PI);
+    
+    scope.deg2rad = (deg: number) => deg * DEG_TO_RAD;
+    localParser.set('deg2rad', scope.deg2rad);
+    
+    scope.rad2deg = (rad: number) => rad * RAD_TO_DEG;
+    localParser.set('rad2deg', scope.rad2deg);
+    
+    // Add custom trig functions for correct angle mode
+    if (angleMode === 'DEG') {
+      // DEG mode - functions take degrees and return degrees
+      const sinDeg = (x: number) => Math.sin(x * DEG_TO_RAD);
+      const cosDeg = (x: number) => Math.cos(x * DEG_TO_RAD);
+      const tanDeg = (x: number) => Math.tan(x * DEG_TO_RAD);
+      const asinDeg = (x: number) => Math.asin(x) * RAD_TO_DEG;
+      const acosDeg = (x: number) => Math.acos(x) * RAD_TO_DEG;
+      const atanDeg = (x: number) => Math.atan(x) * RAD_TO_DEG;
+      
+      localParser.set('sin', sinDeg);
+      localParser.set('cos', cosDeg);
+      localParser.set('tan', tanDeg);
+      localParser.set('asin', asinDeg);
+      localParser.set('acos', acosDeg);
+      localParser.set('atan', atanDeg);
+      localParser.set('arcsin', asinDeg);
+      localParser.set('arccos', acosDeg);
+      localParser.set('arctan', atanDeg);
+    }
+    
+    // Pre-process the expression with our complex number and implicit multiplication handlers
+    let processedExpr = expression.trim();
+    
+    // Special case for just 'i'
+    if (processedExpr === 'i') {
+      return { result: { re: 0, im: 1 }, updatedVariables: {} };
+    }
+    
+    // Handle direct imaginary numbers like 10i
+    processedExpr = processedExpr.replace(/(\d+)i\b/g, '$1*i');
+    
+    // Handle direct variable multiplication like 10x where x is a variable
+    Object.keys(variables).forEach(varName => {
+      if (varName === 'i') return; // Skip i as it's handled separately
+      
+      // Create pattern that matches a number followed by this variable name
+      const pattern = new RegExp(`(\\d+)${varName}\\b`, 'g');
+      processedExpr = processedExpr.replace(pattern, `$1*${varName}`);
+    });
+    
+    // Handle deg/rad notation in expressions
+    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*deg/g, (_, num) => {
+      return angleMode === 'DEG' ? num : `(${num} * PI / 180)`;
+    });
+    
+    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*rad/g, (_, num) => {
+      return angleMode === 'RAD' ? num : `(${num} * 180 / PI)`;
+    });
+    
+    try {
+      // Use the parser to evaluate
+      const result = localParser.evaluate(processedExpr);
+      return { result, updatedVariables: {} };
+    } catch (firstError) {
+      // If it fails, try more aggressive replacements
+      try {
+        // Add all possible * for adjacency
+        const withAllImplicit = processedExpr.replace(/(\d+)([a-zA-Z])/g, '$1*$2');
+        const result = localParser.evaluate(withAllImplicit);
+        return { result, updatedVariables: {} };
+      } catch (e) {
+        // For specific case of 10i
+        if (/^\s*\d+i\s*$/.test(processedExpr)) {
+          const num = parseFloat(processedExpr.replace(/i/g, ''));
+          return { 
+            result: { re: 0, im: num },
+            updatedVariables: {} 
+          };
+        }
+        
+        // If all attempts fail
+        throw firstError;
+      }
+    }
   } catch (error) {
     // For any error, return null result
+    console.error("Evaluation error:", error);
     return { result: null, updatedVariables: {} };
   }
 }
