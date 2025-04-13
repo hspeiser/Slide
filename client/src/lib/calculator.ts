@@ -1,33 +1,186 @@
 import * as math from 'mathjs';
 
+// Unit mapping for better recognition
+const unitMap: Record<string, string> = {
+  'in': 'inch',
+  'inch': 'inch',
+  'inches': 'inch',
+  'ft': 'ft',
+  'feet': 'ft',
+  'foot': 'ft',
+  'yd': 'yd',
+  'yard': 'yd',
+  'yards': 'yd',
+  'm': 'm',
+  'meter': 'm',
+  'meters': 'm',
+  'km': 'km',
+  'kilometer': 'km',
+  'kilometers': 'km',
+  'mile': 'mi',
+  'miles': 'mi',
+  'mi': 'mi',
+  'gal': 'gal',
+  'gallon': 'gal',
+  'gallons': 'gal',
+  'l': 'L',
+  'liter': 'L',
+  'liters': 'L',
+  'L': 'L',
+  'kg': 'kg',
+  'kilogram': 'kg',
+  'kilograms': 'kg',
+  'lb': 'lbs',
+  'lbs': 'lbs',
+  'pound': 'lbs',
+  'pounds': 'lbs',
+  'c': 'degC',
+  'C': 'degC',
+  '°C': 'degC',
+  'degC': 'degC',
+  'celsius': 'degC',
+  'f': 'degF',
+  'F': 'degF',
+  '°F': 'degF',
+  'degF': 'degF',
+  'fahrenheit': 'degF',
+  'rad': 'rad',
+  'radian': 'rad',
+  'radians': 'rad',
+  'deg': 'deg',
+  'degree': 'deg',
+  'degrees': 'deg'
+};
+
 // Unit conversion mappings
 const unitConversions: Record<string, { fromUnit: string; toUnit: string }> = {
   'km to miles': { fromUnit: 'km', toUnit: 'mi' },
+  'kilometer to miles': { fromUnit: 'km', toUnit: 'mi' },
+  'kilometers to miles': { fromUnit: 'km', toUnit: 'mi' },
+  'km to mi': { fromUnit: 'km', toUnit: 'mi' },
   'miles to km': { fromUnit: 'mi', toUnit: 'km' },
+  'mi to km': { fromUnit: 'mi', toUnit: 'km' },
+  'miles to kilometer': { fromUnit: 'mi', toUnit: 'km' },
+  'miles to kilometers': { fromUnit: 'mi', toUnit: 'km' },
+  
   'kg to lbs': { fromUnit: 'kg', toUnit: 'lbs' },
+  'kg to lb': { fromUnit: 'kg', toUnit: 'lbs' },
+  'kg to pounds': { fromUnit: 'kg', toUnit: 'lbs' },
+  'kilogram to pounds': { fromUnit: 'kg', toUnit: 'lbs' },
+  'kilograms to pounds': { fromUnit: 'kg', toUnit: 'lbs' },
+  
   'lbs to kg': { fromUnit: 'lbs', toUnit: 'kg' },
+  'lb to kg': { fromUnit: 'lbs', toUnit: 'kg' },
+  'pounds to kg': { fromUnit: 'lbs', toUnit: 'kg' },
+  'pounds to kilogram': { fromUnit: 'lbs', toUnit: 'kg' },
+  'pounds to kilograms': { fromUnit: 'lbs', toUnit: 'kg' },
+  
   'm to ft': { fromUnit: 'm', toUnit: 'ft' },
+  'meter to ft': { fromUnit: 'm', toUnit: 'ft' },
+  'meters to ft': { fromUnit: 'm', toUnit: 'ft' },
+  'm to feet': { fromUnit: 'm', toUnit: 'ft' },
+  'meter to feet': { fromUnit: 'm', toUnit: 'ft' },
+  'meters to feet': { fromUnit: 'm', toUnit: 'ft' },
+  
   'ft to m': { fromUnit: 'ft', toUnit: 'm' },
+  'feet to m': { fromUnit: 'ft', toUnit: 'm' },
+  'foot to m': { fromUnit: 'ft', toUnit: 'm' },
+  'ft to meter': { fromUnit: 'ft', toUnit: 'm' },
+  'feet to meter': { fromUnit: 'ft', toUnit: 'm' },
+  'ft to meters': { fromUnit: 'ft', toUnit: 'm' },
+  'feet to meters': { fromUnit: 'ft', toUnit: 'm' },
+  
   'm to in': { fromUnit: 'm', toUnit: 'inch' },
+  'meter to in': { fromUnit: 'm', toUnit: 'inch' },
+  'meters to in': { fromUnit: 'm', toUnit: 'inch' },
+  'm to inch': { fromUnit: 'm', toUnit: 'inch' },
+  'meter to inch': { fromUnit: 'm', toUnit: 'inch' },
+  'meters to inch': { fromUnit: 'm', toUnit: 'inch' },
+  'm to inches': { fromUnit: 'm', toUnit: 'inch' },
+  'meter to inches': { fromUnit: 'm', toUnit: 'inch' },
+  'meters to inches': { fromUnit: 'm', toUnit: 'inch' },
+  
   'in to m': { fromUnit: 'inch', toUnit: 'm' },
+  'inch to m': { fromUnit: 'inch', toUnit: 'm' },
+  'inches to m': { fromUnit: 'inch', toUnit: 'm' },
+  'in to meter': { fromUnit: 'inch', toUnit: 'm' },
+  'inch to meter': { fromUnit: 'inch', toUnit: 'm' },
+  'inches to meter': { fromUnit: 'inch', toUnit: 'm' },
+  'in to meters': { fromUnit: 'inch', toUnit: 'm' },
+  'inch to meters': { fromUnit: 'inch', toUnit: 'm' },
+  'inches to meters': { fromUnit: 'inch', toUnit: 'm' },
+  
   'yd to in': { fromUnit: 'yd', toUnit: 'inch' },
   'yard to in': { fromUnit: 'yd', toUnit: 'inch' },
+  'yards to in': { fromUnit: 'yd', toUnit: 'inch' },
+  'yd to inch': { fromUnit: 'yd', toUnit: 'inch' },
+  'yard to inch': { fromUnit: 'yd', toUnit: 'inch' },
+  'yards to inch': { fromUnit: 'yd', toUnit: 'inch' },
+  'yd to inches': { fromUnit: 'yd', toUnit: 'inch' },
+  'yard to inches': { fromUnit: 'yd', toUnit: 'inch' },
+  'yards to inches': { fromUnit: 'yd', toUnit: 'inch' },
+  
   'in to yd': { fromUnit: 'inch', toUnit: 'yd' },
+  'inch to yd': { fromUnit: 'inch', toUnit: 'yd' },
+  'inches to yd': { fromUnit: 'inch', toUnit: 'yd' },
   'in to yard': { fromUnit: 'inch', toUnit: 'yd' },
+  'inch to yard': { fromUnit: 'inch', toUnit: 'yd' },
+  'inches to yard': { fromUnit: 'inch', toUnit: 'yd' },
+  'in to yards': { fromUnit: 'inch', toUnit: 'yd' },
+  'inch to yards': { fromUnit: 'inch', toUnit: 'yd' },
+  'inches to yards': { fromUnit: 'inch', toUnit: 'yd' },
+  
   'l to gal': { fromUnit: 'L', toUnit: 'gal' },
+  'L to gal': { fromUnit: 'L', toUnit: 'gal' },
+  'liter to gal': { fromUnit: 'L', toUnit: 'gal' },
+  'liters to gal': { fromUnit: 'L', toUnit: 'gal' },
+  'l to gallon': { fromUnit: 'L', toUnit: 'gal' },
+  'L to gallon': { fromUnit: 'L', toUnit: 'gal' },
+  'liter to gallon': { fromUnit: 'L', toUnit: 'gal' },
+  'liters to gallon': { fromUnit: 'L', toUnit: 'gal' },
+  'l to gallons': { fromUnit: 'L', toUnit: 'gal' },
+  'L to gallons': { fromUnit: 'L', toUnit: 'gal' },
+  'liter to gallons': { fromUnit: 'L', toUnit: 'gal' },
+  'liters to gallons': { fromUnit: 'L', toUnit: 'gal' },
+  
   'gal to l': { fromUnit: 'gal', toUnit: 'L' },
+  'gal to L': { fromUnit: 'gal', toUnit: 'L' },
+  'gallon to l': { fromUnit: 'gal', toUnit: 'L' },
+  'gallons to l': { fromUnit: 'gal', toUnit: 'L' },
+  'gallon to L': { fromUnit: 'gal', toUnit: 'L' },
+  'gallons to L': { fromUnit: 'gal', toUnit: 'L' },
+  'gal to liter': { fromUnit: 'gal', toUnit: 'L' },
+  'gallon to liter': { fromUnit: 'gal', toUnit: 'L' },
+  'gallons to liter': { fromUnit: 'gal', toUnit: 'L' },
+  'gal to liters': { fromUnit: 'gal', toUnit: 'L' },
+  'gallon to liters': { fromUnit: 'gal', toUnit: 'L' },
+  'gallons to liters': { fromUnit: 'gal', toUnit: 'L' },
+  
   '°C to °F': { fromUnit: 'degC', toUnit: 'degF' },
+  'C to F': { fromUnit: 'degC', toUnit: 'degF' },
+  'celsius to fahrenheit': { fromUnit: 'degC', toUnit: 'degF' },
+  'c to f': { fromUnit: 'degC', toUnit: 'degF' },
+  'degC to degF': { fromUnit: 'degC', toUnit: 'degF' },
+  
   '°F to °C': { fromUnit: 'degF', toUnit: 'degC' },
+  'F to C': { fromUnit: 'degF', toUnit: 'degC' },
+  'fahrenheit to celsius': { fromUnit: 'degF', toUnit: 'degC' },
+  'f to c': { fromUnit: 'degF', toUnit: 'degC' },
+  'degF to degC': { fromUnit: 'degF', toUnit: 'degC' },
 };
 
 // Create a custom math.js instance with configuration
 const mathInstance = math.create(math.all);
 
-// Configure math.js
+// Configure math.js with complex number support
 mathInstance.config({
   number: 'number',
   precision: 14
 });
+
+// Add complex number helper function to scope
+const complexFn = mathInstance.evaluate('complex');
+const powFn = mathInstance.evaluate('pow');
 
 /**
  * Evaluates a mathematical expression
@@ -55,10 +208,15 @@ export function evaluate(
   }
   
   // Create a scope with current variables immediately
-  const scope = { ...variables };
-  
-  // Configure angle mode 
-  scope.angleMode = angleMode === 'DEG' ? 'deg' : 'rad';
+  const scope: Record<string, any> = { 
+    ...variables,
+    // Add complex number support
+    complex: complexFn,
+    pow: powFn,
+    i: complexFn(0, 1), // Add i directly to the scope so i can be used directly
+    // Add default angle mode
+    angleMode: angleMode === 'DEG' ? 'deg' : 'rad'
+  };
 
   // Check if this is adding units to a variable (e.g., "x in" or "x m")
   const variableUnitMatch = actualExpression.match(/^([a-zA-Z][a-zA-Z0-9]*)\s+([a-zA-Z]+)$/);
@@ -140,34 +298,66 @@ export function evaluate(
   if (assignmentMatch) {
     const [, variableName, valueExpression] = assignmentMatch;
     
-    // Pre-process the expression for angle conversions
+    // Add support for complex numbers i/j notation
+    // First, pre-process common complex number patterns
     let processedValueExpr = valueExpression;
+    
+    // Pre-process complex number inputs for better handling
+    const imgUnitRegex = /(\d*\.?\d*)i\b/g;
+    processedValueExpr = processedValueExpr.replace(imgUnitRegex, (match, num) => {
+      if (num === '') return 'complex(0, 1)';  // just i becomes complex(0, 1)
+      return `complex(0, ${num})`;            // 5i becomes complex(0, 5)
+    });
+    
+    // Handle pre-multipliers of i: 5*i becomes complex(0, 5)
+    processedValueExpr = processedValueExpr.replace(/(\d+\.?\d*)\s*\*\s*i\b/g, 'complex(0, $1)');
     
     // Define a custom function to handle degrees in our scope
     if (angleMode === 'DEG') {
-      // Regular trig functions
-      processedValueExpr = processedValueExpr
-        .replace(/\bsin\s*\(/g, 'sin(deg2rad(')
-        .replace(/\bcos\s*\(/g, 'cos(deg2rad(')
-        .replace(/\btan\s*\(/g, 'tan(deg2rad(')
-        .replace(/\)/g, '))');
-        
       // Add degree conversion functions to scope
       scope.deg2rad = (degrees: number) => degrees * Math.PI / 180;
       scope.rad2deg = (radians: number) => radians * 180 / Math.PI;
       
-      // Inverse trig functions
-      // Replace arcsin/arccos/arctan with asin/acos/atan
-      processedValueExpr = processedValueExpr
-        .replace(/\barcsin\s*\(/g, 'rad2deg(asin(')
-        .replace(/\barccos\s*\(/g, 'rad2deg(acos(')  
-        .replace(/\barctan\s*\(/g, 'rad2deg(atan(');
+      // Handle special degree notation like sin(90 deg) or cos(45 rad)
+      processedValueExpr = processedValueExpr.replace(/(\d+(\.\d+)?)\s*deg/g, (match, num) => {
+        return num;
+      });
+      
+      processedValueExpr = processedValueExpr.replace(/(\d+(\.\d+)?)\s*rad/g, (match, num) => {
+        return `(${num} * 180 / ${Math.PI})`;
+      });
+      
+      try {
+        // First, only transform specific patterns for trig functions
+        // Regular trig functions - process these individually
+        processedValueExpr = processedValueExpr
+          .replace(/\bsin\s*\(([^)]+)\)/g, (match, inner) => `sin(deg2rad(${inner}))`)
+          .replace(/\bcos\s*\(([^)]+)\)/g, (match, inner) => `cos(deg2rad(${inner}))`)
+          .replace(/\btan\s*\(([^)]+)\)/g, (match, inner) => `tan(deg2rad(${inner}))`);
         
-      // Then handle asin/acos/atan  
-      processedValueExpr = processedValueExpr
-        .replace(/\basin\s*\(/g, 'rad2deg(asin(')
-        .replace(/\bacos\s*\(/g, 'rad2deg(acos(')
-        .replace(/\batan\s*\(/g, 'rad2deg(atan(');
+        // Handle inverse trig functions - process each pattern individually
+        processedValueExpr = processedValueExpr
+          .replace(/\barcsin\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(asin(${inner}))`)
+          .replace(/\barccos\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(acos(${inner}))`)
+          .replace(/\barctan\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(atan(${inner}))`);
+        
+        // Then handle asin/acos/atan forms
+        processedValueExpr = processedValueExpr
+          .replace(/\basin\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(asin(${inner}))`)
+          .replace(/\bacos\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(acos(${inner}))`)
+          .replace(/\batan\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(atan(${inner}))`);
+      } catch (e) {
+        // Fallback to simpler approach if regex fails
+        if (processedValueExpr.includes('arctan')) {
+          processedValueExpr = processedValueExpr.replace(/arctan/g, 'atan');
+        }
+        if (processedValueExpr.includes('arcsin')) {
+          processedValueExpr = processedValueExpr.replace(/arcsin/g, 'asin');
+        }
+        if (processedValueExpr.includes('arccos')) {
+          processedValueExpr = processedValueExpr.replace(/arccos/g, 'acos');
+        }
+      }
     }
     
     try {
@@ -192,31 +382,71 @@ export function evaluate(
     // Process expression based on angle mode
     let processedExpression = actualExpression;
     
+    // Add support for complex numbers i/j notation
+    // Pre-process complex number inputs for better handling
+    const imgUnitRegex = /(\d*\.?\d*)i\b/g;
+    processedExpression = processedExpression.replace(imgUnitRegex, (match, num) => {
+      if (num === '') return 'complex(0, 1)';  // just i becomes complex(0, 1)
+      return `complex(0, ${num})`;            // 5i becomes complex(0, 5)
+    });
+    
+    // Handle pre-multipliers of i: 5*i becomes complex(0, 5)
+    processedExpression = processedExpression.replace(/(\d+\.?\d*)\s*\*\s*i\b/g, 'complex(0, $1)');
+    
     // Define a custom function to handle degrees in our scope
     if (angleMode === 'DEG') {
       // Add degree conversion functions to scope
       scope.deg2rad = (degrees: number) => degrees * Math.PI / 180;
       scope.rad2deg = (radians: number) => radians * 180 / Math.PI;
       
-      // Regular trig functions
-      processedExpression = processedExpression
-        .replace(/\bsin\s*\(/g, 'sin(deg2rad(')
-        .replace(/\bcos\s*\(/g, 'cos(deg2rad(')
-        .replace(/\btan\s*\(/g, 'tan(deg2rad(')
-        .replace(/\)/g, '))');
+      // Handle special degree notation like sin(90 deg) or cos(45 rad)
+      processedExpression = processedExpression.replace(/(\d+(\.\d+)?)\s*deg/g, (match, num) => {
+        return num;
+      });
       
-      // Inverse trig functions  
-      // Replace arcsin/arccos/arctan with asin/acos/atan
-      processedExpression = processedExpression
-        .replace(/\barcsin\s*\(/g, 'rad2deg(asin(')
-        .replace(/\barccos\s*\(/g, 'rad2deg(acos(')  
-        .replace(/\barctan\s*\(/g, 'rad2deg(atan(');
+      processedExpression = processedExpression.replace(/(\d+(\.\d+)?)\s*rad/g, (match, num) => {
+        return `(${num} * 180 / ${Math.PI})`;
+      });
+      
+      // Handle trig functions with careful parenthesis balancing
+      // Store original expression for debugging
+      const origExpr = processedExpression;
+      
+      try {
+        // First, only transform specific patterns for trig functions
+        // Use a more careful approach that doesn't mess up all parentheses
         
-      // Then handle asin/acos/atan  
-      processedExpression = processedExpression
-        .replace(/\basin\s*\(/g, 'rad2deg(asin(')
-        .replace(/\bacos\s*\(/g, 'rad2deg(acos(')
-        .replace(/\batan\s*\(/g, 'rad2deg(atan(');
+        // Regular trig functions - process these individually
+        processedExpression = processedExpression
+          .replace(/\bsin\s*\(([^)]+)\)/g, (match, inner) => `sin(deg2rad(${inner}))`)
+          .replace(/\bcos\s*\(([^)]+)\)/g, (match, inner) => `cos(deg2rad(${inner}))`)
+          .replace(/\btan\s*\(([^)]+)\)/g, (match, inner) => `tan(deg2rad(${inner}))`);
+        
+        // Handle inverse trig functions - process each pattern individually
+        processedExpression = processedExpression
+          .replace(/\barcsin\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(asin(${inner}))`)
+          .replace(/\barccos\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(acos(${inner}))`)
+          .replace(/\barctan\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(atan(${inner}))`);
+        
+        // Then handle asin/acos/atan forms
+        processedExpression = processedExpression
+          .replace(/\basin\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(asin(${inner}))`)
+          .replace(/\bacos\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(acos(${inner}))`)
+          .replace(/\batan\s*\(([^)]+)\)/g, (match, inner) => `rad2deg(atan(${inner}))`);
+      } catch (e) {
+        // If anything goes wrong with regex, revert to original expression
+        processedExpression = origExpr;
+        // Just use basic function replacements
+        if (processedExpression.includes('arctan')) {
+          processedExpression = processedExpression.replace(/arctan/g, 'atan');
+        }
+        if (processedExpression.includes('arcsin')) {
+          processedExpression = processedExpression.replace(/arcsin/g, 'asin');
+        }
+        if (processedExpression.includes('arccos')) {
+          processedExpression = processedExpression.replace(/arccos/g, 'acos');
+        }
+      }
     }
     
     // Configure general math settings
