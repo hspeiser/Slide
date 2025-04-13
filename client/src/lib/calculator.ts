@@ -69,10 +69,10 @@ mathInstance.config({
   implicit: 'show'  // Enable implicit multiplication
 });
 
-// Define a custom operator for parallel resistors using the || symbol
+// Define a parallel function instead of an operator (since || is JavaScript's OR operator)
 // Formula: R_parallel = 1 / (1/R1 + 1/R2)
 mathInstance.import({
-  '||': function(a: any, b: any): any {
+  parallel: function(a: any, b: any): any {
     // Handle complex numbers and any other type mathjs can divide
     try {
       // Convert to numbers if strings
