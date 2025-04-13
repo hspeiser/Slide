@@ -197,15 +197,19 @@ const Calculator = () => {
       />
       
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <EditorPanel 
-          content={content} 
-          onChange={setContent} 
-          highlightedLine={highlightedLine}
-        />
-        <ResultPanel 
-          results={results} 
-          onHighlightLine={setHighlightedLine}
-        />
+        <div className="md:w-2/3 flex-grow">
+          <EditorPanel 
+            content={content} 
+            onChange={setContent} 
+            highlightedLine={highlightedLine}
+          />
+        </div>
+        <div className="md:w-1/3">
+          <ResultPanel 
+            results={results} 
+            onHighlightLine={setHighlightedLine}
+          />
+        </div>
       </main>
       
       <CalculatorFooter 
