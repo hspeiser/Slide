@@ -268,16 +268,32 @@ function handleUnitCalculation(
 function preProcessComplexNumbers(expression: string): string {
   let processedExpr = expression;
   
-  // Replace standalone 'i' with complex(0,1)
-  processedExpr = processedExpr.replace(/\bi\b/g, 'complex(0,1)');
+  // Complex number handling
+  if (processedExpr === 'i') {
+    return 'complex(0,1)';
+  }
   
-  // Replace patterns like 5i with complex(0,5)
-  processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*i\b/g, 'complex(0,$1)');
+  if (/^\d+\.?\d*i$/.test(processedExpr)) {
+    const num = processedExpr.replace('i', '');
+    return `complex(0,${num})`;
+  }
   
-  // Replace patterns like 5*i with complex(0,5)
-  processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\*\s*i\b/g, 'complex(0,$1)');
+  if (/^\d+\.?\d*\s*\*\s*i$/.test(processedExpr)) {
+    const num = processedExpr.split('*')[0].trim();
+    return `complex(0,${num})`;
+  }
   
-  // Replace (a+bi) patterns - this is harder and we don't do it fully here
+  // For expressions containing i but not just i alone
+  if (processedExpr.includes('i')) {
+    // Handle standalone 'i' (not part of a word/variable)
+    processedExpr = processedExpr.replace(/\bi\b/g, 'complex(0,1)');
+    
+    // Handle numeric coefficients immediately before i: 5i -> complex(0,5)
+    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*i\b/g, 'complex(0,$1)');
+    
+    // Handle multiplication with i: 5*i -> complex(0,5)
+    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\*\s*i\b/g, 'complex(0,$1)');
+  }
   
   return processedExpr;
 }

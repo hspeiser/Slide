@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -102,37 +102,42 @@
 /* CodeMirror specific styles */
 .cm-editor {
   height: 100%;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  line-height: 1.5;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 15px;
+  line-height: 1.6;
   letter-spacing: 0.3px;
   border-radius: 0.5rem;
   overflow: hidden;
 }
 
 .cm-line {
-  min-height: 1.5rem;
+  min-height: 1.6rem;
+  height: 1.6rem;
   padding: 0 4px;
   margin: 0.15rem 0;
   transition: background-color 0.15s ease;
+  display: flex;
+  align-items: center;
 }
 
 /* Ensure consistent height and alignment for both input and output */
 .editor-container, .result-panel {
-  font-size: 14px;
-  line-height: 1.5;
-  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
   border-radius: 0.5rem;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) inset;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15) inset;
 }
 
 .editor-container .cm-line, .result-panel .result-line {
-  min-height: 1.5rem;
-  height: 1.5rem;
+  min-height: 1.6rem;
+  height: 1.6rem;
   margin: 0.15rem 0;
   box-sizing: border-box;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
 }
 
 .cm-scroller {
@@ -226,24 +231,42 @@
 
 /* Result styling for better visibility */
 .result-value {
-  text-shadow: 0 0 1px hsla(var(--editor-result) / 0.3);
-  padding: 2px 4px;
-  transition: all 0.15s ease;
-  border-radius: 3px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
+  text-shadow: 0 0 5px hsla(var(--editor-result) / 0.35);
+  padding: 2px 6px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 15px;
   letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.6rem;
+}
+
+.result-value:hover {
+  box-shadow: 0 0 8px hsla(var(--editor-result) / 0.5);
 }
 
 /* Result line specific styling */
 .result-line {
-  padding: 0 4px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14px;
-  line-height: 1.5;
+  padding: 0 6px;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 15px;
+  line-height: 1.6;
   letter-spacing: 0.3px;
   box-sizing: border-box;
   margin: 0.15rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 1.6rem;
+  height: 1.6rem;
+}
+
+/* For multiline results */
+.result-value.multiline {
+  height: auto;
+  white-space: pre-wrap;
 }
 
 /* Error highlighting */

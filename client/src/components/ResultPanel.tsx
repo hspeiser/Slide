@@ -91,6 +91,11 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
     });
   };
   
+  // Calculate if a line will wrap based on length
+  const isMultiline = (text: string): boolean => {
+    return text.length > 30; // This is a simple heuristic, you might need to refine
+  };
+  
   return (
     <div className="w-full md:w-48 lg:w-64 flex flex-col overflow-hidden result-panel">
       <div 
@@ -100,19 +105,22 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
         <div className="p-4">
           {results.map((result, index) => {
             const displayValue = getDisplayValue(result);
+            const willWrap = displayValue ? isMultiline(displayValue) : false;
             
             return (
               <div 
                 key={index} 
-                className={`result-line min-h-[1.5rem] h-[1.5rem] text-right whitespace-nowrap overflow-x-auto px-4 ${
+                className={`result-line ${willWrap ? 'min-h-[3.2rem] h-auto' : 'min-h-[1.6rem] h-[1.6rem]'} 
+                  text-right overflow-x-auto px-4 ${
                   copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
                 }`}
               >
                 {displayValue && (
                   <span 
-                    className="result-value inline-block px-2 py-0.5 rounded-md cursor-pointer
+                    className={`result-value inline-block px-2 py-0.5 rounded-md cursor-pointer
                               text-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result))] 
-                              hover:text-[hsl(var(--editor-bg))] transition-all duration-200"
+                              hover:text-[hsl(var(--editor-bg))] transition-all duration-200
+                              ${willWrap ? 'multiline whitespace-pre-wrap' : 'whitespace-nowrap'}`}
                     onClick={() => copyToClipboard(result, index)}
                     onMouseEnter={() => onHighlightLine?.(index)}
                     onMouseLeave={() => onHighlightLine?.(null)}
