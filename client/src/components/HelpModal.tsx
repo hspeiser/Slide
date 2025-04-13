@@ -11,8 +11,8 @@ const HelpModal = ({ onClose }: HelpModalProps) => {
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
         className="bg-[hsl(var(--editor-bg))] border-[hsl(var(--editor-selection)/0.3)] 
-                  text-[hsl(var(--editor-text))] max-w-2xl w-full max-h-[80vh] 
-                  overflow-auto rounded-lg shadow-lg"
+                   text-[hsl(var(--editor-text))] max-w-2xl w-full max-h-[80vh] 
+                   overflow-auto rounded-lg shadow-lg"
       >
         <DialogHeader className="space-y-1.5">
           <div className="flex justify-between items-center">

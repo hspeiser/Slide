@@ -71,14 +71,7 @@ const SettingsModal = ({ onClose, decimalPlaces, onDecimalPlacesChange }: Settin
             </div>
           </div>
           
-          <div className="flex justify-end pt-2 space-x-2">
-            <Button 
-              variant="outline" 
-              className="border-[hsl(var(--editor-selection)/0.3)] hover:bg-[hsl(var(--editor-selection)/0.15)] w-24"
-              onClick={onClose}
-            >
-              Cancel
-            </Button>
+          <div className="flex justify-end pt-2">
             <Button 
               className="bg-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result)/0.9)] w-24 text-[hsl(var(--editor-bg))]"
               onClick={handleSave}
