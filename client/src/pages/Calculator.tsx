@@ -89,8 +89,27 @@ const Calculator = () => {
             // Try to extract numeric value from complex math.js objects
             try {
               const resultStr = result.toString();
+              
+              // Handle complex numbers (with imaginary parts)
+              if (resultStr.includes('i') && typeof result.re === 'number' && typeof result.im === 'number') {
+                // Format both real and imaginary parts with proper decimal places
+                const realPart = Number(result.re.toFixed(decimalPlaces)).toString()
+                  .replace(/\.?0+$/, '');
+                
+                const imPart = Math.abs(Number(result.im.toFixed(decimalPlaces)));
+                const imFormatted = imPart.toString().replace(/\.?0+$/, '');
+                
+                // Format like "3 + 2i" or "3 - 2i"
+                if (imPart === 0) {
+                  formattedResult = realPart;
+                } else if (result.re === 0) {
+                  formattedResult = result.im < 0 ? `-${imFormatted}i` : `${imFormatted}i`;
+                } else {
+                  formattedResult = `${realPart} ${result.im < 0 ? '-' : '+'} ${imFormatted}i`;
+                }
+              }
               // Check if it's a unit conversion or other math.js object
-              if (resultStr.includes(' ') || resultStr.includes('m')) {
+              else if (resultStr.includes(' ') || /[a-zA-Z]/.test(resultStr)) {
                 // For unit conversions, try to format the numeric part
                 const numericPart = parseFloat(resultStr);
                 if (!isNaN(numericPart)) {

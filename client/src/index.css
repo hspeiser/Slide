@@ -21,7 +21,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 207 100% 50%;
+    --primary: 207 85% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -34,26 +34,26 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
-    --radius: 0.25rem;
+    --radius: 0.5rem;
 
-    /* Editor colors - Dark theme with vibrant colors */
-    --editor-bg: 225 12% 10%;
-    --editor-line: 220 10% 18%;
-    --editor-text: 0 0% 88%;
-    --editor-selection: 210 50% 30%;
-    --editor-cursor: 180 100% 50%;
+    /* Editor colors - Softer dark theme with smoother colors */
+    --editor-bg: 225 15% 12%;
+    --editor-line: 220 12% 20%;
+    --editor-text: 0 0% 92%;
+    --editor-selection: 210 40% 32%;
+    --editor-cursor: 180 80% 50%;
     --editor-line-num: 220 15% 50%;
-    --editor-active-line: 225 20% 16%;
+    --editor-active-line: 225 15% 18%;
     
-    /* Syntax highlighting - Vibrant dark theme */
-    --editor-keyword: 210 80% 65%;
-    --editor-function: 35 90% 75%;
-    --editor-number: 95 65% 65%;
-    --editor-string: 10 90% 70%;
-    --editor-comment: 140 30% 55%;
-    --editor-variable: 200 95% 75%;
-    --editor-result: 160 80% 60%;
-    --editor-error: 0 90% 65%;
+    /* Syntax highlighting - Slightly softer colors */
+    --editor-keyword: 210 70% 65%;
+    --editor-function: 35 80% 70%;
+    --editor-number: 95 60% 65%;
+    --editor-string: 10 80% 65%;
+    --editor-comment: 140 25% 55%;
+    --editor-variable: 200 75% 70%;
+    --editor-result: 160 70% 60%;
+    --editor-error: 0 75% 65%;
   }
 
   .light {
@@ -63,38 +63,39 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 207 100% 50%;
+    --primary: 207 85% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
+    --secondary: 210 35% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
+    --muted: 210 35% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
+    --accent: 210 35% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
 
-    /* Editor light colors - Higher contrast */
-    --editor-bg: 210 30% 98%;
-    --editor-line: 210 15% 92%;
-    --editor-text: 210 50% 10%;
-    --editor-selection: 210 50% 85%;
-    --editor-cursor: 210 100% 40%;
+    /* Editor light colors - Softer and more pleasing */
+    --editor-bg: 210 25% 98%;
+    --editor-line: 210 12% 94%;
+    --editor-text: 210 40% 12%;
+    --editor-selection: 210 40% 85%;
+    --editor-cursor: 210 90% 45%;
     --editor-line-num: 210 20% 60%;
-    --editor-active-line: 210 30% 96%;
+    --editor-active-line: 210 25% 96%;
     
-    /* Syntax highlighting - Vibrant light theme */
-    --editor-keyword: 210 100% 50%;
-    --editor-function: 35 100% 40%;
-    --editor-number: 140 60% 35%;
-    --editor-string: 0 90% 55%;
-    --editor-comment: 210 30% 50%;
-    --editor-variable: 210 100% 40%;
-    --editor-result: 160 100% 30%;
-    --editor-error: 0 90% 60%;
+    /* Syntax highlighting - Softer light theme */
+    --editor-keyword: 210 80% 50%;
+    --editor-function: 35 80% 45%;
+    --editor-number: 140 55% 40%;
+    --editor-string: 0 75% 55%;
+    --editor-comment: 210 25% 50%;
+    --editor-variable: 210 80% 45%;
+    --editor-result: 160 80% 35%;
+    --editor-error: 0 75% 60%;
   }
 }
 
@@ -105,12 +106,15 @@
   font-size: 14px;
   line-height: 1.5;
   letter-spacing: 0.3px;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
 .cm-line {
   min-height: 1.5rem;
-  padding: 0 2px;
+  padding: 0 4px;
   margin: 0.15rem 0;
+  transition: background-color 0.15s ease;
 }
 
 /* Ensure consistent height and alignment for both input and output */
@@ -118,6 +122,9 @@
   font-size: 14px;
   line-height: 1.5;
   font-family: 'JetBrains Mono', monospace;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) inset;
 }
 
 .editor-container .cm-line, .result-panel .result-line {
@@ -125,20 +132,25 @@
   height: 1.5rem;
   margin: 0.15rem 0;
   box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 .cm-scroller {
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: hsla(var(--editor-selection) / 0.3) transparent;
 }
 
 .cm-content {
   cursor: text;
+  padding: 4px 0;
 }
 
 .cm-cursor {
   border-left-width: 2px !important;
   animation: blink 1.2s step-end infinite;
-  transition: all 0.1s ease-out;
+  transition: all 0.2s ease;
+  border-radius: 1px;
 }
 
 @keyframes blink {
@@ -149,29 +161,33 @@
 /* Active line highlight */
 .cm-activeLine {
   background-color: hsla(var(--editor-active-line) / 0.6) !important;
-  border-radius: 3px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
 }
 
 /* Add subtle transitions for smoother experience */
 .cm-lineNumbers {
   transition: color 0.3s ease;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .cm-activeLineGutter {
   color: hsl(var(--editor-text)) !important;
   font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 /* Highlighted line effect from ResultPanel */
 .highlighted-line {
   background-color: hsla(var(--editor-selection) / 0.5) !important;
-  border-radius: 3px;
+  border-radius: 4px;
   animation: pulse 2s infinite;
+  transition: background-color 0.3s ease;
 }
 
 @keyframes pulse {
   0% { background-color: hsla(var(--editor-selection) / 0.3); }
-  50% { background-color: hsla(var(--editor-selection) / 0.6); }
+  50% { background-color: hsla(var(--editor-selection) / 0.5); }
   100% { background-color: hsla(var(--editor-selection) / 0.3); }
 }
 

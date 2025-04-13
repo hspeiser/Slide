@@ -8,6 +8,8 @@ const unitConversions: Record<string, { fromUnit: string; toUnit: string }> = {
   'lbs to kg': { fromUnit: 'lbs', toUnit: 'kg' },
   'm to ft': { fromUnit: 'm', toUnit: 'ft' },
   'ft to m': { fromUnit: 'ft', toUnit: 'm' },
+  'm to in': { fromUnit: 'm', toUnit: 'inch' },
+  'in to m': { fromUnit: 'inch', toUnit: 'm' },
   'l to gal': { fromUnit: 'L', toUnit: 'gal' },
   'gal to l': { fromUnit: 'gal', toUnit: 'L' },
   '°C to °F': { fromUnit: 'degC', toUnit: 'degF' },
@@ -48,6 +50,18 @@ export function evaluate(
     return { result: null, updatedVariables: {} };
   }
 
+  // Check for unit calculations (e.g., "0.255 in * 10 in")
+  const unitCalculationMatch = actualExpression.match(/(\d+\.?\d*)\s*([a-zA-Z]+)\s*([+\-*/])\s*(\d+\.?\d*)\s*([a-zA-Z]+)/);
+  if (unitCalculationMatch) {
+    try {
+      // Let mathjs handle unit operations
+      const result = mathInstance.evaluate(actualExpression);
+      return { result, updatedVariables: {} };
+    } catch (error) {
+      // Just pass through to regular evaluation if this fails
+    }
+  }
+  
   // Handle unit conversions
   const unitConversionMatch = Object.keys(unitConversions).find(key => 
     actualExpression.toLowerCase().includes(key)
@@ -66,6 +80,18 @@ export function evaluate(
           updatedVariables: {} 
         };
       } catch (error) {
+        // Special handling for "in" (inches)
+        if (toUnit === 'inch' && actualExpression.toLowerCase().includes('m to in')) {
+          try {
+            const converted = mathInstance.evaluate(`${value} m to inch`);
+            return { 
+              result: `${math.format(converted.value, { precision: 5 })} inch`, 
+              updatedVariables: {} 
+            };
+          } catch (innerError) {
+            // Fall through to general error
+          }
+        }
         return { result: `Error: Invalid conversion`, updatedVariables: {} };
       }
     }
@@ -115,11 +141,23 @@ export function evaluate(
       scope.dcos = (degrees: number) => Math.cos(degrees * Math.PI / 180);
       scope.dtan = (degrees: number) => Math.tan(degrees * Math.PI / 180);
       
+      // Define custom inverse trig functions (both asin and arcsin formats)
+      scope.dasin = (value: number) => Math.asin(value) * 180 / Math.PI;
+      scope.dacos = (value: number) => Math.acos(value) * 180 / Math.PI;
+      scope.datan = (value: number) => Math.atan(value) * 180 / Math.PI;
+      
       // Replace standard trig functions with our degree versions
       processedExpression = processedExpression
         .replace(/sin\s*\(/g, 'dsin(')
         .replace(/cos\s*\(/g, 'dcos(')
-        .replace(/tan\s*\(/g, 'dtan(');
+        .replace(/tan\s*\(/g, 'dtan(')
+        // Handle inverse trig functions (both asin and arcsin formats)
+        .replace(/asin\s*\(/g, 'dasin(')
+        .replace(/acos\s*\(/g, 'dacos(')
+        .replace(/atan\s*\(/g, 'datan(')
+        .replace(/arcsin\s*\(/g, 'dasin(')
+        .replace(/arccos\s*\(/g, 'dacos(')
+        .replace(/arctan\s*\(/g, 'datan(');
     }
     
     // Configure general math settings
