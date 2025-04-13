@@ -1,5 +1,57 @@
 import * as math from 'mathjs';
 
+// Unit mapping for better recognition
+const unitMap: Record<string, string> = {
+  'in': 'inch',
+  'inch': 'inch',
+  'inches': 'inch',
+  'ft': 'ft',
+  'feet': 'ft',
+  'foot': 'ft',
+  'yd': 'yd',
+  'yard': 'yd',
+  'yards': 'yd',
+  'm': 'm',
+  'meter': 'm',
+  'meters': 'm',
+  'km': 'km',
+  'kilometer': 'km',
+  'kilometers': 'km',
+  'mile': 'mi',
+  'miles': 'mi',
+  'mi': 'mi',
+  'gal': 'gal',
+  'gallon': 'gal',
+  'gallons': 'gal',
+  'l': 'L',
+  'liter': 'L',
+  'liters': 'L',
+  'L': 'L',
+  'kg': 'kg',
+  'kilogram': 'kg',
+  'kilograms': 'kg',
+  'lb': 'lbs',
+  'lbs': 'lbs',
+  'pound': 'lbs',
+  'pounds': 'lbs',
+  'c': 'degC',
+  'C': 'degC',
+  '°C': 'degC',
+  'degC': 'degC',
+  'celsius': 'degC',
+  'f': 'degF',
+  'F': 'degF',
+  '°F': 'degF',
+  'degF': 'degF',
+  'fahrenheit': 'degF',
+  'rad': 'rad',
+  'radian': 'rad',
+  'radians': 'rad',
+  'deg': 'deg',
+  'degree': 'deg',
+  'degrees': 'deg'
+};
+
 // Create a custom math.js instance with configuration
 const mathInstance = math.create(math.all);
 
@@ -36,32 +88,25 @@ export function evaluate(
     const expr = expression.split('//')[0].trim();
     if (!expr) return { result: null, updatedVariables: {} };
     
-    // 2. Create scope with the right angle mode
+    // Create proper scope with trig functions for the right angle mode
     const scope: Record<string, any> = { ...variables };
     
     // Add important constants and complex number support
     scope.PI = PI;
-    scope.pi = PI;
-    scope.e = Math.E;
     scope.i = mathInstance.evaluate('complex(0, 1)');
     
     // Configure trig functions based on angle mode
     if (angleMode === 'DEG') {
-      // In DEG mode, override trig functions to work with degrees
+      // DEG mode - functions take degrees as input
       scope.sin = (x: number) => Math.sin(x * DEG_TO_RAD);
       scope.cos = (x: number) => Math.cos(x * DEG_TO_RAD);
       scope.tan = (x: number) => Math.tan(x * DEG_TO_RAD);
       scope.asin = (x: number) => Math.asin(x) * RAD_TO_DEG;
       scope.acos = (x: number) => Math.acos(x) * RAD_TO_DEG;
       scope.atan = (x: number) => Math.atan(x) * RAD_TO_DEG;
-      
-      // Also add aliases
-      scope.arcsin = scope.asin;
-      scope.arccos = scope.acos;
-      scope.arctan = scope.atan;
     }
     
-    // 3. Check for variable assignment
+    // 2. Variable assignment?
     const assign = expr.match(/^\s*([a-zA-Z_]\w*)\s*=\s*(.+)$/);
     if (assign) {
       const [, name, rhs] = assign;
@@ -69,7 +114,7 @@ export function evaluate(
       return { result: value, updatedVariables: { [name]: value } };
     }
     
-    // 4. Handle unit conversion (works with spaces)
+    // 3. Unit conversion (only works if there's a space after the number)
     if (expr.toLowerCase().includes(' to ')) {
       try {
         const result = mathInstance.evaluate(expr, scope);
@@ -79,18 +124,19 @@ export function evaluate(
       }
     }
     
-    // 5. Regular evaluation with implicit multiplication
+    // 4. Plain evaluation – implicit multiplication now "just works"
     const result = mathInstance.evaluate(expr, scope);
     return { result, updatedVariables: {} };
   } catch (error) {
     // Return null for any top-level errors
-    console.error("Evaluation error:", error);
     return { result: null, updatedVariables: {} };
   }
 }
 
 /**
- * Helper function to convert non-breaking spaces to regular spaces
+ * Handle spaces in expressions - convert any non-breaking spaces to regular spaces
+ * With implicit multiplication enabled, we no longer need to manually convert spaces
+ * to multiplication operators - mathjs handles this automatically
  */
 function handleSpaces(expression: string): string {
   // Convert any non-breaking spaces to regular spaces and normalize spacing
