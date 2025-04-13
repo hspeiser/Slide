@@ -2,13 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap');
+
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-mono antialiased bg-background text-foreground;
+    font-family: 'JetBrains Mono', 'Roboto Mono', monospace;
   }
 
   :root {
@@ -33,19 +36,24 @@
     --ring: 224.3 76.3% 48%;
     --radius: 0.25rem;
 
-    /* Editor colors */
-    --editor-bg: 0 0% 12%;
-    --editor-line: 0 0% 18%;
-    --editor-text: 0 0% 83%;
-    --editor-cursor: 60 2% 68%;
-    --editor-keyword: 210 79% 59%;
-    --editor-function: 39 76% 71%;
-    --editor-number: 93 39% 73%;
-    --editor-string: 14 68% 64%;
-    --editor-comment: 120 26% 50%;
-    --editor-variable: 197 96% 80%;
-    --editor-result: 168 60% 55%;
-    --editor-error: 0 73% 58%;
+    /* Editor colors - Dark theme with vibrant colors */
+    --editor-bg: 225 12% 10%;
+    --editor-line: 220 10% 18%;
+    --editor-text: 0 0% 88%;
+    --editor-selection: 210 50% 30%;
+    --editor-cursor: 180 100% 50%;
+    --editor-line-num: 220 15% 50%;
+    --editor-active-line: 225 20% 16%;
+    
+    /* Syntax highlighting - Vibrant dark theme */
+    --editor-keyword: 210 80% 65%;
+    --editor-function: 35 90% 75%;
+    --editor-number: 95 65% 65%;
+    --editor-string: 10 90% 70%;
+    --editor-comment: 140 30% 55%;
+    --editor-variable: 200 95% 75%;
+    --editor-result: 160 80% 60%;
+    --editor-error: 0 90% 65%;
   }
 
   .light {
@@ -69,19 +77,24 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
 
-    /* Editor light colors */
-    --editor-bg: 0 0% 97%;
-    --editor-line: 0 0% 92%;
-    --editor-text: 0 0% 13%;
-    --editor-cursor: 0 0% 33%;
-    --editor-keyword: 210 100% 56%;
-    --editor-function: 37 100% 36%;
-    --editor-number: 100 42% 42%;
-    --editor-string: 1 75% 58%;
-    --editor-comment: 120 30% 40%;
-    --editor-variable: 210 100% 66%;
-    --editor-result: 165 83% 33%;
-    --editor-error: 0 85% 65%;
+    /* Editor light colors - Higher contrast */
+    --editor-bg: 210 30% 98%;
+    --editor-line: 210 15% 92%;
+    --editor-text: 210 50% 10%;
+    --editor-selection: 210 50% 85%;
+    --editor-cursor: 210 100% 40%;
+    --editor-line-num: 210 20% 60%;
+    --editor-active-line: 210 30% 96%;
+    
+    /* Syntax highlighting - Vibrant light theme */
+    --editor-keyword: 210 100% 50%;
+    --editor-function: 35 100% 40%;
+    --editor-number: 140 60% 35%;
+    --editor-string: 0 90% 55%;
+    --editor-comment: 210 30% 50%;
+    --editor-variable: 210 100% 40%;
+    --editor-result: 160 100% 30%;
+    --editor-error: 0 90% 60%;
   }
 }
 
@@ -90,10 +103,13 @@
   height: 100%;
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
 }
 
 .cm-line {
   min-height: 1.5rem;
+  padding: 0 2px;
 }
 
 .cm-scroller {
@@ -104,12 +120,87 @@
   cursor: text;
 }
 
-/* Syntax highlighting */
-.cm-keyword { color: hsl(var(--editor-keyword)); }
-.cm-builtin, .cm-function { color: hsl(var(--editor-function)); }
-.cm-number { color: hsl(var(--editor-number)); }
-.cm-string { color: hsl(var(--editor-string)); }
-.cm-comment { color: hsl(var(--editor-comment)); }
-.cm-variable { color: hsl(var(--editor-variable)); }
-.cm-result { color: hsl(var(--editor-result)); }
-.cm-error { color: hsl(var(--editor-error)); }
+.cm-cursor {
+  border-left-width: 2px !important;
+  animation: blink 1.2s step-end infinite;
+  transition: all 0.1s ease-out;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Active line highlight */
+.cm-activeLine {
+  background-color: hsla(var(--editor-active-line) / 0.6) !important;
+  border-radius: 3px;
+}
+
+/* Add subtle transitions for smoother experience */
+.cm-lineNumbers {
+  transition: color 0.3s ease;
+}
+
+.cm-activeLineGutter {
+  color: hsl(var(--editor-text)) !important;
+  font-weight: 500;
+}
+
+/* Highlighted line effect from ResultPanel */
+.highlighted-line {
+  background-color: hsla(var(--editor-selection) / 0.5) !important;
+  border-radius: 3px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { background-color: hsla(var(--editor-selection) / 0.3); }
+  50% { background-color: hsla(var(--editor-selection) / 0.6); }
+  100% { background-color: hsla(var(--editor-selection) / 0.3); }
+}
+
+/* Syntax highlighting with subtle glows */
+.cm-keyword {
+  color: hsl(var(--editor-keyword));
+  text-shadow: 0 0 2px hsla(var(--editor-keyword) / 0.3);
+  font-weight: 500;
+}
+
+.cm-builtin, .cm-function {
+  color: hsl(var(--editor-function));
+  text-shadow: 0 0 2px hsla(var(--editor-function) / 0.2);
+}
+
+.cm-number {
+  color: hsl(var(--editor-number));
+  text-shadow: 0 0 1px hsla(var(--editor-number) / 0.2);
+}
+
+.cm-string {
+  color: hsl(var(--editor-string));
+  text-shadow: 0 0 1px hsla(var(--editor-string) / 0.2);
+}
+
+.cm-comment {
+  color: hsl(var(--editor-comment));
+  font-style: italic;
+}
+
+.cm-variable {
+  color: hsl(var(--editor-variable));
+}
+
+/* Result styling for better visibility */
+.result-value {
+  text-shadow: 0 0 1px hsla(var(--editor-result) / 0.3);
+  padding: 2px 4px;
+  transition: all 0.15s ease;
+  border-radius: 3px;
+}
+
+/* Error highlighting */
+.cm-error, .error-text {
+  color: hsl(var(--editor-error));
+  text-shadow: 0 0 3px hsla(var(--editor-error) / 0.2);
+}

@@ -78,7 +78,7 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
                 </span>
               )}
               {result && result.startsWith('Error:') && (
-                <span className="result-value inline-block text-[hsl(var(--editor-error))]">
+                <span className="result-value inline-block error-text">
                   {result}
                 </span>
               )}

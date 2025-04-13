@@ -9,7 +9,7 @@ interface CalculatorFooterProps {
 
 const CalculatorFooter = ({ variableCount, angleMode, onClear, onExport }: CalculatorFooterProps) => {
   return (
-    <footer className="border-t border-gray-700 p-2 flex justify-between items-center text-xs text-gray-500">
+    <footer className="border-t border-gray-700 p-2 flex justify-between items-center text-xs text-gray-500 sticky bottom-0 bg-[hsl(var(--editor-bg))] z-10">
       <div>
         <span className="mr-4">Memory: Variable count: {variableCount}</span>
         <span>Angle: {angleMode}</span>

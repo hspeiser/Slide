@@ -33,6 +33,21 @@ const Calculator = () => {
       }
       
       try {
+        // Don't show errors for incomplete expressions
+        // Check if the expression is incomplete (common cases like missing closing parenthesis)
+        const isIncompleteExpression = (
+          (line.split('(').length !== line.split(')').length) || // Unbalanced parentheses
+          line.endsWith('+') || line.endsWith('-') || 
+          line.endsWith('*') || line.endsWith('/') ||
+          line.endsWith('^') || line.endsWith('=')
+        );
+        
+        if (isIncompleteExpression) {
+          // For incomplete expressions, just show nothing
+          newResults.push(null);
+          continue;
+        }
+        
         const { result, updatedVariables } = evaluate(line, newVariables, angleMode);
         
         // Update variables with any new ones defined in this line
@@ -71,7 +86,17 @@ const Calculator = () => {
         // Add the result
         newResults.push(formattedResult);
       } catch (error) {
-        newResults.push(`Error: ${(error as Error).message}`);
+        // Don't show errors for simple syntax issues that occur during typing
+        const errorMessage = (error as Error).message.toLowerCase();
+        const isTypingError = errorMessage.includes('unexpected') || 
+                             errorMessage.includes('syntax') ||
+                             errorMessage.includes('unterminated');
+                             
+        if (isTypingError) {
+          newResults.push(null);
+        } else {
+          newResults.push(`Error: ${(error as Error).message}`);
+        }
       }
     }
     
