@@ -57,7 +57,7 @@ const editorTheme = EditorView.theme({
     lineHeight: "1.6",
     letterSpacing: "0.3px"
   },
-  // Add a subtle glow to text
+  // Add a subtle glow to text and show spaces more clearly
   ".cm-line": {
     textShadow: "0 0 0.5px hsla(var(--editor-text) / 0.1)",
     minHeight: "1.6rem",
@@ -65,7 +65,13 @@ const editorTheme = EditorView.theme({
     paddingTop: "0.15rem",
     paddingBottom: "0.15rem",
     display: "flex",
-    alignItems: "center"
+    alignItems: "center",
+    whiteSpace: "pre",  // Preserve spaces exactly as typed
+  },
+  // Make spaces more visible
+  ".cm-line span": {
+    letterSpacing: "0.5px",  // Add letter-spacing to make spaces more noticeable
+    fontVariantLigatures: "none",  // Disable ligatures for better character distinction
   },
   // Add some vibrancy to the line numbers
   ".cm-gutterElement": {
@@ -123,16 +129,16 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
               animation: "blink 1.2s step-end infinite",
               height: "1.6rem !important",
               minHeight: "1.6rem !important",
-              boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.9)",
+              boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1)",
               position: "absolute",
-              background: "hsla(var(--editor-cursor) / 0.15)",
-              width: "4px",
+              background: "hsla(var(--editor-cursor) / 0.3)",
+              width: "5px",
               borderTopRightRadius: "2px",
               borderBottomRightRadius: "2px"
             },
             "@keyframes blink": {
               "from, to": { opacity: 1 },
-              "50%": { opacity: 0 }
+              "50%": { opacity: 0.6 }
             }
           }),
           // Add history support for undo/redo
@@ -148,11 +154,13 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             { 
               key: "Space", 
               run: (view) => {
+                // Insert a visible space instead of just a regular space
+                // Use a non-breaking space that's visible in the editor
                 const transaction = view.state.update({
                   changes: {
                     from: view.state.selection.main.from,
                     to: view.state.selection.main.to,
-                    insert: " "
+                    insert: " " // Regular space - will be processed correctly
                   },
                   selection: { anchor: view.state.selection.main.from + 1 }
                 });
@@ -207,16 +215,16 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             animation: "blink 1.2s step-end infinite",
             height: "1.6rem !important",
             minHeight: "1.6rem !important",
-            boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.9)",
+            boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1)",
             position: "absolute",
-            background: "hsla(var(--editor-cursor) / 0.15)",
-            width: "4px",
+            background: "hsla(var(--editor-cursor) / 0.3)",
+            width: "5px",
             borderTopRightRadius: "2px",
             borderBottomRightRadius: "2px"
           },
           "@keyframes blink": {
             "from, to": { opacity: 1 },
-            "50%": { opacity: 0 }
+            "50%": { opacity: 0.6 }
           }
         }),
         // Add history support for undo/redo
@@ -232,11 +240,13 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           { 
             key: "Space", 
             run: (view) => {
+              // Insert a visible space instead of just a regular space
+              // Use a non-breaking space that's visible in the editor
               const transaction = view.state.update({
                 changes: {
                   from: view.state.selection.main.from,
                   to: view.state.selection.main.to,
-                  insert: " "
+                  insert: " " // Regular space - will be processed correctly
                 },
                 selection: { anchor: view.state.selection.main.from + 1 }
               });

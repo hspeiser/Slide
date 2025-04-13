@@ -269,6 +269,8 @@ function handleUnitCalculation(
  * Pre-process expressions for complex number notation and implicit multiplication
  */
 function preProcessComplexNumbers(expression: string): string {
+  // Special case handlers
+  
   // First, handle special cases for the entire expression
   let processedExpr = expression.trim();
   
@@ -305,17 +307,26 @@ function preProcessComplexNumbers(expression: string): string {
   // Replace all "N i" patterns (number, space, then i) in expressions
   processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)\s+i\b/g, '$1*i');
   
-  // Handle implicit multiplication of numbers with variables: 2x -> 2*x
-  // Make sure to use a more robust regex to catch all cases
-  // Before we apply the transformation, replace any existing explicit multiplications
-  // to avoid double transformations
-  let tempExpr = processedExpr;
-  // First mark existing explicit multiplications with a special marker
-  tempExpr = tempExpr.replace(/(\d+\.?\d*)\s*\*\s*([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1@@@$2');
-  // Now apply implicit multiplication only where needed
-  tempExpr = tempExpr.replace(/(\d+\.?\d*)([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1*$2');
-  // Now restore the original explicit multiplications
-  processedExpr = tempExpr.replace(/@@@/g, '*');
+  // ===== HANDLE IMPLICIT MULTIPLICATION =====
+  
+  // Special handler for 10x case - directly check and handle cases like "10x" where number is followed by a variable
+  if (/\d+[a-zA-Z]/.test(processedExpr)) {
+    // If we have something like "10x", directly make it "10*x"
+    processedExpr = processedExpr.replace(/(\d+)([a-zA-Z])/g, '$1*$2');
+  }
+  
+  // Also handle decimal numbers followed by variables
+  processedExpr = processedExpr.replace(/(\d+\.\d+)([a-zA-Z])/g, '$1*$2');
+  
+  // Now handle other forms of implicit multiplication
+  processedExpr = processedExpr.replace(/([a-zA-Z0-9_])([a-zA-Z])/g, (match, p1, p2) => {
+    // Check if p1 is a number - if so, we already handled it above
+    if (/^\d+$/.test(p1)) {
+      return match; // Don't change, already handled
+    }
+    // Otherwise, add the multiplication operator
+    return `${p1}*${p2}`;
+  });
   
   // Handle implicit multiplication with parentheses: 2(x+1) -> 2*(x+1)
   processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\(/g, '$1*(');
