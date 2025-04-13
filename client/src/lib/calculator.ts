@@ -68,7 +68,7 @@ try {
   // Add additional implicit multiplication support
   mathInstance.import({
     // This function ensures proper implicit multiplication behavior (like 2x, 5i)
-    implicit: function(a, b) {
+    implicit: function(a: any, b: any): any {
       return math.multiply(a, b);
     }
   }, { override: true });
