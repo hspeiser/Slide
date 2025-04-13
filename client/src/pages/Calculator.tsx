@@ -147,11 +147,8 @@ const Calculator = () => {
                              line.toLowerCase().includes(' to ') ||
                              line.toLowerCase().includes(' in ');
                              
-        if (isTypingError) {
-          newResults.push(null);
-        } else {
-          newResults.push(`Error: ${(error as Error).message}`);
-        }
+        // Don't show any errors in the output panel
+        newResults.push(null);
       }
     }
     

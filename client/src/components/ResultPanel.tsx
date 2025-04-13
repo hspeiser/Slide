@@ -61,24 +61,19 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
           {results.map((result, index) => (
             <div 
               key={index} 
-              className={`result-line min-h-[1.5rem] h-[1.5rem] text-right whitespace-nowrap overflow-x-auto ${
+              className={`result-line min-h-[1.5rem] h-[1.5rem] text-right whitespace-nowrap overflow-x-auto px-4 ${
                 copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
               }`}
             >
-              {result && !result.startsWith('Error:') && (
+              {result && (
                 <span 
-                  className="result-value inline-block px-1.5 py-0.5 rounded cursor-pointer
+                  className="result-value inline-block px-2 py-0.5 rounded-md cursor-pointer
                             text-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result))] 
-                            hover:text-[hsl(var(--editor-bg))] transition-colors duration-100"
+                            hover:text-[hsl(var(--editor-bg))] transition-all duration-200"
                   onClick={() => copyToClipboard(result, index)}
                   onMouseEnter={() => onHighlightLine?.(index)}
                   onMouseLeave={() => onHighlightLine?.(null)}
                 >
-                  {result}
-                </span>
-              )}
-              {result && result.startsWith('Error:') && (
-                <span className="result-value inline-block error-text">
                   {result}
                 </span>
               )}

@@ -149,8 +149,9 @@
 .cm-cursor {
   border-left-width: 2px !important;
   animation: blink 1.2s step-end infinite;
-  transition: all 0.2s ease;
+  transition: all 0s linear !important;
   border-radius: 1px;
+  will-change: transform;
 }
 
 @keyframes blink {
@@ -179,16 +180,17 @@
 
 /* Highlighted line effect from ResultPanel */
 .highlighted-line {
-  background-color: hsla(var(--editor-selection) / 0.5) !important;
+  background-color: hsla(var(--editor-selection) / 0.4) !important;
   border-radius: 4px;
-  animation: pulse 2s infinite;
-  transition: background-color 0.3s ease;
+  animation: pulse 2.5s infinite;
+  transition: background-color 0.15s ease-in !important;
+  will-change: background-color;
 }
 
 @keyframes pulse {
-  0% { background-color: hsla(var(--editor-selection) / 0.3); }
-  50% { background-color: hsla(var(--editor-selection) / 0.5); }
-  100% { background-color: hsla(var(--editor-selection) / 0.3); }
+  0% { background-color: hsla(var(--editor-selection) / 0.2); }
+  50% { background-color: hsla(var(--editor-selection) / 0.4); }
+  100% { background-color: hsla(var(--editor-selection) / 0.2); }
 }
 
 /* Syntax highlighting with subtle glows */
@@ -235,11 +237,13 @@
 
 /* Result line specific styling */
 .result-line {
-  padding: 0 2px;
+  padding: 0 4px;
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
   line-height: 1.5;
   letter-spacing: 0.3px;
+  box-sizing: border-box;
+  margin: 0.15rem 0;
 }
 
 /* Error highlighting */
