@@ -266,51 +266,45 @@ function handleUnitCalculation(
  * Pre-process expressions for complex number notation
  */
 function preProcessComplexNumbers(expression: string): string {
+  // First, handle special cases for the entire expression
   let processedExpr = expression.trim();
   
-  // Single i case
+  // Case 1: Single i
   if (processedExpr === 'i') {
     return 'complex(0,1)';
   }
   
-  // Handle common patterns first
-  // 10i case (number immediately followed by i)
-  if (/^\d+\.?\d*i$/.test(processedExpr)) {
+  // Case 2: Simple Ni pattern (like 10i)
+  if (/^-?\d+\.?\d*i$/.test(processedExpr)) {
     const num = processedExpr.replace(/i$/, '');
     return `complex(0,${num})`;
   }
   
-  // 10 i case (space between number and i) - most permissive pattern
-  if (/^\d+\.?\d*\s+i$/.test(processedExpr)) {
+  // Case 3: N i pattern (like "10 i")
+  if (/^-?\d+\.?\d*\s+i$/.test(processedExpr)) {
     const num = processedExpr.replace(/\s+i$/, '');
     return `complex(0,${num})`;
   }
   
-  // Match any number followed by spaces then i (anywhere in the expression)
-  if (/(\d+\.?\d*)\s+i/.test(processedExpr)) {
-    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s+i/g, 'complex(0,$1)');
-  }
-  
-  // 10*i or 10 * i case
-  if (/^\d+\.?\d*\s*\*\s*i$/.test(processedExpr)) {
+  // Case 4: N*i pattern (like "10*i" or "10 * i")
+  if (/^-?\d+\.?\d*\s*\*\s*i$/.test(processedExpr)) {
     const num = processedExpr.split('*')[0].trim();
     return `complex(0,${num})`;
   }
   
-  // For expressions containing i but not just i alone
-  if (processedExpr.includes('i')) {
-    // Handle standalone 'i' (not part of a word/variable)
-    processedExpr = processedExpr.replace(/\bi\b/g, 'complex(0,1)');
-    
-    // Handle numeric coefficients immediately before i: 5i -> complex(0,5)
-    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*i\b/g, 'complex(0,$1)');
-    
-    // Handle whitespace before i: "5 i" -> complex(0,5)
-    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s+i\b/g, 'complex(0,$1)');
-    
-    // Handle multiplication with i: 5*i -> complex(0,5)
-    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\*\s*i\b/g, 'complex(0,$1)');
-  }
+  // For more complex expressions, we need to do targeted replacements
+  
+  // First replace all standalone "i" that aren't part of other identifiers
+  processedExpr = processedExpr.replace(/\b(^|\s+)i\b(?!\w)/g, '$1complex(0,1)');
+  
+  // Replace all numerical coefficients immediately followed by i (like "10i")
+  processedExpr = processedExpr.replace(/(-?\d+\.?\d*)i\b/g, 'complex(0,$1)');
+  
+  // Replace all "N i" patterns (number, space, then i)
+  processedExpr = processedExpr.replace(/(-?\d+\.?\d*)\s+i\b/g, 'complex(0,$1)');
+  
+  // Replace all "N*i" patterns
+  processedExpr = processedExpr.replace(/(-?\d+\.?\d*)\s*\*\s*i\b/g, 'complex(0,$1)');
   
   return processedExpr;
 }

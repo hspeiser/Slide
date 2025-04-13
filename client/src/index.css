@@ -113,11 +113,24 @@
 .cm-line {
   min-height: 1.6rem;
   height: 1.6rem;
-  padding: 0 4px;
+  padding: 0 6px;
   margin: 0.15rem 0;
   transition: background-color 0.15s ease;
   display: flex;
   align-items: center;
+  position: relative;
+}
+
+/* Add a subtle highlight to empty lines to make cursor more visible */
+.cm-line:empty::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: hsla(var(--editor-text) / 0.01);
+  pointer-events: none;
 }
 
 /* Ensure consistent height and alignment for both input and output */
@@ -152,17 +165,21 @@
 }
 
 .cm-cursor {
-  border-left-width: 2px !important;
+  border-left-width: 3px !important;
   border-left-color: hsl(var(--editor-cursor)) !important;
   animation: blink 1.2s step-end infinite;
-  transition: transform 0.05s cubic-bezier(0.23, 1, 0.32, 1) !important;
-  border-radius: 1px;
+  transition: all 0.04s cubic-bezier(0.23, 1, 0.32, 1) !important;
+  border-radius: 2px;
   will-change: transform;
   z-index: 20;
   position: relative;
   height: 1.6rem !important;
   margin-top: 0 !important;
-  box-shadow: 0 0 3px hsla(var(--editor-cursor) / 0.7);
+  box-shadow: 0 0 8px hsla(var(--editor-cursor) / 0.9);
+  background-color: hsla(var(--editor-cursor) / 0.2);
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+  width: 2px !important;
 }
 
 @keyframes blink {

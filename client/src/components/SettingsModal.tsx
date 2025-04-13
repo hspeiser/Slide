@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogDescription } from './ui/dialog';
 import { X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
@@ -22,26 +22,40 @@ const SettingsModal = ({ onClose, decimalPlaces, onDecimalPlacesChange }: Settin
   
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[hsl(var(--editor-line))] text-[hsl(var(--editor-text))] max-w-md w-full rounded-md border-[hsl(var(--editor-selection))] shadow-md" aria-describedby="settings-description">
-        <DialogHeader className="flex justify-between items-start">
-          <DialogTitle className="text-xl font-bold">Settings</DialogTitle>
+      <DialogContent 
+        className="bg-[hsl(var(--editor-bg))] border-[hsl(var(--editor-selection)/0.3)] 
+                  text-[hsl(var(--editor-text))] max-w-md w-full rounded-lg 
+                  shadow-lg backdrop-blur-sm"
+        aria-describedby="settings-description"
+      >
+        <DialogHeader className="flex justify-between items-start space-y-1.5">
+          <div>
+            <DialogTitle className="text-2xl font-bold">Settings</DialogTitle>
+            <DialogDescription className="text-sm text-[hsl(var(--editor-text)/0.7)]">
+              Customize your calculator display preferences
+            </DialogDescription>
+          </div>
           <DialogClose asChild>
-            <Button variant="ghost" className="text-gray-400 hover:text-[hsl(var(--editor-text))]" onClick={onClose}>
-              <X className="h-5 w-5" />
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="h-8 w-8 rounded-full absolute right-4 top-4 
+                        text-[hsl(var(--editor-text)/0.5)] hover:text-[hsl(var(--editor-text))]
+                        hover:bg-[hsl(var(--editor-selection)/0.15)]" 
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
             </Button>
           </DialogClose>
         </DialogHeader>
         
-        <p id="settings-description" className="sr-only">
-          Configure calculator settings such as decimal places.
-        </p>
-        
         <div className="space-y-6 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="decimal-places" className="font-medium">
-              Decimal Places: {localDecimalPlaces}
+          <div className="space-y-3">
+            <Label htmlFor="decimal-places" className="font-medium text-base">
+              Decimal Places: <span className="font-semibold text-[hsl(var(--editor-result))]">{localDecimalPlaces}</span>
             </Label>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 pt-1">
               <Slider
                 id="decimal-places"
                 min={0}
@@ -51,33 +65,25 @@ const SettingsModal = ({ onClose, decimalPlaces, onDecimalPlacesChange }: Settin
                 onValueChange={(value) => setLocalDecimalPlaces(value[0])}
                 className="flex-1"
               />
-              <Input
-                type="number"
-                id="decimal-places-input"
-                value={localDecimalPlaces}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  if (!isNaN(value) && value >= 0 && value <= 10) {
-                    setLocalDecimalPlaces(value);
-                  }
-                }}
-                className="w-16 text-center bg-[hsl(var(--editor-bg))]"
-                min={0}
-                max={10}
-              />
+              <div className="w-12 h-12 flex items-center justify-center
+                            rounded-md border border-[hsl(var(--editor-selection)/0.3)]
+                            bg-[hsl(var(--editor-active-line)/0.3)] text-[hsl(var(--editor-result))]
+                            text-center text-lg font-semibold">
+                {localDecimalPlaces}
+              </div>
             </div>
           </div>
           
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-2 space-x-2">
             <Button 
               variant="outline" 
-              className="bg-[hsl(var(--editor-line))] hover:bg-opacity-80 border-0 mr-2"
+              className="border-[hsl(var(--editor-selection)/0.3)] hover:bg-[hsl(var(--editor-selection)/0.15)] w-24"
               onClick={onClose}
             >
               Cancel
             </Button>
             <Button 
-              className="bg-[hsl(var(--primary))] hover:bg-opacity-90"
+              className="bg-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result)/0.9)] w-24 text-[hsl(var(--editor-bg))]"
               onClick={handleSave}
             >
               Save
