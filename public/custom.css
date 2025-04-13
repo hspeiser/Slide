@@ -1,0 +1,15 @@
+/* Remove traffic light buttons styles */
+.button-bar, 
+.traffic-lights, 
+.replit-ui-theme-root .jsx-3414412928,
+.jsx-3487995339,
+.jsx-2872063299 {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Also hide any element with traffic-light in its class name */
+[class*="traffic-light"] {
+  display: none !important;
+}

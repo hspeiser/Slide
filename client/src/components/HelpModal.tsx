@@ -14,20 +14,9 @@ const HelpModal = ({ onClose }: HelpModalProps) => {
                    text-[hsl(var(--editor-text))] max-w-3xl w-full max-h-[85vh] 
                    overflow-auto rounded-lg shadow-lg"
       >
-        <DialogHeader className="sticky top-0 z-10 bg-[hsl(var(--editor-bg))] pb-2 border-b border-[hsl(var(--editor-selection)/0.3)]">
+        <DialogHeader className="pb-2 border-b border-[hsl(var(--editor-selection)/0.3)]">
           <div className="flex justify-between items-center">
             <DialogTitle className="text-2xl font-bold text-[hsl(var(--editor-function))]">Calculator Help</DialogTitle>
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              className="h-8 w-8 rounded-full
-                      text-[hsl(var(--editor-text)/0.5)] hover:text-[hsl(var(--editor-text))]
-                      hover:bg-[hsl(var(--editor-selection)/0.15)]" 
-              onClick={onClose}
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
           </div>
           <DialogDescription className="text-sm text-[hsl(var(--editor-text)/0.7)]">
             Documentation for using the scientific calculator

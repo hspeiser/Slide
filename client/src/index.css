@@ -4,6 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Remove browser window control buttons (red/yellow/green) */
+.replit-ui-theme-root .button-bar,
+.jsx-3487995339,
+.jsx-3414412928,
+.button-bar,
+.jsx-2872063299 {
+  display: none !important;
+}
+
+/* Hide window control traffic light buttons */
+div[data-testid="workspace-editor-frame"] .traffic-lights {
+  display: none !important;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -58,46 +72,46 @@
   }
 
   .light {
-    /* Much softer light mode - reduces eye strain */
-    --background: 210 25% 96%;  /* Soft blue-gray background */
-    --foreground: 222.2 40% 15%; /* Darker text that's easier on the eyes */
-    --card: 210 25% 96%;
-    --card-foreground: 222.2 40% 15%; 
-    --popover: 210 30% 96%;
-    --popover-foreground: 222.2 40% 15%;
-    --primary: 207 85% 45%;  /* Slightly deeper blue */
+    /* Much more contrasted light mode with darker backgrounds */
+    --background: 210 25% 92%;  /* Darker app background */
+    --foreground: 222.2 40% 12%; /* Even darker text for better contrast */
+    --card: 210 30% 87%;         /* Darker card backgrounds */
+    --card-foreground: 222.2 40% 12%; 
+    --popover: 210 30% 87%;
+    --popover-foreground: 222.2 40% 12%;
+    --primary: 207 85% 40%;      /* Deeper blue for better visibility */
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 35% 92%;  /* Slightly darker secondary */
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 35% 92%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 35% 92%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 70% 50%;  /* Less intense red */
+    --secondary: 210 25% 83%;    /* Significantly darker secondary */
+    --secondary-foreground: 222.2 47.4% 10%;
+    --muted: 210 25% 83%;
+    --muted-foreground: 215.4 16.3% 40%;
+    --accent: 210 25% 83%;
+    --accent-foreground: 222.2 47.4% 10%;
+    --destructive: 0 70% 45%;    /* Deeper red */
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 86%;  /* Darker border */
-    --input: 214.3 31.8% 86%;
-    --ring: 221.2 83.2% 48%;  /* Slightly deeper ring color */
+    --border: 214.3 31.8% 76%;   /* Much darker border */
+    --input: 214.3 31.8% 76%;
+    --ring: 221.2 83.2% 45%;     /* Deeper ring color */
     --radius: 0.5rem;
 
-    /* Editor light colors - Much softer to reduce eye strain */
-    --editor-bg: 215 30% 94%;  /* Soft blue-tinted background */
-    --editor-line: 210 15% 90%;
-    --editor-text: 210 40% 15%;  /* Darker text for better contrast */
-    --editor-selection: 210 40% 80%;
-    --editor-cursor: 210 90% 40%;
-    --editor-line-num: 210 20% 55%;
-    --editor-active-line: 215 30% 90%;
+    /* Editor light colors - Higher contrast design */
+    --editor-bg: 215 35% 86%;    /* Much darker editor background */
+    --editor-line: 210 25% 80%;
+    --editor-text: 210 40% 12%;  /* Darker text for better contrast */
+    --editor-selection: 210 40% 75%;
+    --editor-cursor: 210 90% 35%;
+    --editor-line-num: 210 20% 50%;
+    --editor-active-line: 215 35% 80%;
     
-    /* Syntax highlighting - Richer colors with less brightness */
-    --editor-keyword: 210 80% 45%;
-    --editor-function: 35 70% 40%;
-    --editor-number: 140 50% 40%;
-    --editor-string: 0 65% 50%;
-    --editor-comment: 210 25% 45%;
-    --editor-variable: 210 70% 40%;
-    --editor-result: 160 70% 35%;
-    --editor-error: 0 65% 55%;
+    /* Syntax highlighting - Deeper colors for better contrast */
+    --editor-keyword: 210 80% 40%;
+    --editor-function: 35 70% 35%;
+    --editor-number: 140 50% 35%;
+    --editor-string: 0 65% 45%;
+    --editor-comment: 210 25% 40%;
+    --editor-variable: 210 70% 35%;
+    --editor-result: 160 70% 30%;
+    --editor-error: 0 65% 50%;
   }
 }
 
