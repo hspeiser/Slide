@@ -104,6 +104,14 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
   const editorViewRef = useRef<EditorView | null>(null);
   const { theme } = useTheme();
 
+  // Auto-focus editor when component mounts
+  useEffect(() => {
+    // Set initial focus
+    if (editorRef.current) {
+      editorRef.current.focus();
+    }
+  }, []);
+
   // Set up editor
   useEffect(() => {
     if (!editorRef.current) return;
@@ -160,7 +168,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
                   changes: {
                     from: view.state.selection.main.from,
                     to: view.state.selection.main.to,
-                    insert: " " // Regular space - will be processed correctly
+                    insert: "\u00A0" // Non-breaking space - more visible and easily editable
                   },
                   selection: { anchor: view.state.selection.main.from + 1 }
                 });
@@ -246,7 +254,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
                 changes: {
                   from: view.state.selection.main.from,
                   to: view.state.selection.main.to,
-                  insert: " " // Regular space - will be processed correctly
+                  insert: "\u00A0" // Non-breaking space - more visible and easily editable
                 },
                 selection: { anchor: view.state.selection.main.from + 1 }
               });

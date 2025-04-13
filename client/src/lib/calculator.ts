@@ -269,8 +269,6 @@ function handleUnitCalculation(
  * Pre-process expressions for complex number notation and implicit multiplication
  */
 function preProcessComplexNumbers(expression: string): string {
-  // Special case handlers
-  
   // First, handle special cases for the entire expression
   let processedExpr = expression.trim();
   
@@ -299,34 +297,41 @@ function preProcessComplexNumbers(expression: string): string {
     return processedExpr; // Already in correct form
   }
   
-  // For general expressions, we do targeted replacements
+  // Now do all the replacements needed for general expressions
   
-  // Replace all numerical coefficients immediately followed by i (like "10i" in expressions)
-  processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)i\b/g, '$1*i');
+  // === IMPLICIT MULTIPLICATION - NUMBERS WITH VARIABLES ===
   
-  // Replace all "N i" patterns (number, space, then i) in expressions
-  processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)\s+i\b/g, '$1*i');
+  // 1. Handle direct number-variable cases (e.g., 10x -> 10*x)
+  // This MUST be done first as it's the most specific case
+  processedExpr = processedExpr.replace(/(\d+)([a-zA-Z])/g, '$1*$2');
   
-  // ===== HANDLE IMPLICIT MULTIPLICATION =====
-  
-  // Special handler for 10x case - directly check and handle cases like "10x" where number is followed by a variable
-  if (/\d+[a-zA-Z]/.test(processedExpr)) {
-    // If we have something like "10x", directly make it "10*x"
-    processedExpr = processedExpr.replace(/(\d+)([a-zA-Z])/g, '$1*$2');
-  }
-  
-  // Also handle decimal numbers followed by variables
+  // 2. Handle decimal numbers followed by variables (e.g., 10.5x -> 10.5*x)
   processedExpr = processedExpr.replace(/(\d+\.\d+)([a-zA-Z])/g, '$1*$2');
   
-  // Now handle other forms of implicit multiplication
-  processedExpr = processedExpr.replace(/([a-zA-Z0-9_])([a-zA-Z])/g, (match, p1, p2) => {
-    // Check if p1 is a number - if so, we already handled it above
-    if (/^\d+$/.test(p1)) {
-      return match; // Don't change, already handled
+  // === COMPLEX NUMBER HANDLING ===
+  
+  // 3. Handle complex number notation with coefficients (like "10i" in expressions)
+  // We must do this AFTER number-variable handling
+  processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)i\b/g, '$1*i');
+  
+  // 4. Handle spaces before i (like "10 i" in expressions)
+  processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)\s+i\b/g, '$1*i');
+  
+  // === OTHER FORMS OF IMPLICIT MULTIPLICATION ===
+  
+  // 5. Handle multiplication between variables (e.g., xy -> x*y)
+  processedExpr = processedExpr.replace(/([a-zA-Z][a-zA-Z0-9_]*?)([a-zA-Z][a-zA-Z0-9_]*)/g, 
+    (match, p1, p2) => {
+      // Skip if it's a known multi-character function or variable
+      // This prevents things like "sin" from becoming "s*in"
+      if (match.length > 2 && 
+          (match === 'sin' || match === 'cos' || match === 'tan' || 
+           match === 'log' || match === 'exp' || match === 'sqrt')) {
+        return match;
+      }
+      return `${p1}*${p2}`;
     }
-    // Otherwise, add the multiplication operator
-    return `${p1}*${p2}`;
-  });
+  );
   
   // Handle implicit multiplication with parentheses: 2(x+1) -> 2*(x+1)
   processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\(/g, '$1*(');
