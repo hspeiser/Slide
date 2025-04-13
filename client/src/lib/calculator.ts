@@ -103,6 +103,7 @@ export function evaluate(
     scope.cbrt = Math.cbrt;
     scope.exp = Math.exp;
     scope.log = Math.log;
+    scope.ln = Math.log;  // Add natural log (ln) as an alias for log
     scope.log10 = Math.log10;
     scope.log2 = Math.log2;
     scope.pow = Math.pow;
@@ -163,7 +164,10 @@ export function evaluate(
     if (expr.toLowerCase().includes(' to ')) {
       try {
         const result = mathInstance.evaluate(expr, scope);
-        return { result: result.toString(), updatedVariables: {} };
+        
+        // For unit conversion, we want to return the full object
+        // so the formatter in Calculator.tsx can apply proper decimal places
+        return { result, updatedVariables: {} };
       } catch (error) {
         // Fall through to regular evaluation
       }
