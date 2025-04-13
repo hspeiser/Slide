@@ -61,7 +61,7 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
           {results.map((result, index) => (
             <div 
               key={index} 
-              className={`result-line min-h-[1.5rem] h-[1.5rem] text-right whitespace-nowrap overflow-x-auto px-4 ${
+              className={`result-line min-h-[1.5rem] h-[1.5rem] text-right whitespace-nowrap overflow-x-auto px-4 py-[0.08rem] ${
                 copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
               }`}
             >

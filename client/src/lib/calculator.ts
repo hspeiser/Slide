@@ -1,11 +1,11 @@
 import * as math from 'mathjs';
 
-// Create a custom math.js instance with configuration
+// Create a custom math.js instance
 const mathInstance = math.create(math.all);
 
-// Configure math.js with default settings
+// Configure mathjs for precision calculations
 mathInstance.config({
-  number: 'number',
+  number: 'number', 
   precision: 14
 });
 
@@ -34,98 +34,67 @@ export function evaluate(
     return { result: null, updatedVariables: {} };
   }
   
+  // Handle imaginary unit (i) in any position
+  const processedExpression = prepareForEvaluation(actualExpression);
+  
   // Create a scope with current variables
   const scope = { ...variables };
   
-  // Add useful constants
+  // Add constants
   scope.pi = Math.PI;
   scope.e = Math.E;
-  scope.i = math.complex(0, 1); // Imaginary unit
   
-  // Add angle conversion functions
-  scope.deg2rad = function(deg: number) { return deg * Math.PI / 180; };
-  scope.rad2deg = function(rad: number) { return rad * 180 / Math.PI; };
+  // Add trig functions that respect the angle mode
+  setupTrigFunctions(scope, angleMode);
   
-  // Add trigonometric functions that respect the angle mode
-  if (angleMode === 'DEG') {
-    // Override trig functions to work in degrees
-    scope.sin = function(x: number) { return Math.sin(x * Math.PI / 180); };
-    scope.cos = function(x: number) { return Math.cos(x * Math.PI / 180); };
-    scope.tan = function(x: number) { 
-      // Handle special case for tan(90) and tan(270) in degrees
-      if (Math.abs(x % 180) === 90) return Infinity;
-      return Math.tan(x * Math.PI / 180); 
-    };
-    
-    // Inverse trig functions (return degrees)
-    scope.asin = scope.arcsin = function(x: number) { return Math.asin(x) * 180 / Math.PI; };
-    scope.acos = scope.arccos = function(x: number) { return Math.acos(x) * 180 / Math.PI; };
-    scope.atan = scope.arctan = function(x: number) { return Math.atan(x) * 180 / Math.PI; };
-  }
-
-  // Check if this is unit conversion syntax (e.g., "10 m to in", "5 kg to lbs")
-  if (/\d+(\.\d+)?\s+\w+\s+to\s+\w+/.test(actualExpression)) {
+  // Check for unit handling: "10 m to in" pattern
+  if (/\d+(\.\d+)?\s+\w+\s+to\s+\w+/.test(processedExpression)) {
     try {
-      // Handle the 'in' keyword which is a reserved word in javascript
-      let processedExpr = actualExpression.replace(/\bin\b(?!\w)/g, 'inch');
-      
-      // Let mathjs handle the conversion
-      const result = mathInstance.evaluate(processedExpr);
+      const result = evaluateUnitConversion(processedExpression);
       return { result, updatedVariables: {} };
     } catch (error) {
-      return { 
-        result: `Error: ${(error as Error).message}`, 
-        updatedVariables: {} 
-      };
+      return { result: `Error: ${(error as Error).message}`, updatedVariables: {} };
     }
   }
   
-  // Check if this is adding units to a variable (e.g., "x in" or "x m")
-  const variableUnitMatch = actualExpression.match(/^([a-zA-Z][a-zA-Z0-9]*)\s+([a-zA-Z]+)$/);
-  if (variableUnitMatch && Object.keys(variables).includes(variableUnitMatch[1])) {
+  // Check for direct unit calculation "10 in * 10 m"
+  const unitOperationMatch = processedExpression.match(/(\d+(\.\d+)?)\s+(\w+)\s*[\*\+\-\/]\s*(\d+(\.\d+)?)\s+(\w+)/);
+  if (unitOperationMatch) {
+    try {
+      // Handle 'in' keyword
+      let processed = processedExpression.replace(/\bin\b/g, 'inch');
+      const result = mathInstance.evaluate(processed);
+      return { result, updatedVariables: {} };
+    } catch (error) {
+      return { result: `Error: ${(error as Error).message}`, updatedVariables: {} };
+    }
+  }
+  
+  // Check for variable with unit: "x in"
+  const variableUnitMatch = processedExpression.match(/^([a-zA-Z][a-zA-Z0-9]*)\s+([a-zA-Z]+)$/);
+  if (variableUnitMatch && variables[variableUnitMatch[1]] !== undefined) {
     const [, varName, unitName] = variableUnitMatch;
     const varValue = variables[varName];
     
     try {
-      // Create unit value from the variable - handle 'in' special case
       const unitExpr = unitName.toLowerCase() === 'in' 
         ? `${varValue} inch` 
         : `${varValue} ${unitName}`;
       
-      // Let mathjs handle the unit conversion
       const result = mathInstance.evaluate(unitExpr);
       return { result, updatedVariables: {} };
     } catch (error) {
-      // Fall through to regular evaluation
+      // Fall through to normal evaluation
     }
   }
   
-  // Check for unit calculations (e.g., "10 m * 5")
-  try {
-    // Handle inch keyword by temporarily replacing it
-    let processedExpr = actualExpression.replace(/\bin\b(?!\w)/g, 'inch');
-    
-    // Check if the expression contains unit names
-    const hasUnits = /[0-9.]\s*[a-zA-Z]+/.test(processedExpr);
-    
-    if (hasUnits) {
-      const result = mathInstance.evaluate(processedExpr, scope);
-      return { result, updatedVariables: {} };
-    }
-  } catch (error) {
-    // Just pass through to regular evaluation
-  }
-  
-  // Handle variable assignment 
-  const assignmentMatch = actualExpression.match(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.+)$/);
+  // Handle variable assignment
+  const assignmentMatch = processedExpression.match(/^\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.+)$/);
   if (assignmentMatch) {
     const [, variableName, valueExpression] = assignmentMatch;
     
     try {
-      // Safe evaluate value
       const value = mathInstance.evaluate(valueExpression, scope);
-      
-      // Store the value
       return {
         result: value,
         updatedVariables: { [variableName]: value }
@@ -138,28 +107,141 @@ export function evaluate(
     }
   }
   
-  // Check for complex number expressions with i
-  let processedExpression = actualExpression;
-  
-  // Handle expressions like (1+i)^2
-  if (actualExpression.includes('i') && !actualExpression.match(/\bi\b\s*[A-Za-z]/)) {
-    try {
-      const result = mathInstance.evaluate(processedExpression, scope);
-      return { result, updatedVariables: {} };
-    } catch (error) {
-      // Fall through to regular evaluation
-      console.error("Complex number error:", error);
-    }
-  }
-  
-  // Regular mathematical expression
+  // Regular expression evaluation
   try {
     const result = mathInstance.evaluate(processedExpression, scope);
     return { result, updatedVariables: {} };
   } catch (error) {
+    // Handle special cases for math errors
+    const errorMessage = (error as Error).message;
+    
+    // Try fallback approaches for known edge cases
+    if (errorMessage.includes('unexpected operator')) {
+      try {
+        // Try with parentheses for complex number expressions
+        const result = handleComplexExpression(processedExpression, scope);
+        if (result !== undefined) {
+          return { result, updatedVariables: {} };
+        }
+      } catch (innerError) {
+        // Fall through to generic error
+      }
+    }
+    
     return { 
-      result: `Error: ${(error as Error).message}`, 
+      result: `Error: ${errorMessage}`, 
       updatedVariables: {} 
     };
   }
+}
+
+/**
+ * Prepare an expression for evaluation by replacing unit names and handling
+ * complex numbers with imaginary unit i
+ */
+function prepareForEvaluation(expression: string): string {
+  let processed = expression;
+  
+  // Replace 'in' unit with 'inch'
+  processed = processed.replace(/(\d+(\.\d+)?)\s+in\b/g, '$1 inch');
+  processed = processed.replace(/\bin\s+to\s+/gi, 'inch to ');
+  processed = processed.replace(/\bto\s+in\b/gi, 'to inch');
+  
+  // Ensure proper imaginary number i formatting
+  processed = processed.replace(/(\d+)i/g, '$1*i');
+  
+  // Make sure "sin(90) + i*cos(90)" works but not "sin(90) + icos(90)"
+  processed = processed.replace(/\bi\s*([a-z])/gi, 'i*$1');
+  
+  return processed;
+}
+
+/**
+ * Add trigonometric functions to scope that respect the angle mode
+ */
+function setupTrigFunctions(scope: Record<string, any>, angleMode: 'DEG' | 'RAD'): void {
+  // Define the complex imaginary unit for calculations
+  scope.i = math.complex(0, 1);
+  
+  // Conversion functions always available
+  scope.deg2rad = (deg: number) => deg * Math.PI / 180;
+  scope.rad2deg = (rad: number) => rad * 180 / Math.PI;
+  
+  if (angleMode === 'DEG') {
+    // Add degree-based trigonometric functions
+    scope.sin = (x: number) => Math.sin(x * Math.PI / 180);
+    scope.cos = (x: number) => Math.cos(x * Math.PI / 180);
+    scope.tan = (x: number) => {
+      // Special case for tan(90) and similar angles
+      if (Math.abs(Math.abs(x % 180) - 90) < 1e-10) {
+        return Infinity;
+      }
+      return Math.tan(x * Math.PI / 180);
+    };
+    
+    // Inverse trigonometric functions return degrees
+    scope.asin = scope.arcsin = (x: number) => Math.asin(x) * 180 / Math.PI;
+    scope.acos = scope.arccos = (x: number) => Math.acos(x) * 180 / Math.PI;
+    scope.atan = scope.arctan = (x: number) => Math.atan(x) * 180 / Math.PI;
+    
+    // Make the deg() function process values as degrees
+    scope.deg = (x: number) => x;
+  } else {
+    // In RAD mode, ensure deg() function still works by converting from degrees to radians
+    scope.deg = (x: number) => x * Math.PI / 180;
+  }
+}
+
+/**
+ * Handle unit conversions properly
+ */
+function evaluateUnitConversion(expression: string): any {
+  // Replace 'in' with 'inch' to avoid JS keyword issues
+  const processedExpr = expression.replace(/\bin\b/g, 'inch');
+  
+  // Try to evaluate the unit conversion
+  return mathInstance.evaluate(processedExpr);
+}
+
+/**
+ * Handle complex expressions with the imaginary unit i
+ */
+function handleComplexExpression(expression: string, scope: Record<string, any>): any {
+  // Replace complex imaginary numbers for direct evaluation
+  let processedExpr = expression;
+  
+  // Try different approaches for complex number handling
+  
+  // First attempt: Direct complex number construction
+  if (expression.includes('i')) {
+    try {
+      return mathInstance.evaluate(processedExpr, scope);
+    } catch (e) {
+      // Continue to next approach
+    }
+  }
+  
+  // Second attempt: For expressions like (1+i)^2, try adding parentheses
+  if (expression.includes('i') && expression.includes('^')) {
+    processedExpr = expression.replace(/\(([^)]*i[^)]*)\)(\^)/g, 'pow($1,$2');
+    try {
+      return mathInstance.evaluate(processedExpr, scope);
+    } catch (e) {
+      // Continue to next approach
+    }
+  }
+  
+  // Third attempt: For expressions with e^i
+  if (expression.includes('e^i') || expression.includes('e^(i')) {
+    try {
+      // Replace e^i with Euler's formula: cos(1) + i*sin(1)
+      processedExpr = expression.replace(/e\^i/g, '(cos(1) + i*sin(1))');
+      processedExpr = expression.replace(/e\^\(i\*([^)]+)\)/g, '(cos($1) + i*sin($1))');
+      return mathInstance.evaluate(processedExpr, scope);
+    } catch (e) {
+      // Continue to final error
+    }
+  }
+  
+  throw new Error('Could not evaluate complex expression');
 }
