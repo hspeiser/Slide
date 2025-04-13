@@ -35,6 +35,7 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
     --radius: 0.5rem;
+    --space-character: 180 80% 60%;
 
     /* Editor colors - Softer dark theme with smoother colors */
     --editor-bg: 225 15% 12%;
@@ -296,4 +297,33 @@
 .cm-error, .error-text {
   color: hsl(var(--editor-error));
   text-shadow: 0 0 3px hsla(var(--editor-error) / 0.2);
+}
+
+/* Style non-breaking spaces to make them clearly visible */
+.cm-content .cm-text {
+  position: relative;
+}
+
+/* Target non-breaking spaces specifically */
+.cm-content .cm-text:has(+ .cm-text) {
+  position: relative;
+}
+
+.cm-content .cm-text[contenteditable="true"]:empty::after,
+.cm-content .cm-text:has(+ .cm-text)::after {
+  content: "·";
+  color: hsla(var(--space-character) / 0.8);
+  position: absolute;
+  left: 0;
+  top: -0.1rem;
+  pointer-events: none;
+  font-weight: bold;
+}
+
+/* Make sure the cursor is always visible when focused */
+.cm-editor:focus-within .cm-cursor {
+  border-left-width: 4px !important;
+  box-shadow: 0 0 10px hsla(var(--editor-cursor) / 1) !important;
+  background-color: hsla(var(--editor-cursor) / 0.3) !important;
+  width: 4px !important;
 }

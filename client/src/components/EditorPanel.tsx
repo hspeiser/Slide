@@ -104,12 +104,17 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
   const editorViewRef = useRef<EditorView | null>(null);
   const { theme } = useTheme();
 
-  // Auto-focus editor when component mounts
+  // Auto-focus effect - runs once on mount
   useEffect(() => {
-    // Set initial focus
-    if (editorRef.current) {
-      editorRef.current.focus();
-    }
+    // When component mounts, set a very short timeout to focus
+    const timer = setTimeout(() => {
+      if (editorRef.current) {
+        editorRef.current.click();
+        editorRef.current.focus();
+      }
+    }, 10);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Set up editor

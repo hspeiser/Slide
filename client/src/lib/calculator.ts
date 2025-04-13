@@ -274,7 +274,7 @@ function preProcessComplexNumbers(expression: string): string {
   
   // Special case 1: Just the letter i by itself
   if (processedExpr === 'i') {
-    return 'i'; // Now properly defined at initialization
+    return 'complex(0,1)'; // Set it directly to complex(0,1) for clarity
   }
   
   // Special case 2: Easy form like 10i (direct coefficient)
@@ -297,38 +297,48 @@ function preProcessComplexNumbers(expression: string): string {
     return processedExpr; // Already in correct form
   }
   
-  // Now do all the replacements needed for general expressions
+  // === CRUCIAL PREPROCESSING REPLACEMENTS ===
   
-  // === IMPLICIT MULTIPLICATION - NUMBERS WITH VARIABLES ===
+  // 1. FIRST PASS: Convert non-breaking spaces to regular spaces for processing
+  processedExpr = processedExpr.replace(/\u00A0/g, ' ');
   
-  // 1. Handle direct number-variable cases (e.g., 10x -> 10*x)
-  // This MUST be done first as it's the most specific case
+  // 2. SECOND PASS: Replace direct number-variable cases (10x → 10*x)
+  // This is the main issue we need to fix! Using word boundaries to be precise
   processedExpr = processedExpr.replace(/(\d+)([a-zA-Z])/g, '$1*$2');
   
-  // 2. Handle decimal numbers followed by variables (e.g., 10.5x -> 10.5*x)
+  // 3. Handle decimal numbers followed by variables (10.5x → 10.5*x)
   processedExpr = processedExpr.replace(/(\d+\.\d+)([a-zA-Z])/g, '$1*$2');
   
-  // === COMPLEX NUMBER HANDLING ===
+  // 4. Handle imaginary unit with coefficient (10i → 10*i)
+  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)i\b/g, '$1*i');
   
-  // 3. Handle complex number notation with coefficients (like "10i" in expressions)
-  // We must do this AFTER number-variable handling
-  processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)i\b/g, '$1*i');
+  // 5. Handle negative numbers with i (-10i → -10*i)
+  processedExpr = processedExpr.replace(/(-\d+\.?\d*)i\b/g, '$1*i');
   
-  // 4. Handle spaces before i (like "10 i" in expressions)
-  processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)\s+i\b/g, '$1*i');
+  // 6. Handle spaces before i (10 i → 10*i)
+  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s+i\b/g, '$1*i');
   
-  // === OTHER FORMS OF IMPLICIT MULTIPLICATION ===
+  // 7. Handle implicit multiplication between variables (xy → x*y) 
+  // but we need to be careful not to break function names
+  const knownFunctions = ['sin', 'cos', 'tan', 'log', 'exp', 'sqrt', 'asin', 'acos', 'atan'];
   
-  // 5. Handle multiplication between variables (e.g., xy -> x*y)
-  processedExpr = processedExpr.replace(/([a-zA-Z][a-zA-Z0-9_]*?)([a-zA-Z][a-zA-Z0-9_]*)/g, 
+  // Create a function to check if a string is a known function
+  const isKnownFunction = (str: string) => knownFunctions.includes(str);
+  
+  // Now handle variable multiplication safely
+  processedExpr = processedExpr.replace(/([a-zA-Z][a-zA-Z0-9_]*)([a-zA-Z][a-zA-Z0-9_]*)/g, 
     (match, p1, p2) => {
-      // Skip if it's a known multi-character function or variable
-      // This prevents things like "sin" from becoming "s*in"
-      if (match.length > 2 && 
-          (match === 'sin' || match === 'cos' || match === 'tan' || 
-           match === 'log' || match === 'exp' || match === 'sqrt')) {
+      // Skip if the entire match is a known function name
+      if (isKnownFunction(match)) {
         return match;
       }
+      
+      // Skip if p1 is a known function and p2 is a single character
+      // (this would be the case for something like "sin x")
+      if (isKnownFunction(p1) && p2.length === 1) {
+        return match;
+      }
+      
       return `${p1}*${p2}`;
     }
   );
@@ -416,8 +426,11 @@ function preProcessAngles(
  * This enables expressions like "2 x" to be interpreted as "2*x"
  */
 function handleSpaces(expression: string): string {
-  // First normalize any multiple spaces to single spaces
-  let processedExpr = expression.replace(/\s+/g, ' ').trim();
+  // Convert any non-breaking spaces to regular spaces first
+  let processedExpr = expression.replace(/\u00A0/g, ' ');
+  
+  // Then normalize any multiple spaces to single spaces
+  processedExpr = processedExpr.replace(/\s+/g, ' ').trim();
   
   // Handle spaces between numbers and variables: "2 x" -> "2*x"
   processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s+([a-zA-Z_][a-zA-Z0-9_]*\b)/g, '$1*$2');
