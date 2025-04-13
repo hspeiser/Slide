@@ -137,28 +137,16 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   position: relative;
 }
 
-/* Reset cursor to basics first */
+/* Simple cursor fix using the 2px border approach - proven solution for all zoom levels */
 .cm-cursor {
-  border-left: none !important;
-  background: none !important;
+  border-left: 2px solid hsl(var(--editor-cursor)) !important;
+  margin-left: -1px; /* keep it centered */
+  animation: cm-blink 1.06s steps(1) infinite;
 }
 
-/* Then define a new cursor style that works across all zoom levels */
-.cm-cursor::after {
-  content: '';
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px; 
-  background-color: hsl(var(--editor-cursor));
-  animation: cursor-blink 1s step-end infinite;
-}
-
-@keyframes cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+@keyframes cm-blink {
+  0%, 50% { opacity: 1; }
+  50.1%, 100% { opacity: 0; }
 }
 
 /* Ensure consistent height and alignment for both input and output */
@@ -335,7 +323,8 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   font-weight: bold;
 }
 
-/* Focused cursor needs a wider width */
-.cm-editor:focus-within .cm-cursor::after {
-  width: 4px;
+/* Make the cursor wider when focused */
+.cm-editor:focus-within .cm-cursor {
+  border-left-width: 3px !important;
+  margin-left: -1.5px; /* keep it centered */
 }

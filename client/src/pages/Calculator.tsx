@@ -8,8 +8,17 @@ import SettingsModal from "@/components/SettingsModal";
 import { evaluate } from "@/lib/calculator";
 import * as math from 'mathjs';
 
+// Welcome message text to show when app first loads
+const WELCOME_MESSAGE = `// Welcome to Bitwise
+// A powerful scientific calculator
+
+// Type your calculations below to get started
+// Example: sin(45 deg) or 10 || 20
+
+`;
+
 const Calculator = () => {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState(WELCOME_MESSAGE);
   const [results, setResults] = useState<(string | null)[]>([]);
   const [variables, setVariables] = useState<Record<string, any>>({});
   const [angleMode, setAngleMode] = useState<'DEG' | 'RAD'>('DEG');
