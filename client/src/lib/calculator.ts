@@ -120,9 +120,38 @@ export function evaluate(
     // This is a special case since JavaScript treats || as logical OR
     let expr = expression.split('//')[0].trim();
     
+    // Convert any non-breaking spaces to regular spaces for better input handling
+    expr = expr.replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
+    
     // Replace pattern for resistors in parallel using || notation
     // This improved regex handles expressions with parentheses, variables, and numbers
     expr = expr.replace(/(\(.*?\)|\d+\.?\d*|\w+)\s*\|\|\s*(\(.*?\)|\d+\.?\d*|\w+)/g, "parallel($1, $2)");
+    
+    // Handle special case for angle unit notation
+    if (angleMode === 'DEG') {
+      // Look for patterns like "sin 30 deg" or "tan 45 deg" and process them correctly
+      expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+deg\b/gi, (match, func, value) => {
+        return `${func}(${value})`;
+      });
+      
+      // Handle special case for rad notation when in DEG mode
+      expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+rad\b/gi, (match, func, value) => {
+        // No conversion needed - just pass the radians value directly to Math functions
+        if (func.toLowerCase() === 'sin') return `Math.sin(${value})`;
+        if (func.toLowerCase() === 'cos') return `Math.cos(${value})`;
+        if (func.toLowerCase() === 'tan') return `Math.tan(${value})`;
+        if (func.toLowerCase() === 'asin') return `Math.asin(${value}) * ${RAD_TO_DEG}`;
+        if (func.toLowerCase() === 'acos') return `Math.acos(${value}) * ${RAD_TO_DEG}`;
+        if (func.toLowerCase() === 'atan') return `Math.atan(${value}) * ${RAD_TO_DEG}`;
+        return `${func}(${value})`;
+      });
+    } else {
+      // In RAD mode, handle deg notation
+      expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+deg\b/gi, (match, func, value) => {
+        // Convert the degrees to radians since we're in RAD mode
+        return `${func}(${value} * ${DEG_TO_RAD})`;
+      });
+    }
     
     if (!expr) return { result: null, updatedVariables: {} };
     

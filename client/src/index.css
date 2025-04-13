@@ -137,9 +137,12 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   position: relative;
 }
 
-/* Simple cursor style for CodeMirror */
+/* Cursor style that works across all zoom levels */
 .cm-cursor {
   border-left: 3px solid hsl(var(--editor-cursor)) !important;
+  background-color: hsl(var(--editor-cursor)) !important;
+  opacity: 1 !important;
+  width: 3px !important;
 }
 
 /* Ensure consistent height and alignment for both input and output */
@@ -316,14 +319,22 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   font-weight: bold;
 }
 
-/* Simple cursor style when editor is focused */
+/* Cursor style when editor is focused - works at all zoom levels */
 .cm-editor:focus-within .cm-cursor {
   border-left-width: 4px !important;
+  width: 4px !important;
+  background-color: hsl(var(--editor-cursor)) !important;
   animation: blink 1.2s step-end infinite;
 }
 
-/* Simple animation to make the cursor blink */
+/* Animation that keeps the cursor visible at all zoom levels */
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%, 100% { 
+    opacity: 1; 
+    background-color: hsl(var(--editor-cursor)) !important;
+  }
+  50% { 
+    opacity: 0.5; 
+    background-color: transparent !important;
+  }
 }
