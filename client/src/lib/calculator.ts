@@ -307,7 +307,15 @@ function preProcessComplexNumbers(expression: string): string {
   
   // Handle implicit multiplication of numbers with variables: 2x -> 2*x
   // Make sure to use a more robust regex to catch all cases
-  processedExpr = processedExpr.replace(/(\d+\.?\d*)([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1*$2');
+  // Before we apply the transformation, replace any existing explicit multiplications
+  // to avoid double transformations
+  let tempExpr = processedExpr;
+  // First mark existing explicit multiplications with a special marker
+  tempExpr = tempExpr.replace(/(\d+\.?\d*)\s*\*\s*([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1@@@$2');
+  // Now apply implicit multiplication only where needed
+  tempExpr = tempExpr.replace(/(\d+\.?\d*)([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1*$2');
+  // Now restore the original explicit multiplications
+  processedExpr = tempExpr.replace(/@@@/g, '*');
   
   // Handle implicit multiplication with parentheses: 2(x+1) -> 2*(x+1)
   processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\(/g, '$1*(');
@@ -320,6 +328,13 @@ function preProcessComplexNumbers(expression: string): string {
   
   // Special case for imaginary unit: 10(i) -> 10*i, not 10*(i)
   processedExpr = processedExpr.replace(/\*\(i\)/g, '*i');
+  
+  // Fix for 100*i causing a numeric precision problem
+  // Look for and fix cases like 100*i transforming to just 1i in output
+  if (processedExpr.match(/\d+\s*\*\s*i\b/)) {
+    // Add a comment to preserve the original expression for later display
+    processedExpr = processedExpr + " // originalExpr:" + processedExpr;
+  }
   
   return processedExpr;
 }

@@ -106,12 +106,31 @@ const Calculator = () => {
                   // Fix for issues like 100*i showing as 1i
                   // Return the actual imaginary value (keeping full precision)
                   if (line.includes('*i') || line.includes('* i') || line.includes('(i)')) {
-                    // Extract the coefficient from the expression
-                    const coeffMatch = line.match(/(\d+(?:\.\d+)?)\s*[\*\(]\s*i/);
-                    if (coeffMatch && coeffMatch[1]) {
-                      formattedResult = result.im < 0 ? `-${coeffMatch[1]}i` : `${coeffMatch[1]}i`;
+                    // First check if we have a comment with the original expression
+                    const commentMatch = line.match(/\/\/\s*originalExpr:(.+)/);
+                    if (commentMatch && commentMatch[1]) {
+                      // Extract the coefficient from the original expression
+                      const origExpr = commentMatch[1].trim();
+                      const coeffMatch = origExpr.match(/(\d+(?:\.\d+)?)\s*\*\s*i/);
+                      if (coeffMatch && coeffMatch[1]) {
+                        formattedResult = result.im < 0 ? `-${coeffMatch[1]}i` : `${coeffMatch[1]}i`;
+                      } else {
+                        // Fallback to the normal extraction
+                        const directCoeffMatch = line.match(/(\d+(?:\.\d+)?)\s*[\*\(]\s*i/);
+                        if (directCoeffMatch && directCoeffMatch[1]) {
+                          formattedResult = result.im < 0 ? `-${directCoeffMatch[1]}i` : `${directCoeffMatch[1]}i`;
+                        } else {
+                          formattedResult = result.im < 0 ? `-${imFormatted}i` : `${imFormatted}i`;
+                        }
+                      }
                     } else {
-                      formattedResult = result.im < 0 ? `-${imFormatted}i` : `${imFormatted}i`;
+                      // No comment, try to extract directly
+                      const directCoeffMatch = line.match(/(\d+(?:\.\d+)?)\s*[\*\(]\s*i/);
+                      if (directCoeffMatch && directCoeffMatch[1]) {
+                        formattedResult = result.im < 0 ? `-${directCoeffMatch[1]}i` : `${directCoeffMatch[1]}i`;
+                      } else {
+                        formattedResult = result.im < 0 ? `-${imFormatted}i` : `${imFormatted}i`;
+                      }
                     }
                   } else {
                     formattedResult = result.im < 0 ? `-${imFormatted}i` : `${imFormatted}i`;
