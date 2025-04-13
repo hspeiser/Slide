@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 
 interface ResultPanelProps {
-  results: (string | null)[];
+  results: any[];
   onHighlightLine?: (index: number | null) => void;
 }
 
@@ -30,9 +30,49 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
     };
   }, []);
   
+  // Get display value safely
+  const getDisplayValue = (result: any): string | null => {
+    if (result === null || result === undefined) return null;
+    
+    // Try to convert to string in a safe way
+    try {
+      // Special handling for complex numbers
+      if (typeof result === 'object' && 
+          result !== null && 
+          're' in result && 
+          're' in result && 
+          'im' in result) {
+        // Format complex number nicely
+        const re = result.re;
+        const im = result.im;
+        
+        if (im === 0) return `${re}`;
+        if (re === 0) return `${im}i`;
+        if (im < 0) return `${re} - ${Math.abs(im)}i`;
+        return `${re} + ${im}i`;
+      }
+      
+      // For other values
+      const str = String(result);
+      
+      // Filter out error messages and function expressions
+      if (str.includes('Error:') || str.startsWith('function ')) {
+        return null;
+      }
+      
+      return str;
+    } catch (e) {
+      return null;
+    }
+  };
+  
   // Copy result to clipboard
-  const copyToClipboard = (result: string, index: number) => {
-    navigator.clipboard.writeText(result).then(() => {
+  const copyToClipboard = (result: any, index: number) => {
+    // Get safe display value
+    const displayValue = getDisplayValue(result);
+    if (!displayValue) return;
+    
+    navigator.clipboard.writeText(displayValue).then(() => {
       toast({
         title: "Copied!",
         description: "Result copied to clipboard",
@@ -58,27 +98,31 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
         className="flex-1 overflow-auto"
       >
         <div className="p-4">
-          {results.map((result, index) => (
-            <div 
-              key={index} 
-              className={`result-line min-h-[1.5rem] h-[1.5rem] text-right whitespace-nowrap overflow-x-auto px-4 ${
-                copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
-              }`}
-            >
-              {result && (
-                <span 
-                  className="result-value inline-block px-2 py-0.5 rounded-md cursor-pointer
-                            text-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result))] 
-                            hover:text-[hsl(var(--editor-bg))] transition-all duration-200"
-                  onClick={() => copyToClipboard(result, index)}
-                  onMouseEnter={() => onHighlightLine?.(index)}
-                  onMouseLeave={() => onHighlightLine?.(null)}
-                >
-                  {result}
-                </span>
-              )}
-            </div>
-          ))}
+          {results.map((result, index) => {
+            const displayValue = getDisplayValue(result);
+            
+            return (
+              <div 
+                key={index} 
+                className={`result-line min-h-[1.5rem] h-[1.5rem] text-right whitespace-nowrap overflow-x-auto px-4 ${
+                  copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
+                }`}
+              >
+                {displayValue && (
+                  <span 
+                    className="result-value inline-block px-2 py-0.5 rounded-md cursor-pointer
+                              text-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result))] 
+                              hover:text-[hsl(var(--editor-bg))] transition-all duration-200"
+                    onClick={() => copyToClipboard(result, index)}
+                    onMouseEnter={() => onHighlightLine?.(index)}
+                    onMouseLeave={() => onHighlightLine?.(null)}
+                  >
+                    {displayValue}
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
