@@ -266,18 +266,27 @@ function handleUnitCalculation(
  * Pre-process expressions for complex number notation
  */
 function preProcessComplexNumbers(expression: string): string {
-  let processedExpr = expression;
+  let processedExpr = expression.trim();
   
-  // Complex number handling
+  // Single i case
   if (processedExpr === 'i') {
     return 'complex(0,1)';
   }
   
+  // Handle common patterns first
+  // 10i case (number immediately followed by i)
   if (/^\d+\.?\d*i$/.test(processedExpr)) {
-    const num = processedExpr.replace('i', '');
+    const num = processedExpr.replace(/i$/, '');
     return `complex(0,${num})`;
   }
   
+  // 10 i case (space between number and i)
+  if (/^\d+\.?\d*\s+i$/.test(processedExpr)) {
+    const num = processedExpr.replace(/\s+i$/, '');
+    return `complex(0,${num})`;
+  }
+  
+  // 10*i or 10 * i case
   if (/^\d+\.?\d*\s*\*\s*i$/.test(processedExpr)) {
     const num = processedExpr.split('*')[0].trim();
     return `complex(0,${num})`;
@@ -290,6 +299,9 @@ function preProcessComplexNumbers(expression: string): string {
     
     // Handle numeric coefficients immediately before i: 5i -> complex(0,5)
     processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*i\b/g, 'complex(0,$1)');
+    
+    // Handle whitespace before i: "5 i" -> complex(0,5)
+    processedExpr = processedExpr.replace(/(\d+\.?\d*)\s+i\b/g, 'complex(0,$1)');
     
     // Handle multiplication with i: 5*i -> complex(0,5)
     processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\*\s*i\b/g, 'complex(0,$1)');

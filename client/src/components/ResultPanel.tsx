@@ -34,12 +34,16 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
   const getDisplayValue = (result: any): string | null => {
     if (result === null || result === undefined) return null;
     
+    // First check for function type
+    if (typeof result === 'function') {
+      return null;
+    }
+    
     // Try to convert to string in a safe way
     try {
       // Special handling for complex numbers
       if (typeof result === 'object' && 
           result !== null && 
-          're' in result && 
           're' in result && 
           'im' in result) {
         // Format complex number nicely
@@ -47,7 +51,10 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
         const im = result.im;
         
         if (im === 0) return `${re}`;
+        if (re === 0 && im === 1) return `i`;
         if (re === 0) return `${im}i`;
+        if (im === 1) return `${re} + i`;
+        if (im === -1) return `${re} - i`;
         if (im < 0) return `${re} - ${Math.abs(im)}i`;
         return `${re} + ${im}i`;
       }
@@ -55,8 +62,11 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
       // For other values
       const str = String(result);
       
-      // Filter out error messages and function expressions
-      if (str.includes('Error:') || str.startsWith('function ')) {
+      // Filter out error messages and function expressions or references
+      if (str.includes('Error:') || 
+          str.startsWith('function ') || 
+          str.includes('=>') ||
+          str.includes('[Function:')) {
         return null;
       }
       
@@ -103,10 +113,14 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
         className="flex-1 overflow-auto"
       >
         <div className="p-4">
+          {/* Empty line at the top to match CodeMirror spacing */}
+          <div className="h-[4px]"></div>
+          
           {results.map((result, index) => {
             const displayValue = getDisplayValue(result);
             const willWrap = displayValue ? isMultiline(displayValue) : false;
             
+            // Always create an empty div to maintain alignment
             return (
               <div 
                 key={index} 
@@ -114,6 +128,7 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
                   text-right overflow-x-auto px-4 ${
                   copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
                 }`}
+                style={{ paddingTop: '0.15rem', paddingBottom: '0.15rem' }}
               >
                 {displayValue && (
                   <span 

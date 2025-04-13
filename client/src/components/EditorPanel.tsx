@@ -4,7 +4,7 @@ import { EditorState, StateField, StateEffect } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { defaultKeymap } from '@codemirror/commands';
+import { defaultKeymap, history, historyKeymap, undo, redo } from '@codemirror/commands';
 import { useTheme } from './ui/theme-provider';
 
 interface EditorPanelProps {
@@ -108,12 +108,21 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           theme === 'dark' ? oneDark : [],
           highlightState,
           customCursor,
+          // Add history support for undo/redo
+          history(),
+          keymap.of([
+            ...defaultKeymap,
+            ...historyKeymap,
+            // Additional keybindings for undo/redo with higher precedence
+            { key: "Mod-z", run: undo, preventDefault: true },
+            { key: "Mod-y", run: redo, preventDefault: true },
+            { key: "Mod-Shift-z", run: redo, preventDefault: true },
+          ]),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
               onChange(update.state.doc.toString());
             }
           }),
-          keymap.of(defaultKeymap),
         ],
       });
       

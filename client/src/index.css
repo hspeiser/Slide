@@ -153,10 +153,13 @@
 
 .cm-cursor {
   border-left-width: 2px !important;
+  border-left-color: hsl(var(--editor-cursor)) !important;
   animation: blink 1.2s step-end infinite;
-  transition: all 0s linear !important;
+  transition: transform 0.08s ease !important;
   border-radius: 1px;
   will-change: transform;
+  z-index: 10;
+  position: relative;
 }
 
 @keyframes blink {
