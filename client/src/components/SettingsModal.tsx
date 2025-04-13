@@ -22,7 +22,7 @@ const SettingsModal = ({ onClose, decimalPlaces, onDecimalPlacesChange }: Settin
   
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[hsl(var(--editor-line))] text-[hsl(var(--editor-text))] max-w-md w-full">
+      <DialogContent className="bg-[hsl(var(--editor-line))] text-[hsl(var(--editor-text))] max-w-md w-full rounded-md border-[hsl(var(--editor-selection))] shadow-md" aria-describedby="settings-description">
         <DialogHeader className="flex justify-between items-start">
           <DialogTitle className="text-xl font-bold">Settings</DialogTitle>
           <DialogClose asChild>
@@ -31,6 +31,10 @@ const SettingsModal = ({ onClose, decimalPlaces, onDecimalPlacesChange }: Settin
             </Button>
           </DialogClose>
         </DialogHeader>
+        
+        <p id="settings-description" className="sr-only">
+          Configure calculator settings such as decimal places.
+        </p>
         
         <div className="space-y-6 py-4">
           <div className="space-y-2">

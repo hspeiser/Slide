@@ -110,6 +110,21 @@
 .cm-line {
   min-height: 1.5rem;
   padding: 0 2px;
+  margin: 0.15rem 0;
+}
+
+/* Ensure consistent height and alignment for both input and output */
+.editor-container, .result-panel {
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.editor-container .cm-line, .result-panel .result-line {
+  min-height: 1.5rem;
+  height: 1.5rem;
+  margin: 0.15rem 0;
+  box-sizing: border-box;
 }
 
 .cm-scroller {

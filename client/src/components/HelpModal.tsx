@@ -9,7 +9,7 @@ interface HelpModalProps {
 const HelpModal = ({ onClose }: HelpModalProps) => {
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="bg-[hsl(var(--editor-line))] text-[hsl(var(--editor-text))] max-w-2xl w-full max-h-[80vh] overflow-auto">
+      <DialogContent className="bg-[hsl(var(--editor-line))] text-[hsl(var(--editor-text))] max-w-2xl w-full max-h-[80vh] overflow-auto rounded-md border-[hsl(var(--editor-selection))] shadow-md" aria-describedby="help-description">
         <DialogHeader className="flex justify-between items-start">
           <DialogTitle className="text-xl font-bold">Bitwise Calculator Help</DialogTitle>
           <DialogClose asChild>

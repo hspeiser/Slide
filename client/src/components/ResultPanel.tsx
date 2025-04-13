@@ -52,7 +52,7 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
   };
   
   return (
-    <div className="w-full md:w-48 lg:w-64 flex flex-col overflow-hidden">
+    <div className="w-full md:w-48 lg:w-64 flex flex-col overflow-hidden result-panel">
       <div 
         ref={panelRef}
         className="flex-1 overflow-auto"
@@ -61,7 +61,7 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
           {results.map((result, index) => (
             <div 
               key={index} 
-              className={`min-h-[1.5rem] mb-[3px] text-right whitespace-nowrap overflow-x-auto ${
+              className={`result-line min-h-[1.5rem] h-[1.5rem] text-right whitespace-nowrap overflow-x-auto ${
                 copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
               }`}
             >

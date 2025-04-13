@@ -100,7 +100,10 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
       const startState = EditorState.create({
         doc: content,
         extensions: [
-          basicSetup,
+          // Use only specific parts of basicSetup to avoid auto-indent
+          EditorState.tabSize.of(2),
+          EditorState.allowMultipleSelections.of(true),
+          EditorView.lineWrapping,
           javascript(),
           theme === 'dark' ? oneDark : [],
           highlightState,
@@ -136,7 +139,10 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
     const newState = EditorState.create({
       doc: editorViewRef.current.state.doc,
       extensions: [
-        basicSetup,
+        // Use only specific parts of basicSetup to avoid auto-indent
+        EditorState.tabSize.of(2),
+        EditorState.allowMultipleSelections.of(true),
+        EditorView.lineWrapping,
         javascript(),
         theme === 'dark' ? oneDark : [],
         highlightState,

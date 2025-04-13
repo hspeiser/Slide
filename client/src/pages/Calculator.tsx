@@ -56,9 +56,11 @@ const Calculator = () => {
         // Format the result with the specified decimal places
         let formattedResult: string | null = null;
         if (result !== null && result !== undefined) {
+          // Format all numeric results consistently
           if (typeof result === 'number') {
             // Check if the number is close to an integer to fix scientific notation issues
             const isNearZero = Math.abs(result) < 1e-10;
+            
             // Handle numbers very close to zero
             if (isNearZero) {
               formattedResult = '0';
@@ -77,6 +79,33 @@ const Calculator = () => {
               if (formattedResult.endsWith('.')) {
                 formattedResult = formattedResult.slice(0, -1);
               }
+            }
+          } 
+          // Handle unit conversions and other complex results
+          else if (result && typeof result === 'object' && result.toString) {
+            // Try to extract numeric value from complex math.js objects
+            try {
+              const resultStr = result.toString();
+              // Check if it's a unit conversion or other math.js object
+              if (resultStr.includes(' ') || resultStr.includes('m')) {
+                // For unit conversions, try to format the numeric part
+                const numericPart = parseFloat(resultStr);
+                if (!isNaN(numericPart)) {
+                  // Format the numeric part with proper decimal places
+                  const formattedNum = numericPart.toFixed(decimalPlaces)
+                    .replace(/\.?0+$/, '');
+                  
+                  // Extract the unit part if it exists
+                  const unitPart = resultStr.replace(/^[\d.\-+e]+/, '').trim();
+                  formattedResult = formattedNum + unitPart;
+                } else {
+                  formattedResult = resultStr;
+                }
+              } else {
+                formattedResult = resultStr;
+              }
+            } catch (e) {
+              formattedResult = String(result);
             }
           } else {
             formattedResult = String(result);

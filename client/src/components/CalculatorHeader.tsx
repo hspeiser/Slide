@@ -17,7 +17,7 @@ const CalculatorHeader = ({ angleMode, toggleAngleMode, onShowHelp, onShowSettin
   };
 
   return (
-    <header className="border-b border-gray-700 flex justify-between items-center p-2">
+    <header className="border-b border-gray-700 flex justify-between items-center p-2 sticky top-0 bg-[hsl(var(--editor-bg))] z-10">
       <div className="flex items-center">
         <div className="flex space-x-2 mr-4">
           <span className="h-3 w-3 rounded-full bg-red-500"></span>
