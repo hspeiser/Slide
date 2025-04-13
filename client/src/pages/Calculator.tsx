@@ -42,7 +42,11 @@ const Calculator = () => {
           line.endsWith('^') || line.endsWith('=') ||
           line.endsWith(' ') || // Ending with a space indicates typing in progress
           /\b(to|in)\s*$/i.test(line) || // Unit conversion operations in progress
-          /\d+\s*[a-z]+$/i.test(line) // Unit specification in progress
+          /\d+\s*[a-z]+$/i.test(line) || // Unit specification in progress
+          /\b(sin|cos|tan|asin|acos|atan|arcsin|arccos|arctan)\s*(\(\s*)?$/i.test(line) || // Incomplete trig function
+          /\b(log|ln|sqrt|abs|exp)\s*(\(\s*)?$/i.test(line) || // Incomplete math function
+          /\bi\s*[\*\+-\/\^]?$/i.test(line) || // Complex number operations in progress
+          /[\*\+-\/\^]\s*i\s*$/i.test(line) // Complex number operations in progress
         );
         
         if (isIncompleteExpression) {
