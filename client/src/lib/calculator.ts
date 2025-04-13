@@ -135,11 +135,16 @@ export function evaluate(
       .trim();
 
     // Replace pattern for resistors in parallel using || notation
-    // This improved regex handles expressions with parentheses, variables, and numbers
-    expr = expr.replace(
-      /(\(.*?\)|\d+\.?\d*|\w+)\s*\|\|\s*(\(.*?\)|\d+\.?\d*|\w+)/g,
-      "parallel($1, $2)",
-    );
+    // Process || operators repeatedly until none remain
+    let prevExpr;
+    do {
+      prevExpr = expr;
+      // This regex handles expressions with parentheses, variables, and numbers
+      expr = expr.replace(
+        /(\([^()]*\)|\d+\.?\d*|\w+)\s*\|\|\s*(\([^()]*\)|\d+\.?\d*|\w+)/g,
+        "parallel($1, $2)",
+      );
+    } while (expr !== prevExpr && expr.includes("||"));
 
     // Create units object for angle handling
     const units = {
