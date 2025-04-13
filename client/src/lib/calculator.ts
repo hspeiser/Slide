@@ -63,12 +63,37 @@ const unitMap: Record<string, string> = {
 const mathInstance = math.create(math.all);
 
 // Configure math.js with complex number support and implicit multiplication
-// @ts-ignore - 'implicit' is a valid option in mathjs but TypeScript doesn't know about it
 mathInstance.config({
   number: 'number',
   precision: 14,
   implicit: 'show'  // Enable implicit multiplication
 });
+
+// Define a custom operator for parallel resistors using the || symbol
+// Formula: R_parallel = 1 / (1/R1 + 1/R2)
+mathInstance.import({
+  '||': function(a: any, b: any): any {
+    // Handle complex numbers and any other type mathjs can divide
+    try {
+      // Convert to numbers if strings
+      if (typeof a === 'string') a = mathInstance.evaluate(a);
+      if (typeof b === 'string') b = mathInstance.evaluate(b);
+      
+      // Both values must be non-zero to avoid division by zero
+      if (mathInstance.equal(a, 0) || mathInstance.equal(b, 0)) {
+        throw new Error('Cannot calculate parallel value with zero resistance');
+      }
+      
+      // Calculate 1/(1/a + 1/b)
+      const oneOverA = mathInstance.divide(1, a);
+      const oneOverB = mathInstance.divide(1, b);
+      const sum = mathInstance.add(oneOverA, oneOverB);
+      return mathInstance.divide(1, sum);
+    } catch (error: any) {
+      throw new Error('Error calculating parallel values: ' + (error.message || 'Unknown error'));
+    }
+  }
+}, { override: true });
 
 // Define the imaginary unit properly
 mathInstance.evaluate('i = complex(0, 1)');
