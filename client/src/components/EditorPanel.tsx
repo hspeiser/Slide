@@ -1,22 +1,97 @@
 import { useEffect, useRef } from 'react';
-import { EditorView, basicSetup } from 'codemirror';
-import { EditorState } from '@codemirror/state';
+import { EditorView, keymap, Decoration, DecorationSet } from '@codemirror/view';
+import { EditorState, StateField, StateEffect } from '@codemirror/state';
+import { basicSetup } from 'codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
-import { keymap } from '@codemirror/view';
 import { defaultKeymap } from '@codemirror/commands';
 import { useTheme } from './ui/theme-provider';
 
 interface EditorPanelProps {
   content: string;
   onChange: (value: string) => void;
+  highlightedLine?: number | null;
 }
 
-const EditorPanel = ({ content, onChange }: EditorPanelProps) => {
+// Define a highlight line effect
+const highlightLineEffect = StateEffect.define<number | null>();
+
+// Create a state field for line highlighting
+const highlightState = StateField.define<DecorationSet>({
+  create: () => Decoration.none,
+  update(highlights, tr) {
+    highlights = Decoration.none;
+    
+    for (let effect of tr.effects) {
+      if (effect.is(highlightLineEffect) && effect.value !== null) {
+        const line = effect.value;
+        // Make sure the line exists in the document
+        if (line >= 0 && line < tr.state.doc.lines) {
+          const lineObj = tr.state.doc.line(line + 1);
+          const deco = Decoration.line({
+            attributes: { class: "highlighted-line" }
+          });
+          highlights = highlights.update({
+            add: [deco.range(lineObj.from)]
+          });
+        }
+      }
+    }
+    
+    return highlights;
+  },
+  provide: (field) => EditorView.decorations.from(field)
+});
+
+// Custom cursor style
+const customCursor = EditorView.theme({
+  ".cm-cursor": {
+    borderLeftWidth: "2px",
+    borderLeftColor: "hsl(var(--editor-cursor))",
+    animation: "blink 1.2s step-end infinite"
+  },
+  "@keyframes blink": {
+    "from, to": { opacity: 1 },
+    "50%": { opacity: 0 }
+  },
+  // Highlighted line background
+  ".highlighted-line": {
+    backgroundColor: "hsla(var(--editor-selection) / 0.5)",
+    transition: "background-color 0.2s ease"
+  },
+  // Better fonts
+  "&": {
+    fontFamily: "'JetBrains Mono', 'Fira Code', 'Roboto Mono', monospace",
+    fontSize: "14px",
+    lineHeight: "1.5",
+  },
+  // Add a subtle glow to text
+  ".cm-line": {
+    textShadow: "0 0 0.5px hsla(var(--editor-text) / 0.1)",
+  },
+  // Add some vibrancy to the line numbers
+  ".cm-gutterElement": {
+    color: "hsla(var(--editor-line-num) / 0.8)",
+    fontSize: "12px",
+    transition: "color 0.2s ease"
+  },
+  ".cm-activeLineGutter": {
+    backgroundColor: "transparent",
+    color: "hsl(var(--editor-text))",
+    fontWeight: "bold"
+  },
+  // Active line subtle highlight
+  ".cm-activeLine": {
+    backgroundColor: "hsla(var(--editor-line) / 0.15)"
+  }
+});
+
+const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null);
   const { theme } = useTheme();
 
+  // Set up editor
   useEffect(() => {
     if (!editorRef.current) return;
     
@@ -28,6 +103,8 @@ const EditorPanel = ({ content, onChange }: EditorPanelProps) => {
           basicSetup,
           javascript(),
           theme === 'dark' ? oneDark : [],
+          highlightState,
+          customCursor,
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
               onChange(update.state.doc.toString());
@@ -62,6 +139,8 @@ const EditorPanel = ({ content, onChange }: EditorPanelProps) => {
         basicSetup,
         javascript(),
         theme === 'dark' ? oneDark : [],
+        highlightState,
+        customCursor,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString());
@@ -86,6 +165,15 @@ const EditorPanel = ({ content, onChange }: EditorPanelProps) => {
       editorViewRef.current.dispatch(transaction);
     }
   }, [content]);
+  
+  // Update highlighted line when it changes
+  useEffect(() => {
+    if (!editorViewRef.current) return;
+    
+    editorViewRef.current.dispatch({
+      effects: highlightLineEffect.of(highlightedLine ?? null)
+    });
+  }, [highlightedLine]);
   
   return (
     <div className="flex-1 border-r border-gray-700 flex flex-col overflow-hidden">

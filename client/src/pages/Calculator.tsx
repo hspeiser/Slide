@@ -16,6 +16,7 @@ const Calculator = () => {
   const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [decimalPlaces, setDecimalPlaces] = useState(5);
+  const [highlightedLine, setHighlightedLine] = useState<number | null>(null);
   
   // Calculate results whenever content, angle mode, or decimal places change
   useEffect(() => {
@@ -41,7 +42,27 @@ const Calculator = () => {
         let formattedResult: string | null = null;
         if (result !== null && result !== undefined) {
           if (typeof result === 'number') {
-            formattedResult = math.format(result, { precision: decimalPlaces });
+            // Check if the number is close to an integer to fix scientific notation issues
+            const isNearZero = Math.abs(result) < 1e-10;
+            // Handle numbers very close to zero
+            if (isNearZero) {
+              formattedResult = '0';
+            } 
+            // Handle trig functions returning values very close to 0, 1, or -1
+            else if (Math.abs(result - Math.round(result)) < 1e-10) {
+              formattedResult = String(Math.round(result));
+            }
+            // Handle other numbers within the precision limits
+            else {
+              // Use fixed notation for consistent decimal display
+              formattedResult = result.toFixed(decimalPlaces);
+              // Remove trailing zeros
+              formattedResult = formattedResult.replace(/\.?0+$/, '');
+              // If it's just a whole number, leave it as an integer
+              if (formattedResult.endsWith('.')) {
+                formattedResult = formattedResult.slice(0, -1);
+              }
+            }
           } else {
             formattedResult = String(result);
           }
@@ -99,8 +120,15 @@ const Calculator = () => {
       />
       
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <EditorPanel content={content} onChange={setContent} />
-        <ResultPanel results={results} />
+        <EditorPanel 
+          content={content} 
+          onChange={setContent} 
+          highlightedLine={highlightedLine}
+        />
+        <ResultPanel 
+          results={results} 
+          onHighlightLine={setHighlightedLine}
+        />
       </main>
       
       <CalculatorFooter 
