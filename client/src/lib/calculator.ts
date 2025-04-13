@@ -121,8 +121,8 @@ export function evaluate(
     let expr = expression.split('//')[0].trim();
     
     // Replace pattern for resistors in parallel using || notation
-    // Look for number || number or variable || variable patterns
-    expr = expr.replace(/(\d+\.?\d*|\w+)\s*\|\|\s*(\d+\.?\d*|\w+)/g, "parallel($1, $2)");
+    // This improved regex handles expressions with parentheses, variables, and numbers
+    expr = expr.replace(/(\(.*?\)|\d+\.?\d*|\w+)\s*\|\|\s*(\(.*?\)|\d+\.?\d*|\w+)/g, "parallel($1, $2)");
     
     if (!expr) return { result: null, updatedVariables: {} };
     

@@ -227,14 +227,14 @@ const Calculator = () => {
         onShowSettings={() => setShowSettings(true)}
       />
       
-      <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Calculator layout with resizable panels */}
-        <div className="w-full flex md:flex-row flex-col h-full overflow-hidden">
-          {/* Input panel - takes 2/3 on wide screens but maintains minimum width at smaller sizes */}
-          <div 
-            className="md:w-2/3 h-full min-h-[200px] md:max-h-full flex-grow relative"
-            style={{ minWidth: 'min(66%, 300px)', maxWidth: 'calc(100% - 150px)' }}
-          >
+      <main className="flex-1 flex overflow-hidden">
+        {/* Use a simple flex layout with fixed percentages, no vertical bar */}
+        <div 
+          className="flex flex-row h-full w-full overflow-hidden" 
+          style={{ display: 'grid', gridTemplateColumns: '70% 30%' }}
+        >
+          {/* Input panel - always takes 70% of available space */}
+          <div className="h-full min-h-[200px] relative">
             <EditorPanel 
               content={content} 
               onChange={setContent} 
@@ -242,11 +242,8 @@ const Calculator = () => {
             />
           </div>
           
-          {/* Output panel - takes 1/3 on wide screens, ensures minimum width */}
-          <div 
-            className="md:w-1/3 h-full flex-shrink-0 overflow-hidden border-l border-[hsla(var(--editor-selection)/0.3)]"
-            style={{ width: 'min(33%, 400px)', minWidth: '150px' }}
-          >
+          {/* Output panel - always takes 30% of available space */}
+          <div className="h-full overflow-auto">
             <ResultPanel 
               results={results} 
               onHighlightLine={setHighlightedLine}
