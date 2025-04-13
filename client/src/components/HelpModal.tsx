@@ -43,7 +43,7 @@ const HelpModal = ({ onClose }: HelpModalProps) => {
               <li>Multiplication: <code>4 * 5</code> or <code>4 × 5</code></li>
               <li>Division: <code>10 / 2</code></li>
               <li>Exponents: <code>2^3</code> or <code>2**3</code></li>
-              <li>Parallel Resistors: <code>parallel(10, 20)</code> (calculates 1/(1/10 + 1/20))</li>
+              <li>Parallel Resistors: <code>10 || 20</code> or <code>parallel(10, 20)</code> (calculates 1/(1/10 + 1/20))</li>
             </ul>
           </div>
           
@@ -83,20 +83,23 @@ x = 5 // This is also a comment</code></pre>
           
           <div>
             <h3 className="text-lg font-semibold mb-2">Engineering Features</h3>
-            <p className="mb-2">Use the parallel function for circuit calculations:</p>
-            <pre className="bg-[hsl(var(--editor-bg))] p-2 rounded mb-2"><code>// Parallel resistors using parallel() function
-parallel(10, 20)    // Result: 6.667 ohms
+            <p className="mb-2">Use either || symbol or parallel() function for circuit calculations:</p>
+            <pre className="bg-[hsl(var(--editor-bg))] p-2 rounded mb-2"><code>// Parallel resistors using || symbol (engineering notation)
+10 || 20           // Result: 6.667 ohms
+
+// Or using the parallel() function
+parallel(10, 20)   // Same result: 6.667 ohms
 
 // Works with variables
 r1 = 100
 r2 = 200
-parallel(r1, r2)    // Result: 66.667 ohms
+r1 || r2           // Result: 66.667 ohms
 
 // Works with complex numbers (impedance)
 z1 = 10 + 5i
 z2 = 20 - 10i
-parallel(z1, z2)    // Parallel impedance</code></pre>
-            <p className="text-sm text-[hsl(var(--editor-text)/0.7)]">The parallel function calculates <code>1/(1/a + 1/b)</code>, which is the formula for resistors in parallel.</p>
+z1 || z2           // Parallel impedance calculation</code></pre>
+            <p className="text-sm text-[hsl(var(--editor-text)/0.7)]">Both methods calculate <code>1/(1/a + 1/b)</code>, which is the formula for resistors in parallel.</p>
           </div>
         </div>
       </DialogContent>

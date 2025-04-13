@@ -228,20 +228,30 @@ const Calculator = () => {
       />
       
       <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Input panel - takes 2/3 on wide screens, full width on mobile */}
-        <div className="w-full md:w-2/3 h-full md:h-full min-w-0 flex-grow relative order-1">
-          <EditorPanel 
-            content={content} 
-            onChange={setContent} 
-            highlightedLine={highlightedLine}
-          />
-        </div>
-        {/* Output panel - takes 1/3 on wide screens, full width on mobile */}
-        <div className="w-full md:w-1/3 h-full flex-shrink-0 min-w-[180px] overflow-hidden border-l border-[hsla(var(--editor-selection)/0.3)] md:order-2 order-2">
-          <ResultPanel 
-            results={results} 
-            onHighlightLine={setHighlightedLine}
-          />
+        {/* Calculator layout with resizable panels */}
+        <div className="w-full flex md:flex-row flex-col h-full overflow-hidden">
+          {/* Input panel - takes 2/3 on wide screens but maintains minimum width at smaller sizes */}
+          <div 
+            className="md:w-2/3 h-full min-h-[200px] md:max-h-full flex-grow relative"
+            style={{ minWidth: 'min(66%, 300px)', maxWidth: 'calc(100% - 150px)' }}
+          >
+            <EditorPanel 
+              content={content} 
+              onChange={setContent} 
+              highlightedLine={highlightedLine}
+            />
+          </div>
+          
+          {/* Output panel - takes 1/3 on wide screens, ensures minimum width */}
+          <div 
+            className="md:w-1/3 h-full flex-shrink-0 overflow-hidden border-l border-[hsla(var(--editor-selection)/0.3)]"
+            style={{ width: 'min(33%, 400px)', minWidth: '150px' }}
+          >
+            <ResultPanel 
+              results={results} 
+              onHighlightLine={setHighlightedLine}
+            />
+          </div>
         </div>
       </main>
       

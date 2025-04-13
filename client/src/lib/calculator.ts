@@ -116,8 +116,14 @@ export function evaluate(
   angleMode: 'DEG' | 'RAD' = 'DEG'
 ): { result: any; updatedVariables: Record<string, any> } {
   try {
-    // 1. Strip comments
-    const expr = expression.split('//')[0].trim();
+    // Pre-process: handle parallel resistor special symbol || before mathjs sees it
+    // This is a special case since JavaScript treats || as logical OR
+    let expr = expression.split('//')[0].trim();
+    
+    // Replace pattern for resistors in parallel using || notation
+    // Look for number || number or variable || variable patterns
+    expr = expr.replace(/(\d+\.?\d*|\w+)\s*\|\|\s*(\d+\.?\d*|\w+)/g, "parallel($1, $2)");
+    
     if (!expr) return { result: null, updatedVariables: {} };
     
     // Create proper scope with trig functions for the right angle mode
