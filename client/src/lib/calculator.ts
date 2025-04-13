@@ -127,60 +127,92 @@ export function evaluate(
     // This improved regex handles expressions with parentheses, variables, and numbers
     expr = expr.replace(/(\(.*?\)|\d+\.?\d*|\w+)\s*\|\|\s*(\(.*?\)|\d+\.?\d*|\w+)/g, "parallel($1, $2)");
     
-    // First, handle any values with explicit unit notation regardless of the current angle mode
+    // Create units object for angle handling
+    const units = {
+      deg: 'deg',
+      rad: 'rad',
+      // Add more units as needed
+    };
     
-    // Case 1: Look for "45 deg" style inputs without a function
-    if (expr.match(/^(\d+\.?\d*)\s+deg$/i)) {
-      // Just a degree value - keep it as is for DEG mode, or convert to RAD if in RAD mode
-      if (angleMode === 'RAD') {
-        expr = expr.replace(/^(\d+\.?\d*)\s+deg$/i, (match, value) => {
-          return `${value} * ${DEG_TO_RAD}`;
-        });
-      } else {
-        expr = expr.replace(/^(\d+\.?\d*)\s+deg$/i, '$1');
-      }
+    // Special case for trig functions with degrees like sin(45 deg)
+    const trigDegPattern = /\b(sin|cos|tan|asin|acos|atan)\s*\(\s*(\d+\.?\d*)\s*deg\s*\)/gi;
+    if (trigDegPattern.test(expr)) {
+      expr = expr.replace(trigDegPattern, (match, func, value) => {
+        // In DEG mode, we need to use our custom function directly
+        if (angleMode === 'DEG') {
+          return `${func}(${value})`;
+        } else {
+          // In RAD mode, convert degrees to radians
+          return `${func}(${value} * ${DEG_TO_RAD})`;
+        }
+      });
     }
     
-    // Case 2: Look for "45 rad" style inputs without a function
-    if (expr.match(/^(\d+\.?\d*)\s+rad$/i)) {
-      // Just a radian value - convert to DEG if in DEG mode, or keep as is for RAD mode
-      if (angleMode === 'DEG') {
-        expr = expr.replace(/^(\d+\.?\d*)\s+rad$/i, (match, value) => {
-          return `${value} * ${RAD_TO_DEG}`;
-        });
-      } else {
-        expr = expr.replace(/^(\d+\.?\d*)\s+rad$/i, '$1');
-      }
+    // Special case for trig functions with radians like sin(45 rad)
+    const trigRadPattern = /\b(sin|cos|tan|asin|acos|atan)\s*\(\s*(\d+\.?\d*)\s*rad\s*\)/gi;
+    if (trigRadPattern.test(expr)) {
+      expr = expr.replace(trigRadPattern, (match, func, value) => {
+        // In RAD mode, we can use our custom function directly
+        if (angleMode === 'RAD') {
+          return `${func}(${value})`;
+        } else {
+          // In DEG mode, we need to use Math functions directly to avoid unit conversion
+          if (func.toLowerCase() === 'sin') return `Math.sin(${value})`;
+          if (func.toLowerCase() === 'cos') return `Math.cos(${value})`;
+          if (func.toLowerCase() === 'tan') return `Math.tan(${value})`;
+          if (func.toLowerCase() === 'asin') return `Math.asin(${value}) * ${RAD_TO_DEG}`;
+          if (func.toLowerCase() === 'acos') return `Math.acos(${value}) * ${RAD_TO_DEG}`;
+          if (func.toLowerCase() === 'atan') return `Math.atan(${value}) * ${RAD_TO_DEG}`;
+          return `${func}(${value})`;
+        }
+      });
     }
     
-    // Handle case 3: Look for "sin 30 deg" pattern
-    expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+deg\b/gi, (match, func, value) => {
-      if (angleMode === 'DEG') {
-        // In DEG mode, we can just call the function directly as it expects degrees
-        return `${func}(${value})`;
-      } else {
-        // In RAD mode, we need to convert degrees to radians first
-        return `${func}(${value} * ${DEG_TO_RAD})`;
+    // Handle direct patterns like "45 deg" and "tan 45 deg"
+    if (expr.includes(' deg') || expr.includes(' rad')) {
+      // Handle notation like "tan 45 deg" (with space between function and value)
+      expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+(deg|rad)\b/gi, (match, func, value, unit) => {
+        if (unit.toLowerCase() === 'deg') {
+          if (angleMode === 'DEG') {
+            return `${func}(${value})`;
+          } else {
+            return `${func}(${value} * ${DEG_TO_RAD})`;
+          }
+        } else { // rad
+          if (angleMode === 'RAD') {
+            return `${func}(${value})`;
+          } else {
+            // Special case
+            if (func.toLowerCase() === 'sin') return `Math.sin(${value})`;
+            if (func.toLowerCase() === 'cos') return `Math.cos(${value})`;
+            if (func.toLowerCase() === 'tan') return `Math.tan(${value})`;
+            if (func.toLowerCase() === 'asin') return `Math.asin(${value}) * ${RAD_TO_DEG}`;
+            if (func.toLowerCase() === 'acos') return `Math.acos(${value}) * ${RAD_TO_DEG}`;
+            if (func.toLowerCase() === 'atan') return `Math.atan(${value}) * ${RAD_TO_DEG}`;
+            return `${func}(${value})`;
+          }
+        }
+      });
+      
+      // Handle single values like "45 deg" or "60 rad"
+      if (/^\s*(\d+\.?\d*)\s+(deg|rad)\s*$/i.test(expr)) {
+        expr = expr.replace(/^\s*(\d+\.?\d*)\s+(deg|rad)\s*$/i, (match, value, unit) => {
+          if (unit.toLowerCase() === 'deg') {
+            if (angleMode === 'DEG') {
+              return value; // Keep as is
+            } else {
+              return `${value} * ${DEG_TO_RAD}`; // Convert deg to rad
+            }
+          } else { // rad
+            if (angleMode === 'RAD') {
+              return value; // Keep as is
+            } else {
+              return `${value} * ${RAD_TO_DEG}`; // Convert rad to deg
+            }
+          }
+        });
       }
-    });
-    
-    // Handle case 4: Look for "sin 30 rad" pattern
-    expr = expr.replace(/\b(sin|cos|tan|asin|acos|atan)\s+(\d+\.?\d*)\s+rad\b/gi, (match, func, value) => {
-      if (angleMode === 'DEG') {
-        // In DEG mode, functions expect degrees but we have radians
-        // Use Math functions directly as they expect radians
-        if (func.toLowerCase() === 'sin') return `Math.sin(${value})`;
-        if (func.toLowerCase() === 'cos') return `Math.cos(${value})`;
-        if (func.toLowerCase() === 'tan') return `Math.tan(${value})`;
-        if (func.toLowerCase() === 'asin') return `Math.asin(${value}) * ${RAD_TO_DEG}`;
-        if (func.toLowerCase() === 'acos') return `Math.acos(${value}) * ${RAD_TO_DEG}`;
-        if (func.toLowerCase() === 'atan') return `Math.atan(${value}) * ${RAD_TO_DEG}`;
-        return `${func}(${value})`;
-      } else {
-        // In RAD mode, we can just call the function directly
-        return `${func}(${value})`;
-      }
-    });
+    }
     
     if (!expr) return { result: null, updatedVariables: {} };
     

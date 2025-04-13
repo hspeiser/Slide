@@ -137,12 +137,28 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   position: relative;
 }
 
-/* Cursor style that works across all zoom levels */
+/* Reset cursor to basics first */
 .cm-cursor {
-  border-left: 3px solid hsl(var(--editor-cursor)) !important;
-  background-color: hsl(var(--editor-cursor)) !important;
-  opacity: 1 !important;
-  width: 3px !important;
+  border-left: none !important;
+  background: none !important;
+}
+
+/* Then define a new cursor style that works across all zoom levels */
+.cm-cursor::after {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px; 
+  background-color: hsl(var(--editor-cursor));
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 /* Ensure consistent height and alignment for both input and output */
@@ -319,22 +335,7 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   font-weight: bold;
 }
 
-/* Cursor style when editor is focused - works at all zoom levels */
-.cm-editor:focus-within .cm-cursor {
-  border-left-width: 4px !important;
-  width: 4px !important;
-  background-color: hsl(var(--editor-cursor)) !important;
-  animation: blink 1.2s step-end infinite;
-}
-
-/* Animation that keeps the cursor visible at all zoom levels */
-@keyframes blink {
-  0%, 100% { 
-    opacity: 1; 
-    background-color: hsl(var(--editor-cursor)) !important;
-  }
-  50% { 
-    opacity: 0.5; 
-    background-color: transparent !important;
-  }
+/* Focused cursor needs a wider width */
+.cm-editor:focus-within .cm-cursor::after {
+  width: 4px;
 }
