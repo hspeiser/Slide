@@ -144,6 +144,23 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             { key: "Mod-z", run: undo, preventDefault: true },
             { key: "Mod-y", run: redo, preventDefault: true },
             { key: "Mod-Shift-z", run: redo, preventDefault: true },
+            // Custom handling for space key - insert space instead of newline
+            { 
+              key: "Space", 
+              run: (view) => {
+                const transaction = view.state.update({
+                  changes: {
+                    from: view.state.selection.main.from,
+                    to: view.state.selection.main.to,
+                    insert: " "
+                  },
+                  selection: { anchor: view.state.selection.main.from + 1 }
+                });
+                view.dispatch(transaction);
+                return true;
+              },
+              preventDefault: true
+            },
           ]),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {

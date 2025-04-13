@@ -306,16 +306,20 @@ function preProcessComplexNumbers(expression: string): string {
   processedExpr = processedExpr.replace(/(\b-?\d+\.?\d*)\s+i\b/g, '$1*i');
   
   // Handle implicit multiplication of numbers with variables: 2x -> 2*x
-  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)([a-zA-Z_][a-zA-Z0-9_]*\b)/g, '$1*$2');
+  // Make sure to use a more robust regex to catch all cases
+  processedExpr = processedExpr.replace(/(\d+\.?\d*)([a-zA-Z_][a-zA-Z0-9_]*)/g, '$1*$2');
   
   // Handle implicit multiplication with parentheses: 2(x+1) -> 2*(x+1)
-  processedExpr = processedExpr.replace(/(\b\d+\.?\d*)\s*\(/g, '$1*(');
+  processedExpr = processedExpr.replace(/(\d+\.?\d*)\s*\(/g, '$1*(');
   
   // Handle implicit multiplication between variable and parentheses: x(y+1) -> x*(y+1)
   processedExpr = processedExpr.replace(/([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g, '$1*(');
   
   // Handle implicit multiplication between closing and opening parentheses: (x+1)(y+2) -> (x+1)*(y+2)
   processedExpr = processedExpr.replace(/\)\s*\(/g, ')*(');
+  
+  // Special case for imaginary unit: 10(i) -> 10*i, not 10*(i)
+  processedExpr = processedExpr.replace(/\*\(i\)/g, '*i');
   
   return processedExpr;
 }
@@ -338,6 +342,7 @@ function preProcessAngles(
   scope.PI = PI;
   scope.complex = mathInstance.evaluate('complex');
   scope.i = mathInstance.evaluate('complex(0,1)');
+  scope.j = mathInstance.evaluate('complex(0,1)'); // Also support j for imaginary unit
   
   // Add custom trig functions that handle the right angle mode
   if (angleMode === 'DEG') {

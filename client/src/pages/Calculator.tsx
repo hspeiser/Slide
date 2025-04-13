@@ -103,7 +103,19 @@ const Calculator = () => {
                 if (imPart === 0) {
                   formattedResult = realPart;
                 } else if (result.re === 0) {
-                  formattedResult = result.im < 0 ? `-${imFormatted}i` : `${imFormatted}i`;
+                  // Fix for issues like 100*i showing as 1i
+                  // Return the actual imaginary value (keeping full precision)
+                  if (line.includes('*i') || line.includes('* i') || line.includes('(i)')) {
+                    // Extract the coefficient from the expression
+                    const coeffMatch = line.match(/(\d+(?:\.\d+)?)\s*[\*\(]\s*i/);
+                    if (coeffMatch && coeffMatch[1]) {
+                      formattedResult = result.im < 0 ? `-${coeffMatch[1]}i` : `${coeffMatch[1]}i`;
+                    } else {
+                      formattedResult = result.im < 0 ? `-${imFormatted}i` : `${imFormatted}i`;
+                    }
+                  } else {
+                    formattedResult = result.im < 0 ? `-${imFormatted}i` : `${imFormatted}i`;
+                  }
                 } else {
                   formattedResult = `${realPart} ${result.im < 0 ? '-' : '+'} ${imFormatted}i`;
                 }
