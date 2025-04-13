@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { EditorView, keymap, Decoration, DecorationSet } from '@codemirror/view';
+import { EditorView, keymap, Decoration, DecorationSet, highlightSpecialChars } from '@codemirror/view';
 import { EditorState, StateField, StateEffect } from '@codemirror/state';
 import { basicSetup } from 'codemirror';
 import { javascript } from '@codemirror/lang-javascript';
@@ -117,6 +117,19 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
     return () => clearTimeout(timer);
   }, []);
 
+  // Create space character highlighter
+  const showSpaces = highlightSpecialChars({
+    render: () => {
+      const span = document.createElement("span");
+      span.textContent = "·";
+      span.style.opacity = "0.6";
+      span.style.pointerEvents = "none";
+      return span;
+    },
+    // Using a RegExp instead of a function for type compatibility
+    addSpecialChars: /\s/
+  });
+  
   // Set up editor
   useEffect(() => {
     if (!editorRef.current) return;
@@ -134,18 +147,19 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           theme === 'dark' ? oneDark : [],
           highlightState,
           editorTheme,
+          // Show spaces with visible dots
+          showSpaces,
           // Custom cursor styling
           EditorView.theme({
             ".cm-cursor": {
               borderLeftWidth: "3px",
               borderLeftColor: "hsl(var(--editor-cursor))",
               animation: "blink 1.2s step-end infinite",
-              height: "1.6rem !important",
-              minHeight: "1.6rem !important",
+              height: "auto !important",  // let CodeMirror choose
+              minHeight: "1.2em",
               boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1)",
               position: "absolute",
-              background: "hsla(var(--editor-cursor) / 0.3)",
-              width: "5px",
+              width: "3px",
               borderTopRightRadius: "2px",
               borderBottomRightRadius: "2px"
             },
@@ -163,25 +177,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             { key: "Mod-z", run: undo, preventDefault: true },
             { key: "Mod-y", run: redo, preventDefault: true },
             { key: "Mod-Shift-z", run: redo, preventDefault: true },
-            // Custom handling for space key - insert space instead of newline
-            { 
-              key: "Space", 
-              run: (view) => {
-                // Insert a visible space instead of just a regular space
-                // Use a non-breaking space that's visible in the editor
-                const transaction = view.state.update({
-                  changes: {
-                    from: view.state.selection.main.from,
-                    to: view.state.selection.main.to,
-                    insert: "\u00A0" // Non-breaking space - more visible and easily editable
-                  },
-                  selection: { anchor: view.state.selection.main.from + 1 }
-                });
-                view.dispatch(transaction);
-                return true;
-              },
-              preventDefault: true
-            },
+            // REMOVED custom space handler - using normal spaces now
           ]),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
@@ -220,18 +216,19 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         javascript(),
         theme === 'dark' ? oneDark : [],
         highlightState,
+        // Show spaces with visible dots
+        showSpaces,
         // Custom cursor styling
         EditorView.theme({
           ".cm-cursor": {
             borderLeftWidth: "3px",
             borderLeftColor: "hsl(var(--editor-cursor))",
             animation: "blink 1.2s step-end infinite",
-            height: "1.6rem !important",
-            minHeight: "1.6rem !important",
+            height: "auto !important",  // let CodeMirror choose
+            minHeight: "1.2em",
             boxShadow: "0 0 8px hsla(var(--editor-cursor) / 1)",
             position: "absolute",
-            background: "hsla(var(--editor-cursor) / 0.3)",
-            width: "5px",
+            width: "3px",
             borderTopRightRadius: "2px",
             borderBottomRightRadius: "2px"
           },
@@ -249,25 +246,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           { key: "Mod-z", run: undo, preventDefault: true },
           { key: "Mod-y", run: redo, preventDefault: true },
           { key: "Mod-Shift-z", run: redo, preventDefault: true },
-          // Custom handling for space key - insert space instead of newline
-          { 
-            key: "Space", 
-            run: (view) => {
-              // Insert a visible space instead of just a regular space
-              // Use a non-breaking space that's visible in the editor
-              const transaction = view.state.update({
-                changes: {
-                  from: view.state.selection.main.from,
-                  to: view.state.selection.main.to,
-                  insert: "\u00A0" // Non-breaking space - more visible and easily editable
-                },
-                selection: { anchor: view.state.selection.main.from + 1 }
-              });
-              view.dispatch(transaction);
-              return true;
-            },
-            preventDefault: true
-          },
+          // REMOVED custom space handler - using normal spaces now
         ]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {

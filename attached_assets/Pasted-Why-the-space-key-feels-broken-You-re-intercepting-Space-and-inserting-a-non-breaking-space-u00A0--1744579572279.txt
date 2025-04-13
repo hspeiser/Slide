@@ -1,0 +1,129 @@
+Why the space key feels broken
+You’re intercepting Space and inserting a non‑breaking space (\u00A0).
+
+ts
+Copy
+Edit
+{ key: "Space", run: view => {
+    view.dispatch({ …insert: "\u00A0" });
+    return true;
+}}
+A NBSP is invisible unless you style it specially, so it looks like nothing happened.
+
+It is a different Unicode code‑point, so Backspace/Delete behaves unpredictably (sometimes you need two presses, IME’s treat it oddly, etc.).
+
+Because you replace every plain space, CodeMirror’s own soft‑wrap, indentation, cursor‑movement, and “show invisible characters” extensions no longer recognise it as whitespace.
+
+Your attempt to reveal NBSPs with
+
+css
+Copy
+Edit
+.cm-content .cm-text:has(+ .cm-text)::after { content: "·"; }
+only fires in a few DOM situations, so most NBSPs remain invisible.
+
+Fix → Stop replacing the space key.
+Let CodeMirror insert a normal " " and, if you still want a visible mark, use the built‑in highlightSpecialChars() helper:
+
+ts
+Copy
+Edit
+import { highlightSpecialChars, SpecialCharConfig } from "@codemirror/view";
+
+const showSpaces: SpecialCharConfig = {
+  render: () => {
+    const span = document.createElement("span");
+    span.textContent = "·";
+    span.style.opacity = "0.6";
+    span.style.pointerEvents = "none";
+    return span;
+  },
+  addSpecialChars: ch => ch === " "          // only normal spaces
+};
+
+…extensions: [
+  javascript(),
+  highlightSpecialChars(showSpaces),
+  // remove the custom Space keymap
+]
+This way:
+
+You keep a real space in the document (wrap/indent works again).
+
+You still see the space.
+
+Delete/Backspace behave exactly as users expect.
+
+Why the cursor sometimes disappears
+The cursor is a 2 px–wide element whose colour you set to
+hsl(var(--editor-cursor)).
+On a brand‑new empty line the .cm-line:empty::after overlay covers the whole line with a background; when that colour is close to the cursor’s colour (or the line is scrolled so the caret is flush left) the border simply blends in and looks invisible.
+
+You also force
+
+css
+Copy
+Edit
+.cm-cursor { height: 1.6rem !important; background: hsla(var(--editor-cursor)/.3) }
+so on wrapped or very short lines the cursor may overflow the line box and be clipped.
+
+Fixes
+
+Remove the “empty‑line highlight” overlay or make it transparent:
+
+css
+Copy
+Edit
+.cm-line:empty::after { background: transparent; }
+Let the caret size itself:
+
+css
+Copy
+Edit
+.cm-cursor {
+  height: auto !important;    /* allow CodeMirror to choose */
+  min-height: 1.2em;
+}
+If you still want a stronger caret, keep the wider border-left-width but drop the extra background colour; the solid border is already visible against both themes.
+
+Minimal patch
+diff
+Copy
+Edit
+- // --- 1. REMOVE the custom Space handler entirely ------------------
+- { key: "Space", run: … },
+
+- // --- 2. ADD special‑char highlighter ------------------------------
++ import { highlightSpecialChars } from "@codemirror/view";
++
++ const showSpaces = highlightSpecialChars({
++   render: () => {
++     const span = document.createElement("span");
++     span.textContent = "·";
++     span.style.opacity = "0.6";
++     return span;
++   },
++   addSpecialChars: ch => ch === " "
++ });
+
+  extensions: [
+     javascript(),
++    showSpaces,
+
+-    // (remove Space keymap here)
+  ]
+
+- /* --- 3. Cursor / empty‑line styles --------------------------------*/
+-.cm-line:empty::after { …background-color: hsla(var(--editor-text)/0.01); }
++.cm-line:empty::after { background: transparent; }
+
+-.cm-cursor { height: 1.6rem !important; background: hsla(var(--editor-cursor)/.3); }
++.cm-cursor { height: auto !important; min-height: 1.2em; }
+After these three changes:
+
+Pressing Space always inserts a regular, visible “·”‑marked space.
+
+Delete/Backspace behave normally.
+
+The caret is visible on every new line and during wraps.
+

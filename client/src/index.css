@@ -122,15 +122,9 @@
   position: relative;
 }
 
-/* Add a subtle highlight to empty lines to make cursor more visible */
+/* Make empty lines completely transparent so cursor is always visible */
 .cm-line:empty::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  background-color: hsla(var(--editor-text) / 0.01);
+  background: transparent;
   pointer-events: none;
 }
 
@@ -174,13 +168,11 @@
   will-change: transform;
   z-index: 20;
   position: relative;
-  height: 1.6rem !important;
+  height: auto !important;  /* allow CodeMirror to choose */
+  min-height: 1.2em;
   margin-top: 0 !important;
   box-shadow: 0 0 8px hsla(var(--editor-cursor) / 0.9);
-  background-color: hsla(var(--editor-cursor) / 0.2);
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
-  width: 2px !important;
+  width: 3px !important;
 }
 
 @keyframes blink {
