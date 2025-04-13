@@ -42,14 +42,7 @@ const Calculator = () => {
           line.endsWith('^') || line.endsWith('=') ||
           line.endsWith(' ') || // Ending with a space indicates typing in progress
           /\b(to|in)\s*$/i.test(line) || // Unit conversion operations in progress
-          /\d+\s*[a-z]+$/i.test(line) || // Unit specification in progress
-          /\b(sin|cos|tan|asin|acos|atan|arcsin|arccos|arctan)\s*(\(?.*)?$/i.test(line) || // Trig function call in progress
-          /\b(log|ln|sqrt|abs|exp)\s*(\(.*)?$/i.test(line) || // Math function call in progress
-          /\bi\s*[\*\+-\/\^]?$/i.test(line) || // Complex number operations in progress
-          /[\*\+-\/\^]\s*i\s*$/i.test(line) || // Complex number operations in progress
-          /\b(deg|rad)\s*$/i.test(line) || // Angle unit specification incomplete
-          /\d+\s*\+\s*\d*i\s*[\*\+-\/\^]?$/i.test(line) || // Complex number incomplete
-          /e\^i/i.test(line) && !/e\^i\*pi/i.test(line) // Euler's identity incomplete
+          /\d+\s*[a-z]+$/i.test(line) // Unit specification in progress
         );
         
         if (isIncompleteExpression) {
