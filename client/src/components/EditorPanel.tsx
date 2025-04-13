@@ -43,54 +43,39 @@ const highlightState = StateField.define<DecorationSet>({
   provide: (field) => EditorView.decorations.from(field)
 });
 
-// Enhanced editor theme with better cursor visibility
-const editorTheme = EditorView.theme({
-  // Base font settings for the editor
+// Custom cursor style
+const customCursor = EditorView.theme({
+  ".cm-cursor": {
+    borderLeftWidth: "3px",
+    borderLeftColor: "hsl(var(--editor-cursor))",
+    animation: "blink 1.2s step-end infinite",
+    height: "1.6rem !important",
+    minHeight: "1.6rem !important",
+    boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.9)",
+    position: "absolute",
+    background: "hsla(var(--editor-cursor) / 0.15)",
+    width: "4px",
+    borderTopRightRadius: "2px",
+    borderBottomRightRadius: "2px"
+  },
+  "@keyframes blink": {
+    "from, to": { opacity: 1 },
+    "50%": { opacity: 0 }
+  },
+  // Highlighted line background
+  ".highlighted-line": {
+    backgroundColor: "hsla(var(--editor-selection) / 0.5)",
+    transition: "background-color 0.2s ease"
+  },
+  // Better fonts
   "&": {
     fontFamily: "'Fira Code', 'JetBrains Mono', 'Roboto Mono', monospace",
     fontSize: "15px",
     lineHeight: "1.6",
     letterSpacing: "0.3px"
   },
-  
-  // Custom high-visibility cursor 
-  ".cm-cursor": {
-    borderLeftWidth: "2px",
-    borderLeftColor: "hsl(var(--editor-cursor))",
-    animation: "blink 1.2s step-end infinite",
-    height: "1.6rem !important", 
-    minHeight: "1.6rem !important",
-    boxShadow: "0 0 8px hsla(var(--editor-cursor) / 0.9)",
-    position: "absolute",
-    background: "hsla(var(--editor-cursor) / 0.25)",
-    width: "3px",
-    borderTopRightRadius: "2px",
-    borderBottomRightRadius: "2px",
-    marginLeft: "0",
-    zIndex: 10
-  },
-  
-  // Keyframe animation for cursor blinking
-  "@keyframes blink": {
-    "from, to": { opacity: 1 },
-    "50%": { opacity: 0.3 }
-  },
-  
-  // Highlighted line styles
-  ".highlighted-line": {
-    backgroundColor: "hsla(var(--editor-selection) / 0.5)",
-    transition: "background-color 0.2s ease"
-  },
-  
-  // Line styling with empty-line cursor visibility fix using custom content
-  ".cm-content": {
-    padding: "4px 0",
-    caretColor: "hsl(var(--editor-cursor))"
-  },
-  
-  // Line rendering style
+  // Add a subtle glow to text
   ".cm-line": {
-    position: "relative",
     textShadow: "0 0 0.5px hsla(var(--editor-text) / 0.1)",
     minHeight: "1.6rem",
     height: "1.6rem",
@@ -99,33 +84,29 @@ const editorTheme = EditorView.theme({
     display: "flex",
     alignItems: "center"
   },
-  
-  // Gutter and line number styles
+  // Add some vibrancy to the line numbers
   ".cm-gutterElement": {
     color: "hsla(var(--editor-line-num) / 0.8)",
     fontSize: "12px",
     transition: "color 0.2s ease",
     paddingTop: "0.15rem"
   },
-  
-  // Active line gutter styling
   ".cm-activeLineGutter": {
     backgroundColor: "transparent",
     color: "hsl(var(--editor-text))",
     fontWeight: "bold"
   },
-  
-  // Active line highlight
+  // Active line subtle highlight
   ".cm-activeLine": {
-    backgroundColor: "hsla(var(--editor-line) / 0.15)",
-    borderRadius: "3px"
+    backgroundColor: "hsla(var(--editor-line) / 0.15)"
   },
-  
-  // Scrollbar styling
+  // Make content area match the right panel
+  ".cm-content": {
+    padding: "4px 0"
+  },
+  // Make scrollbar match design
   ".cm-scroller": {
-    overflow: "auto",
-    scrollbarWidth: "thin",
-    scrollbarColor: "hsla(var(--editor-selection)/0.3) transparent"
+    overflow: "auto"
   }
 });
 
@@ -150,7 +131,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           javascript(),
           theme === 'dark' ? oneDark : [],
           highlightState,
-          editorTheme,
+          customCursor,
           // Add history support for undo/redo
           history(),
           keymap.of([
@@ -198,7 +179,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         javascript(),
         theme === 'dark' ? oneDark : [],
         highlightState,
-        editorTheme,
+        customCursor,
         // Add history support for undo/redo
         history(),
         keymap.of([
