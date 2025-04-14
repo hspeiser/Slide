@@ -1,0 +1,3 @@
+@echo off
+echo Starting Electron in simple mode...
+npx electron simple-electron.js
