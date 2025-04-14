@@ -61,8 +61,8 @@ function createWindow() {
       console.log('Running in standalone development mode');
     } else {
       // Use the development server
-      startUrl = 'http://localhost:5000';
-      console.log('Running with development server');
+      startUrl = 'http://127.0.0.1:5000';
+      console.log('Running with development server at', startUrl);
     }
   } else {
     // Production mode always uses built files
