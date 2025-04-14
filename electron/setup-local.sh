@@ -16,7 +16,8 @@ cat > package.json << EOF
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "dev": "node start-electron.js"
+    "dev": "node start-electron.js",
+    "standalone": "node standalone.js"
   },
   "author": "Calculator Developer",
   "license": "MIT",
@@ -34,4 +35,10 @@ EOF
 echo "Installing Electron dependencies..."
 npm install
 
-echo "Setup complete! You can now run the Electron app with 'npm start'"
+echo "Setup complete! You can now run the Electron app using one of these commands:"
+echo ""
+echo "  npm start         - Run Electron directly (requires npm run dev in another terminal)"
+echo "  npm run dev       - Run in development mode with the web server"
+echo "  npm run standalone - Run in standalone mode (recommended, no web server needed)"
+echo ""
+echo "For more details, see the README.md file in this directory."

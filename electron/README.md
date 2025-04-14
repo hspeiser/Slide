@@ -22,7 +22,7 @@ To set up the Electron app for local development:
 
 ## Running the App Locally
 
-There are two ways to run the app:
+There are three ways to run the app:
 
 ### Method 1: Start the web app and Electron separately
 
@@ -37,16 +37,30 @@ There are two ways to run the app:
    npm start
    ```
 
-### Method 2: Use the standalone Electron mode
+### Method 2: Use the development Electron mode
 
-For quick testing without needing to run the web server:
+For development with automatic connecting to the web server:
 
 ```
 cd electron
 npm run dev
 ```
 
-This will start Electron in development mode, automatically forcing ELECTRON_IS_DEV to be true.
+This will start Electron in development mode, automatically connecting to the web server at port 5000.
+
+### Method 3: Use the standalone mode (Recommended)
+
+For quick testing without needing to run the web server (best for local development):
+
+```
+cd electron
+npm run standalone
+```
+
+This will:
+1. Build the web application if needed
+2. Start Electron in standalone mode using the built files
+3. No need for a separate web server to be running
 
 ## Building the Electron App
 
