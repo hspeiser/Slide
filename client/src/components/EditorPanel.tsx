@@ -28,9 +28,15 @@ const highlightState = StateField.define<DecorationSet>({
         // Make sure the line exists in the document
         if (line >= 0 && line < tr.state.doc.lines) {
           const lineObj = tr.state.doc.line(line + 1);
+          
+          // Use a line background decoration instead of a line decoration
+          // This allows clicking anywhere on the line to position the cursor
           const deco = Decoration.line({
-            attributes: { class: "highlighted-line" }
+            attributes: { class: "highlighted-line" },
+            // Important: Set this to false to allow clicks to pass through to the editor
+            inclusive: false
           });
+          
           highlights = highlights.update({
             add: [deco.range(lineObj.from)]
           });
@@ -45,10 +51,13 @@ const highlightState = StateField.define<DecorationSet>({
 
 // Editor styling themes
 const editorTheme = EditorView.theme({
-  // Highlighted line background
+  // Highlighted line background - ensure it doesn't block pointer events
   ".highlighted-line": {
     backgroundColor: "hsla(var(--editor-selection) / 0.5)",
-    transition: "background-color 0.2s ease"
+    transition: "background-color 0.2s ease",
+    pointerEvents: "none",
+    position: "relative",
+    zIndex: "1"
   },
   // Better fonts
   "&": {
@@ -67,6 +76,13 @@ const editorTheme = EditorView.theme({
     display: "flex",
     alignItems: "center",
     whiteSpace: "pre",  // Preserve spaces exactly as typed
+    cursor: "text",     // Always show text cursor for better UX
+    position: "relative",
+    zIndex: "5"
+  },
+  // Add a subtle hover effect to make lines more interactive
+  ".cm-line:hover": {
+    backgroundColor: "hsla(var(--editor-selection) / 0.15)"
   },
   // Make spaces more visible
   ".cm-line span": {
