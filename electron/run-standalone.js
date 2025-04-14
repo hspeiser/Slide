@@ -36,8 +36,10 @@ try {
 }
 
 // Check if we have a built application
+// According to vite.config.ts, the build output is in "dist/public"
 const distPath = path.join(__dirname, '..', 'dist');
-const indexPath = path.join(distPath, 'index.html');
+const publicDistPath = path.join(distPath, 'public');
+const indexPath = path.join(publicDistPath, 'index.html');
 
 if (!fs.existsSync(indexPath)) {
   console.error('Error: Built application not found.');

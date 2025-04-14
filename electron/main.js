@@ -28,11 +28,33 @@ function createWindow() {
   // Check if we're running in standalone mode (no web server)
   const standaloneMode = process.env.ELECTRON_STANDALONE === 'true';
   
+  // Log the current directories to help debug
+  console.log('Current directory:', __dirname);
+  console.log('Looking for built files...');
+  
+  // Check multiple possible build output locations
+  const possibleIndexPaths = [
+    path.join(__dirname, '../dist/index.html'),
+    path.join(__dirname, '../dist/public/index.html'),
+    path.join(__dirname, '../public/index.html'),
+    path.join(__dirname, '../build/index.html')
+  ];
+  
+  let foundIndexPath = null;
+  for (const indexPath of possibleIndexPaths) {
+    console.log('Checking for build at:', indexPath);
+    if (fs.existsSync(indexPath)) {
+      foundIndexPath = indexPath;
+      console.log('Found built index.html at:', indexPath);
+      break;
+    }
+  }
+  
   if (isDev) {
-    if (standaloneMode) {
+    if (standaloneMode && foundIndexPath) {
       // Use the built dist files in standalone mode
       startUrl = url.format({
-        pathname: path.join(__dirname, '../dist/index.html'),
+        pathname: foundIndexPath,
         protocol: 'file:',
         slashes: true,
       });
@@ -44,12 +66,18 @@ function createWindow() {
     }
   } else {
     // Production mode always uses built files
-    startUrl = url.format({
-      pathname: path.join(__dirname, '../dist/index.html'),
-      protocol: 'file:',
-      slashes: true,
-    });
-    console.log('Running in production mode');
+    if (foundIndexPath) {
+      startUrl = url.format({
+        pathname: foundIndexPath,
+        protocol: 'file:',
+        slashes: true,
+      });
+      console.log('Running in production mode with local files');
+    } else {
+      // Fallback to development server
+      startUrl = 'http://localhost:5000';
+      console.log('No build found, falling back to development server');
+    }
   }
 
   mainWindow.loadURL(startUrl);
