@@ -134,6 +134,7 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   letter-spacing: 0.3px;
   border-radius: 0.5rem;
   overflow: hidden;
+  pointer-events: auto !important;
 }
 
 .cm-line {
@@ -145,6 +146,7 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   /* display: flex; REMOVED */
   align-items: center;
   position: relative;
+  pointer-events: auto !important;
 }
 
 /* Simple cursor fix using the 2px border approach - proven solution for all zoom levels */
@@ -190,6 +192,7 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
   transition: all 0.2s ease;
   /* display: flex; REMOVED */
   align-items: center;
+  pointer-events: auto !important;
 }
 
 /* Simple styling for empty lines in the editor */
@@ -206,6 +209,9 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 .cm-content {
   cursor: text;
   padding: 4px 0;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 1;
 }
 
 /* Intentionally empty to remove duplicate animation */
@@ -339,11 +345,13 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 /* Style non-breaking spaces to make them clearly visible */
 .cm-content .cm-text {
   position: relative;
+  pointer-events: auto !important;
 }
 
 /* Target non-breaking spaces specifically */
 .cm-content .cm-text:has(+ .cm-text) {
   position: relative;
+  pointer-events: auto !important;
 }
 
 .cm-content .cm-text[contenteditable="true"]:empty::after,

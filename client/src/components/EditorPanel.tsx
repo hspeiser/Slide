@@ -348,6 +348,7 @@ const EditorPanel = ({
       <div
         ref={editorRef}
         className="editor-container flex-1 h-full overflow-auto p-4 focus:outline-none"
+        style={{ pointerEvents: 'auto' }}
       />
     </div>
   );
