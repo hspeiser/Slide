@@ -16,10 +16,10 @@ const HelpModal = ({ onClose }: HelpModalProps) => {
       >
         <DialogHeader className="pb-2 border-b border-[hsl(var(--editor-selection)/0.3)]">
           <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl font-bold text-[hsl(var(--editor-function))]">Calculator Help</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-[hsl(var(--editor-function))]">Slide Calculator Help</DialogTitle>
           </div>
           <DialogDescription className="text-sm text-[hsl(var(--editor-text)/0.7)]">
-            Documentation for using the scientific calculator
+            Documentation for using the Slide scientific calculator
           </DialogDescription>
         </DialogHeader>
         

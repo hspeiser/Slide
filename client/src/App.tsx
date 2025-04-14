@@ -18,7 +18,7 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="bitwise-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="slide-theme">
         <Router />
         <Toaster />
       </ThemeProvider>

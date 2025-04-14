@@ -29,10 +29,10 @@ const SettingsModal = ({ onClose, decimalPlaces, onDecimalPlacesChange }: Settin
       >
         <DialogHeader className="space-y-1.5">
           <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl font-bold">Settings</DialogTitle>
+            <DialogTitle className="text-2xl font-bold">Slide Settings</DialogTitle>
           </div>
           <DialogDescription className="text-sm text-[hsl(var(--editor-text)/0.7)]">
-            Customize your calculator display preferences
+            Customize your Slide calculator display preferences
           </DialogDescription>
         </DialogHeader>
         
