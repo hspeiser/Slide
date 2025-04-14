@@ -17,7 +17,8 @@ const createTempPackageJson = () => {
     main: 'electron/main.js',
     devDependencies: {
       ...original.devDependencies,
-      'electron': original.dependencies.electron,
+      // Set exact version for electron instead of using a caret version
+      'electron': '28.0.0', // Using exact version number
       'electron-builder': original.dependencies['electron-builder'],
       'electron-is-dev': original.dependencies['electron-is-dev']
     }
@@ -26,6 +27,19 @@ const createTempPackageJson = () => {
   // Electron-builder checks these properties
   modified.author = modified.author || { name: 'Calculator Developer' };
   modified.description = modified.description || 'Scientific Calculator Application';
+  
+  // Ensure essential properties are set for electron-builder
+  modified.name = modified.name || 'scientific-calculator';
+  modified.version = modified.version || '1.0.0';
+  modified.build = {
+    ...(modified.build || {}),
+    appId: 'com.scientific-calculator.app',
+    productName: 'Scientific Calculator'
+  };
+  
+  // Set exact electron version in multiple places to ensure it's detected
+  modified.devDependencies.electron = '28.0.0';
+  modified.electronVersion = '28.0.0';
   
   // Delete properties that cause conflicts
   delete modified.dependencies.electron;
@@ -54,16 +68,42 @@ exec('npm run build', (error, stdout, stderr) => {
   // Create temporary package.json
   const tempPackagePath = createTempPackageJson();
   
+  // Find the electron-builder executable
+  let electronBuilderPath;
+  try {
+    // Try to find electron-builder in node_modules/.bin
+    const possiblePaths = [
+      path.join(__dirname, '..', 'node_modules', '.bin', 'electron-builder'),
+      path.join(__dirname, '..', 'node_modules', 'electron-builder', 'out', 'cli', 'cli.js')
+    ];
+    
+    for (const testPath of possiblePaths) {
+      if (fs.existsSync(testPath)) {
+        electronBuilderPath = testPath;
+        console.log(`Found electron-builder at: ${electronBuilderPath}`);
+        break;
+      }
+    }
+  } catch (error) {
+    console.warn('Error finding electron-builder path:', error);
+  }
+  
   // Build the Electron app using electron-builder
-  const electronBuilderProcess = spawn('npx', [
-    'electron-builder', 
-    'build', 
-    '-c', path.join(__dirname, 'electron-builder.json'),
-    '--project', path.dirname(tempPackagePath)
-  ], {
-    stdio: 'inherit',
-    shell: true
-  });
+  const electronBuilderProcess = spawn(
+    electronBuilderPath ? 'node' : 'npx', 
+    electronBuilderPath 
+      ? [electronBuilderPath, 'build', '-c', path.join(__dirname, 'electron-builder.json'), '--project', path.dirname(tempPackagePath)] 
+      : ['electron-builder', 'build', '-c', path.join(__dirname, 'electron-builder.json'), '--project', path.dirname(tempPackagePath)], 
+    {
+      stdio: 'inherit',
+      shell: true,
+      env: {
+        ...process.env,
+        // Force exact electron version
+        npm_config_electron_version: '28.0.0'
+      }
+    }
+  );
 
   // Handle electron-builder close
   electronBuilderProcess.on('close', code => {
