@@ -18,10 +18,10 @@ const CalculatorHeader = ({ angleMode, toggleAngleMode, onShowHelp, onShowSettin
   };
 
   return (
-    <header className="border-b border-gray-700 flex justify-between items-center p-4 sticky top-0 bg-[hsl(var(--editor-bg))] z-10">
-      <div className="flex items-center space-x-3">
-        <img src={bitwiseLogo} alt="Bitwise Logo" className="h-[4.5rem] w-auto my-auto" />
-        <h1 className="text-3xl font-semibold my-auto">Bitwise</h1>
+    <header className="border-b border-gray-700 flex justify-between items-center p-3 sticky top-0 bg-[hsl(var(--editor-bg))] z-10">
+      <div className="flex items-center space-x-2">
+        <img src={bitwiseLogo} alt="Bitwise Logo" className="h-[2.25rem] w-auto" />
+        <h1 className="text-xl font-semibold translate-y-[0.5px]">Bitwise</h1>
       </div>
       
       <div className="flex items-center space-x-3">
