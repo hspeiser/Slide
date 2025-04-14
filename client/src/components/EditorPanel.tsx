@@ -66,21 +66,18 @@ const editorTheme = EditorView.theme({
     lineHeight: "1.6",
     letterSpacing: "0.3px"
   },
-  // Add a subtle glow to text and show spaces more clearly
+  // Add a subtle glow to text 
+  // NOTE: Don't use flex or margins on lines - CodeMirror needs precise height measurements
   ".cm-line": {
     textShadow: "0 0 0.5px hsla(var(--editor-text) / 0.1)",
     minHeight: "1.6rem",
-    // Removed fixed height to allow content to expand properly
     paddingTop: "0.15rem",
-    paddingBottom: "0.15rem", 
-    display: "flex",
-    alignItems: "center",
-    whiteSpace: "pre-wrap",  // Use pre-wrap for better space handling
+    paddingBottom: "0.15rem",
+    // Leave the default display:block and white-space:pre
+    // CodeMirror's own line-wrapping extension handles wrapping safely
     cursor: "text",     // Always show text cursor for better UX
     position: "relative",
-    zIndex: "5", 
-    wordBreak: "normal",
-    overflowWrap: "normal"
+    zIndex: "5"
   },
   // Add a subtle hover effect to make lines more interactive
   ".cm-line:hover": {
@@ -110,9 +107,7 @@ const editorTheme = EditorView.theme({
   // Make content area match the right panel with proper overflow handling
   ".cm-content": {
     padding: "4px 0",
-    whiteSpace: "pre-wrap",  // Use pre-wrap to handle spaces better
-    wordBreak: "normal",
-    overflowWrap: "normal"
+    // Let CodeMirror handle its own whitespace - don't override
   },
   // Make scrollbar match design and handle horizontal overflow
   ".cm-scroller": {
@@ -141,17 +136,9 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
   }, []);
 
   // Create space character highlighter
-  const showSpaces = highlightSpecialChars({
-    render: () => {
-      const span = document.createElement("span");
-      span.textContent = "·";
-      span.style.opacity = "0.6";
-      span.style.pointerEvents = "none";
-      return span;
-    },
-    // Using a RegExp instead of a function for type compatibility
-    addSpecialChars: /\s/
-  });
+  // Only highlight non-breaking spaces and tabs (default behavior)
+  // This avoids creating extra DOM nodes for every normal space
+  const showSpaces = highlightSpecialChars();
   
   // Set up editor
   useEffect(() => {
