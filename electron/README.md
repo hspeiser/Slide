@@ -16,7 +16,7 @@ npm run dev
 
 # Then in another terminal:
 cd electron
-node run-electron.js
+node connect-to-server.js
 ```
 
 ### 2. Pure Standalone Mode (no server, no build required)
