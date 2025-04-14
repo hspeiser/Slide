@@ -1,7 +1,7 @@
 import { useTheme } from './ui/theme-provider';
 import { MoonIcon, SunIcon, Settings, HelpCircle } from 'lucide-react';
 import { Button } from './ui/button';
-import bitwiseLogo from '../assets/bitwise-logo.png';
+import slideLogo from '../assets/slide-logo.png';
 
 interface CalculatorHeaderProps {
   angleMode: 'DEG' | 'RAD';
@@ -20,8 +20,8 @@ const CalculatorHeader = ({ angleMode, toggleAngleMode, onShowHelp, onShowSettin
   return (
     <header className="border-b border-gray-700 flex justify-between items-center p-3 sticky top-0 bg-[hsl(var(--editor-bg))] z-10">
       <div className="flex items-center space-x-2">
-        <img src={bitwiseLogo} alt="Bitwise Logo" className="h-[2.25rem] w-auto" />
-        <h1 className="text-xl font-semibold translate-y-[0.5px]">Bitwise</h1>
+        <img src={slideLogo} alt="Slide Logo" className="h-[2.25rem] w-auto" />
+        <h1 className="text-xl font-semibold translate-y-[0.5px]">Slide</h1>
       </div>
       
       <div className="flex items-center space-x-3">

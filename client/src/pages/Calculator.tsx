@@ -9,7 +9,7 @@ import { evaluate } from "@/lib/calculator";
 import * as math from 'mathjs';
 
 // Welcome message text to show when app first loads
-const WELCOME_MESSAGE = `// Welcome to Bitwise
+const WELCOME_MESSAGE = `// Welcome to Slide
 // A powerful scientific calculator
 
 // QUICK TUTORIAL:
@@ -220,7 +220,7 @@ const Calculator = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'bitwise-export.txt';
+    a.download = 'slide-export.txt';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
