@@ -150,8 +150,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           // Custom minimal setup with only what we need
           EditorState.tabSize.of(2),
           EditorState.allowMultipleSelections.of(true),
-          // DISABLED: Line wrapping causes space issues
-          // EditorView.lineWrapping,
+          // Re-enable line wrapping with our custom space handler
+          EditorView.lineWrapping,
           // Keep auto-brackets for parentheses but disable most other auto features
           javascript({ jsx: false }),
           // Hide gutters using CSS instead of direct configuration
@@ -204,7 +204,15 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             { key: "Mod-z", run: undo, preventDefault: true },
             { key: "Mod-y", run: redo, preventDefault: true },
             { key: "Mod-Shift-z", run: redo, preventDefault: true },
-            // REMOVED custom space handler - using normal spaces now
+            // Explicit space handler to ensure spaces work correctly
+            { key: "Space", run: (view) => {
+              const transaction = view.state.update({
+                changes: { from: view.state.selection.main.from, to: view.state.selection.main.to, insert: " " },
+                selection: { anchor: view.state.selection.main.from + 1 }
+              });
+              view.dispatch(transaction);
+              return true;
+            }}
           ]),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
@@ -239,8 +247,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         // Custom minimal setup with only what we need
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
-        // DISABLED: Line wrapping causes space issues
-        // EditorView.lineWrapping,
+        // Re-enable line wrapping with our custom space handler
+        EditorView.lineWrapping,
         // Keep auto-brackets for parentheses but disable most other auto features
         javascript({ jsx: false }),
         // Hide gutters using CSS instead of direct configuration
@@ -292,7 +300,15 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           { key: "Mod-z", run: undo, preventDefault: true },
           { key: "Mod-y", run: redo, preventDefault: true },
           { key: "Mod-Shift-z", run: redo, preventDefault: true },
-          // REMOVED custom space handler - using normal spaces now
+          // Explicit space handler to ensure spaces work correctly
+          { key: "Space", run: (view) => {
+            const transaction = view.state.update({
+              changes: { from: view.state.selection.main.from, to: view.state.selection.main.to, insert: " " },
+              selection: { anchor: view.state.selection.main.from + 1 }
+            });
+            view.dispatch(transaction);
+            return true;
+          }}
         ]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
