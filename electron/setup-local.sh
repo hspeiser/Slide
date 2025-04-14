@@ -16,7 +16,7 @@ cat > package.json << EOF
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "dev": "node ../run-electron.js"
+    "dev": "node start-electron.js"
   },
   "author": "Calculator Developer",
   "license": "MIT",

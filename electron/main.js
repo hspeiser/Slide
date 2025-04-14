@@ -23,13 +23,34 @@ function createWindow() {
   });
 
   // Load the app
-  const startUrl = isDev
-    ? 'http://localhost:5000' // Development server URL
-    : url.format({
+  let startUrl;
+  
+  // Check if we're running in standalone mode (no web server)
+  const standaloneMode = process.env.ELECTRON_STANDALONE === 'true';
+  
+  if (isDev) {
+    if (standaloneMode) {
+      // Use the built dist files in standalone mode
+      startUrl = url.format({
         pathname: path.join(__dirname, '../dist/index.html'),
         protocol: 'file:',
         slashes: true,
       });
+      console.log('Running in standalone development mode');
+    } else {
+      // Use the development server
+      startUrl = 'http://localhost:5000';
+      console.log('Running with development server');
+    }
+  } else {
+    // Production mode always uses built files
+    startUrl = url.format({
+      pathname: path.join(__dirname, '../dist/index.html'),
+      protocol: 'file:',
+      slashes: true,
+    });
+    console.log('Running in production mode');
+  }
 
   mainWindow.loadURL(startUrl);
 
