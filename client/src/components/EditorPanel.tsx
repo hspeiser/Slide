@@ -166,7 +166,7 @@ const EditorPanel = ({
           // Custom minimal setup with only what we need
           EditorState.tabSize.of(2),
           EditorState.allowMultipleSelections.of(true),
-          // Re-enable line wrapping with our custom space handler
+          // Enable line wrapping with default space handling
           EditorView.lineWrapping,
           // Keep auto-brackets for parentheses but disable most other auto features
           javascript({ jsx: false }),
@@ -255,7 +255,7 @@ const EditorPanel = ({
         // Custom minimal setup with only what we need
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
-        // Re-enable line wrapping with our custom space handler
+        // Enable line wrapping with default space handling
         EditorView.lineWrapping,
         // Keep auto-brackets for parentheses but disable most other auto features
         javascript({ jsx: false }),

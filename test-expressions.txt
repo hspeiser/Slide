@@ -1,0 +1,79 @@
+# Basic Calculations
+2 + 2
+10 - 5
+3 * 4
+20 / 5
+2^3
+sqrt(16)
+
+# Spaces in Expressions
+sin (45)
+cos (30)
+tan (60)
+log (100)
+3 * x + 2 * y
+a + b * c / d
+
+# Long expressions with many spaces
+2 * x + 3 * y - 4 * z + 5 * w
+(a + b) * (c - d) / (e * f)
+sin(x) + cos(y) - tan(z)
+
+# Multiple spaces in a row
+x        y        z
+a    +    b    *    c
+
+# Expressions with angle mode testing
+sin(45 deg)
+tan(π/4)
+cos(60°)
+sin(π/6 rad)
+
+# Variable assignments
+x = 10
+y = 20
+z = x + y
+
+# Complex calculations
+f(x) = 2*x^2 + 3*x - 5
+f(3)
+derivative(f(x), x)
+
+# Unit conversions
+5 km to miles
+100 kg to lb
+32 F to C
+
+# Parallel operator testing
+10 || 20
+(5 || 10) || 15
+1/(1/100 + 1/200)
+
+# Complex numbers
+2 + 3i
+(1 + i) * (2 - 3i)
+polar(3 + 4i)
+
+# Multi-line calculations
+x = 5
+y = 10
+x + y
+x * y
+x / y
+
+# Matrix operations
+[1, 2; 3, 4] * [5, 6; 7, 8]
+det([1, 2; 3, 4])
+inv([1, 2; 3, 4])
+
+# Engineering notation
+1.5e6
+2.3e-4 * 3.4e5
+
+# Long expressions requiring wrapping
+really_long_equation = 2 * x^2 + 3 * x * y + 4 * y^2 + 5 * x * z + 6 * y * z + 7 * z^2 + 8 * x + 9 * y + 10 * z + 11
+
+# Expressions with errors to test highlighting
+sin(x
+1/0
+log(-1)
