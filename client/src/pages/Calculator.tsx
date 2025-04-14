@@ -7,6 +7,7 @@ import HelpModal from "@/components/HelpModal";
 import SettingsModal from "@/components/SettingsModal";
 import { evaluate } from "@/lib/calculator";
 import * as math from "mathjs";
+import usePlatform from "@/hooks/use-platform";
 
 // Welcome message text to show when app first loads
 const WELCOME_MESSAGE = `// Welcome to Slide
@@ -25,6 +26,7 @@ sin(45 deg) // Trig
 `;
 
 const Calculator = () => {
+  const { isElectron } = usePlatform();
   const [content, setContent] = useState(WELCOME_MESSAGE);
   const [results, setResults] = useState<(string | null)[]>([]);
   const [variables, setVariables] = useState<Record<string, any>>({});
@@ -262,15 +264,43 @@ const Calculator = () => {
       })
       .join("\n");
 
-    const blob = new Blob([exportContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "slide-export.txt";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (isElectron) {
+      // In Electron, we can use the dialog API for a better native experience
+      try {
+        // We'll use window.electron to communicate with the main process
+        // This would need to be properly set up in a preload script
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const defaultPath = `slide-export-${timestamp}.txt`;
+        
+        // For demonstration - in actual implementation we'd use ipcRenderer
+        // or preload to access Electron's dialog API
+        console.log('Saving file using Electron APIs - defaultPath:', defaultPath);
+        
+        // For now, fallback to the web method even in Electron
+        const blob = new Blob([exportContent], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = defaultPath;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Error using Electron save dialog:', err);
+      }
+    } else {
+      // Web browser download
+      const blob = new Blob([exportContent], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "slide-export.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
   };
 
   const toggleAngleMode = () => {
