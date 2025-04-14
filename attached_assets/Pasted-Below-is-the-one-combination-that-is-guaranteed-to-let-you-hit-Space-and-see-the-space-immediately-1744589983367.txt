@@ -1,0 +1,76 @@
+Below is the one combination that is guaranteed to let you:
+
+hit Space and see the space immediately on the same line
+
+keep the caret exactly where it belongs
+
+click anywhere in the text without weird “one line up / down” jumps
+
+1 · Undo the two things that break spaces
+a) Remove the “wrap at every space” extension
+Delete —or comment out—this line in every place you create an editor state:
+
+diff
+Copy
+Edit
+- EditorView.lineWrapping,
+b) Stop decorating ordinary spaces
+highlightSpecialChars({ addSpecialChars: /\s/ }) replaces every space with a widget span, and CodeMirror was never designed for that.
+Use the default call instead; it still shows TABs and NBSPs:
+
+diff
+Copy
+Edit
+- const showSpaces = highlightSpecialChars({
+-   render: ...,
+-   addSpecialChars: /\s/
+- });
++ const showSpaces = highlightSpecialChars();   // safe
+(If you really must draw a dot for normal spaces, we can do it later with text-shadow; for now keep the DOM clean so the editor works.)
+
+2 · Keep line elements pristine
+Make sure your theme does not set display:flex, white-space:pre-wrap, word-break, or overflow-wrap on either .cm-line or .cm-content.
+
+diff
+Copy
+Edit
+".cm-line": {
+-  display: "flex",
+-  whiteSpace: "pre-wrap",
+   minHeight: "1.6rem",
+   /* the rest of your styles */
+},
+
+".cm-content": {
+-  whiteSpace: "pre-wrap",
+-  wordBreak: "normal",
+-  overflowWrap: "normal",
+   padding: "4px 0"
+}
+3 · Nothing else needs to change
+The cursor CSS you already fixed (2 px border, no negative margin) is fine.
+
+All your colour / font / active‑line styles are fine.
+
+Horizontal scrolling will appear automatically for long lines; that is the normal behaviour when EditorView.lineWrapping is disabled.
+
+After you hot‑reload
+Type sin then press Space → you immediately see a space, caret stays.
+
+Keep typing → everything appears on the same row.
+
+Click anywhere → caret lands exactly where you clicked, even if the line has a syntax error.
+
+Press Arrow Down / Up → caret moves one logical line, not two.
+
+If any of those still fail, open DevTools > Elements, select a .cm-line and verify:
+
+display: block
+
+white-space: pre
+
+no word-break or overflow-wrap
+
+no extra child <span> elements inside the text (only the text node itself).
+
+Once the editor behaves, we can discuss a cosmetic way to show dots for spaces without breaking anything—but the steps above must come first.

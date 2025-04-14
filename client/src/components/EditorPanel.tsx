@@ -150,8 +150,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           // Custom minimal setup with only what we need
           EditorState.tabSize.of(2),
           EditorState.allowMultipleSelections.of(true),
-          // Enable CodeMirror's own line wrapping - it properly handles hit testing and cursor positioning
-          EditorView.lineWrapping,
+          // DISABLED: Line wrapping causes space issues
+          // EditorView.lineWrapping,
           // Keep auto-brackets for parentheses but disable most other auto features
           javascript({ jsx: false }),
           // Hide gutters using CSS instead of direct configuration
@@ -239,8 +239,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         // Custom minimal setup with only what we need
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
-        // Enable CodeMirror's own line wrapping - it properly handles hit testing and cursor positioning
-        EditorView.lineWrapping,
+        // DISABLED: Line wrapping causes space issues
+        // EditorView.lineWrapping,
         // Keep auto-brackets for parentheses but disable most other auto features
         javascript({ jsx: false }),
         // Hide gutters using CSS instead of direct configuration
