@@ -1,0 +1,65 @@
+I understand how maddening this is, so let’s get one small, testable change at a time and stop the “space ⇒ phantom line” bug for good.
+
+1 · Why it still breaks
+Problem line	Where it is	What it does
+display: flex; and height: 1.6rem;	your global CSS block for .cm‑line	turns every logical line into a flex row of fixed height. CodeMirror’s hit‑testing can’t cope, so when you press Space the browser wraps the flex row, the caret appears on a new visual line, and CM still thinks you’re on the old one.
+You removed flex in the JS theme earlier, but the global sheet overrides the theme, so the bad rule came back.
+
+2 · Two‑line CSS patch (really!)
+Open your main CSS (the part you pasted after /* CodeMirror specific styles */) and delete or comment out just these two properties:
+
+diff
+Copy
+Edit
+.cm-line {
+-  display: flex;          /* ← REMOVE */
+-  height: 1.6rem;         /* ← REMOVE  (keep min‑height if you like) */
+   min-height: 1.6rem;
+   padding: 0 6px;
+   margin: 0.15rem 0;
+   transition: background-color 0.15s ease;
+   align-items: center;    /* optional – harmless once flex is gone */
+   position: relative;
+}
+Nothing else has to change.
+
+Keeping min-height is fine; it doesn’t confuse the measurement.
+
+align-items is ignored on a block element, so it’s harmless.
+
+3 · Remove the “manual space” key binding
+Your explicit handler for "Space" is now redundant and can interfere with IME input or multiple cursors. Delete it from both keymap arrays:
+
+diff
+Copy
+Edit
+// keymap.of([
+- { key: "Space", run: … },
+CodeMirror’s default keymap already inserts a space perfectly.
+
+4 · (Optionally) turn off line‑wrapping while you test
+While you’re debugging, it’s easier to see what’s happening if each logical line stays one row. Just comment out EditorView.lineWrapping in both extension lists; you can re‑enable it later once the basic behaviour is solid.
+
+5 · Reload and test
+Type: sin Space ( – you should see a space immediately, caret stays on the same row.
+
+Hold Space – a run of spaces should appear, no jumping.
+
+Click anywhere – caret lands exactly where you click.
+
+If any of those still fail, open DevTools → Elements, select a .cm-line, and make sure it now shows display: block and no fixed height.
+Those two properties are the entire root of the problem.
+
+Why this works
+With display:block each line is a single, continuous text flow exactly the way CodeMirror measures it.
+
+Without a fixed height, the editor can tell the real height of wrapped lines (if you re‑enable lineWrapping) and hit‑testing is correct.
+
+The default space handling is simple text insertion; nothing special needed.
+
+Once you confirm spaces behave, you can safely:
+
+re‑enable EditorView.lineWrapping if you want soft‑wrap;
+
+keep all your cursor, colour, hover and active‑line styles – they don’t break anything as long as the line itself stays a plain block element.
+

@@ -1,11 +1,23 @@
-import { useEffect, useRef } from 'react';
-import { EditorView, keymap, Decoration, DecorationSet, highlightSpecialChars } from '@codemirror/view';
-import { EditorState, StateField, StateEffect } from '@codemirror/state';
-import { basicSetup } from 'codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { oneDark } from '@codemirror/theme-one-dark';
-import { defaultKeymap, history, historyKeymap, undo, redo } from '@codemirror/commands';
-import { useTheme } from './ui/theme-provider';
+import { useEffect, useRef } from "react";
+import {
+  EditorView,
+  keymap,
+  Decoration,
+  DecorationSet,
+  highlightSpecialChars,
+} from "@codemirror/view";
+import { EditorState, StateField, StateEffect } from "@codemirror/state";
+import { basicSetup } from "codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { oneDark } from "@codemirror/theme-one-dark";
+import {
+  defaultKeymap,
+  history,
+  historyKeymap,
+  undo,
+  redo,
+} from "@codemirror/commands";
+import { useTheme } from "./ui/theme-provider";
 
 interface EditorPanelProps {
   content: string;
@@ -21,32 +33,32 @@ const highlightState = StateField.define<DecorationSet>({
   create: () => Decoration.none,
   update(highlights, tr) {
     highlights = Decoration.none;
-    
+
     for (let effect of tr.effects) {
       if (effect.is(highlightLineEffect) && effect.value !== null) {
         const line = effect.value;
         // Make sure the line exists in the document
         if (line >= 0 && line < tr.state.doc.lines) {
           const lineObj = tr.state.doc.line(line + 1);
-          
+
           // Use a line background decoration instead of a line decoration
           // This allows clicking anywhere on the line to position the cursor
           const deco = Decoration.line({
             attributes: { class: "highlighted-line" },
             // Important: Set this to false to allow clicks to pass through to the editor
-            inclusive: false
+            inclusive: false,
           });
-          
+
           highlights = highlights.update({
-            add: [deco.range(lineObj.from)]
+            add: [deco.range(lineObj.from)],
           });
         }
       }
     }
-    
+
     return highlights;
   },
-  provide: (field) => EditorView.decorations.from(field)
+  provide: (field) => EditorView.decorations.from(field),
 });
 
 // Editor styling themes
@@ -57,50 +69,50 @@ const editorTheme = EditorView.theme({
     transition: "background-color 0.2s ease",
     pointerEvents: "none",
     position: "relative",
-    zIndex: "1"
+    zIndex: "1",
   },
   // Better fonts
   "&": {
     fontFamily: "'Fira Code', 'JetBrains Mono', 'Roboto Mono', monospace",
     fontSize: "15px",
     lineHeight: "1.6",
-    letterSpacing: "0.3px"
+    letterSpacing: "0.3px",
   },
-  // Add a subtle glow to text 
+  // Add a subtle glow to text
   // NOTE: Don't use flex or margins on lines - CodeMirror needs precise height measurements
   ".cm-line": {
     textShadow: "0 0 0.5px hsla(var(--editor-text) / 0.1)",
     minHeight: "1.6rem",
     paddingTop: "0.15rem",
     paddingBottom: "0.15rem",
-    cursor: "text",     // Always show text cursor for better UX
+    cursor: "text", // Always show text cursor for better UX
     position: "relative",
-    zIndex: "5"
+    zIndex: "5",
   },
   // Add a subtle hover effect to make lines more interactive
   ".cm-line:hover": {
-    backgroundColor: "hsla(var(--editor-selection) / 0.15)"
+    backgroundColor: "hsla(var(--editor-selection) / 0.15)",
   },
   // Make spaces more visible
   ".cm-line span": {
-    letterSpacing: "0.5px",  // Add letter-spacing to make spaces more noticeable
-    fontVariantLigatures: "none",  // Disable ligatures for better character distinction
+    letterSpacing: "0.5px", // Add letter-spacing to make spaces more noticeable
+    fontVariantLigatures: "none", // Disable ligatures for better character distinction
   },
   // Add some vibrancy to the line numbers
   ".cm-gutterElement": {
     color: "hsla(var(--editor-line-num) / 0.8)",
     fontSize: "12px",
     transition: "color 0.2s ease",
-    paddingTop: "0.15rem"
+    paddingTop: "0.15rem",
   },
   ".cm-activeLineGutter": {
     backgroundColor: "transparent",
     color: "hsl(var(--editor-text))",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   // Active line subtle highlight
   ".cm-activeLine": {
-    backgroundColor: "hsla(var(--editor-line) / 0.15)"
+    backgroundColor: "hsla(var(--editor-line) / 0.15)",
   },
   // Make content area match the right panel with proper overflow handling
   ".cm-content": {
@@ -111,11 +123,15 @@ const editorTheme = EditorView.theme({
   ".cm-scroller": {
     overflow: "auto",
     overflowX: "auto",
-    overflowY: "auto"
-  }
+    overflowY: "auto",
+  },
 });
 
-const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) => {
+const EditorPanel = ({
+  content,
+  onChange,
+  highlightedLine,
+}: EditorPanelProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null);
   const { theme } = useTheme();
@@ -129,7 +145,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         editorRef.current.focus();
       }
     }, 10);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -137,11 +153,11 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
   // Only highlight non-breaking spaces and tabs (default behavior)
   // This avoids creating extra DOM nodes for every normal space
   const showSpaces = highlightSpecialChars();
-  
+
   // Set up editor
   useEffect(() => {
     if (!editorRef.current) return;
-    
+
     // Create editor only once
     if (!editorViewRef.current) {
       const startState = EditorState.create({
@@ -155,11 +171,11 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           // Keep auto-brackets for parentheses but disable most other auto features
           javascript({ jsx: false }),
           // Hide gutters using CSS instead of direct configuration
-          EditorView.theme({ 
+          EditorView.theme({
             ".cm-gutters": { display: "none" },
-            ".cm-content": { marginLeft: "4px" }
+            ".cm-content": { marginLeft: "4px" },
           }),
-          theme === 'dark' ? oneDark : [],
+          theme === "dark" ? oneDark : [],
           highlightState,
           editorTheme,
           // Show spaces with visible dots
@@ -188,12 +204,12 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
               backgroundColor: "hsla(var(--editor-active-line) / 0.25)",
               borderRadius: "2px",
               pointerEvents: "none",
-              zIndex: "0"
+              zIndex: "0",
             },
             "@keyframes blink": {
               "0%, 100%": { opacity: 1 },
-              "50%": { opacity: 0.7 }
-            }
+              "50%": { opacity: 0.7 },
+            },
           }),
           // Add history support for undo/redo
           history(),
@@ -204,15 +220,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             { key: "Mod-z", run: undo, preventDefault: true },
             { key: "Mod-y", run: redo, preventDefault: true },
             { key: "Mod-Shift-z", run: redo, preventDefault: true },
-            // Explicit space handler to ensure spaces work correctly
-            { key: "Space", run: (view) => {
-              const transaction = view.state.update({
-                changes: { from: view.state.selection.main.from, to: view.state.selection.main.to, insert: " " },
-                selection: { anchor: view.state.selection.main.from + 1 }
-              });
-              view.dispatch(transaction);
-              return true;
-            }}
+            // No custom space handler needed - CodeMirror's default works correctly
           ]),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
@@ -221,13 +229,13 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           }),
         ],
       });
-      
+
       editorViewRef.current = new EditorView({
         state: startState,
         parent: editorRef.current,
       });
     }
-    
+
     // Cleanup on unmount
     return () => {
       if (editorViewRef.current) {
@@ -236,11 +244,11 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
       }
     };
   }, []);
-  
+
   // Update editor theme when theme changes
   useEffect(() => {
     if (!editorViewRef.current) return;
-    
+
     const newState = EditorState.create({
       doc: editorViewRef.current.state.doc,
       extensions: [
@@ -252,11 +260,11 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         // Keep auto-brackets for parentheses but disable most other auto features
         javascript({ jsx: false }),
         // Hide gutters using CSS instead of direct configuration
-        EditorView.theme({ 
+        EditorView.theme({
           ".cm-gutters": { display: "none" },
-          ".cm-content": { marginLeft: "4px" }
+          ".cm-content": { marginLeft: "4px" },
         }),
-        theme === 'dark' ? oneDark : [],
+        theme === "dark" ? oneDark : [],
         highlightState,
         // Show spaces with visible dots
         showSpaces,
@@ -284,12 +292,12 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
             backgroundColor: "hsla(var(--editor-active-line) / 0.25)",
             borderRadius: "2px",
             pointerEvents: "none",
-            zIndex: "0"
+            zIndex: "0",
           },
           "@keyframes blink": {
             "0%, 100%": { opacity: 1 },
-            "50%": { opacity: 0.7 }
-          }
+            "50%": { opacity: 0.7 },
+          },
         }),
         // Add history support for undo/redo
         history(),
@@ -300,15 +308,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           { key: "Mod-z", run: undo, preventDefault: true },
           { key: "Mod-y", run: redo, preventDefault: true },
           { key: "Mod-Shift-z", run: redo, preventDefault: true },
-          // Explicit space handler to ensure spaces work correctly
-          { key: "Space", run: (view) => {
-            const transaction = view.state.update({
-              changes: { from: view.state.selection.main.from, to: view.state.selection.main.to, insert: " " },
-              selection: { anchor: view.state.selection.main.from + 1 }
-            });
-            view.dispatch(transaction);
-            return true;
-          }}
+          // No custom space handler needed - CodeMirror's default works correctly
         ]),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
@@ -317,14 +317,14 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         }),
       ],
     });
-    
+
     editorViewRef.current.setState(newState);
   }, [theme]);
-  
+
   // Update editor content if it changes externally
   useEffect(() => {
     if (!editorViewRef.current) return;
-    
+
     const currentContent = editorViewRef.current.state.doc.toString();
     if (content !== currentContent) {
       const transaction = editorViewRef.current.state.update({
@@ -333,20 +333,20 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
       editorViewRef.current.dispatch(transaction);
     }
   }, [content]);
-  
+
   // Update highlighted line when it changes
   useEffect(() => {
     if (!editorViewRef.current) return;
-    
+
     editorViewRef.current.dispatch({
-      effects: highlightLineEffect.of(highlightedLine ?? null)
+      effects: highlightLineEffect.of(highlightedLine ?? null),
     });
   }, [highlightedLine]);
-  
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden h-full">
-      <div 
-        ref={editorRef} 
+      <div
+        ref={editorRef}
         className="editor-container flex-1 h-full overflow-auto p-4 focus:outline-none"
       />
     </div>

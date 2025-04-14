@@ -138,11 +138,11 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 
 .cm-line {
   min-height: 1.6rem;
-  height: 1.6rem;
+  /* height: 1.6rem; REMOVED */
   padding: 0 6px;
   margin: 0.15rem 0;
   transition: background-color 0.15s ease;
-  display: flex;
+  /* display: flex; REMOVED */
   align-items: center;
   position: relative;
 }
@@ -184,11 +184,11 @@ div[data-testid="workspace-editor-frame"] .traffic-lights {
 .editor-container .cm-line,
 .result-panel .result-line {
   min-height: 1.6rem;
-  height: 1.6rem;
+  /* height: 1.6rem; REMOVED */
   margin: 0.15rem 0;
   box-sizing: border-box;
   transition: all 0.2s ease;
-  display: flex;
+  /* display: flex; REMOVED */
   align-items: center;
 }
 
