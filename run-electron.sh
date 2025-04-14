@@ -1,15 +1,6 @@
 #!/bin/bash
-# Script to run the Electron app
+# Script to run Electron with a connection to the development server
+# Use this when you have the development server running
 
-# Exit on any error
-set -e
-
-# Check if setup is needed
-if [ "$1" == "--setup" ] || [ ! -d "electron/node_modules" ]; then
-  echo "Setting up Electron development environment..."
-  node electron/dev-setup.js
-  exit 0
-fi
-
-echo "Starting Electron app..."
-node electron/run-electron.js
+echo "Connecting to the development server..."
+cd electron && node connect-to-server.js
