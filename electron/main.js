@@ -26,7 +26,8 @@ function createWindow() {
   let startUrl;
   
   // Check if we're running in standalone mode (no web server)
-  const standaloneMode = process.env.ELECTRON_STANDALONE === 'true';
+  // This can be enabled through environment variable, command line arg, or by failing to connect to the server
+  const standaloneMode = process.env.ELECTRON_STANDALONE === 'true' || process.argv.includes('--standalone');
   
   // Log the current directories to help debug
   console.log('Current directory:', __dirname);
@@ -88,7 +89,47 @@ function createWindow() {
     }
   }
 
-  mainWindow.loadURL(startUrl);
+  // Try to load the URL, with fallback handling
+  mainWindow.loadURL(startUrl).catch(error => {
+    console.error('Failed to load URL:', error);
+    
+    // If we failed to connect to the server and not already in standalone mode,
+    // try to find local files and switch to standalone mode
+    if (!standaloneMode && startUrl.startsWith('http')) {
+      console.log('Server connection failed. Attempting to use local files...');
+      
+      // Check if we have local files
+      if (foundIndexPath) {
+        console.log('Found local files. Switching to standalone mode.');
+        const localUrl = url.format({
+          pathname: foundIndexPath,
+          protocol: 'file:',
+          slashes: true,
+        });
+        
+        // Try to load the local files
+        mainWindow.loadURL(localUrl).catch(localError => {
+          console.error('Failed to load local files:', localError);
+          mainWindow.webContents.openDevTools();
+        });
+      } else {
+        console.error('No local files found for fallback. Application may not work properly.');
+        // Show an error page
+        mainWindow.loadURL(`data:text/html,
+          <html>
+            <head><title>Connection Error</title></head>
+            <body>
+              <h1>Connection Error</h1>
+              <p>Could not connect to development server and no local files found.</p>
+              <p>Please ensure the development server is running or build the application.</p>
+              <button onclick="window.location.reload()">Retry</button>
+            </body>
+          </html>
+        `);
+        mainWindow.webContents.openDevTools();
+      }
+    }
+  });
 
   // Open DevTools in development mode
   if (isDev) {

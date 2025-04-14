@@ -1,111 +1,66 @@
-# Electron App for Scientific Calculator
+# Electron Setup for Calculator App
 
-This directory contains the Electron wrapper for the Scientific Calculator application, allowing it to run as a native desktop application.
+This directory contains all the configuration for running the calculator app as an Electron desktop application.
 
-## Setup for Local Development
+## Running Options
 
-To set up the Electron app for local development:
+You have several options for running the Electron app:
 
-1. Navigate to the `electron` directory:
-   ```
-   cd electron
-   ```
+### 1. With Development Server (recommended for development)
 
-2. Run the setup script:
-   ```
-   ./setup-local.sh
-   ```
-   
-   This will:
-   - Create a local package.json for the Electron app
-   - Install Electron and required dependencies
+This starts the development server and then launches Electron pointing to it:
 
-## Running the App Locally
-
-There are three ways to run the app:
-
-### Method 1: Start the web app and Electron separately
-
-1. Start the web application server (in the root directory):
-   ```
-   npm run dev
-   ```
-
-2. In a separate terminal, start the Electron app:
-   ```
-   cd electron
-   npm start
-   ```
-
-### Method 2: Use the development Electron mode
-
-For development with automatic connecting to the web server:
-
-```
-cd electron
+```bash
+# From project root
 npm run dev
-```
 
-This will start Electron in development mode, automatically connecting to the web server at port 5000.
-
-### Method 3: Use the standalone mode
-
-For quick testing without needing to run the web server:
-
-```
+# Then in another terminal:
 cd electron
-npm run standalone
+node run-electron.js
 ```
 
-This will:
-1. Build the web application if needed
-2. Start Electron in standalone mode using the built files
-3. No need for a separate web server to be running
+### 2. Pure Standalone Mode (no server, no build required)
 
-### Method 4: Two-step process for permission issues (Recommended for macOS/Linux)
+This runs Electron directly without needing a server or built files - best for quick testing:
 
-If you encounter permission issues with the standalone mode, use this two-step approach:
-
+```bash
+# From project root
+cd electron
+node start-standalone.js
 ```
-# Step 1: Build the app first (from project root)
+
+### 3. Standalone Mode with Built Files
+
+This uses pre-built files for a more production-like experience:
+
+```bash
+# From project root
 npm run build
-
-# Step 2: Run Electron with existing build (from electron directory)
 cd electron
-npm run simple
+node run-standalone.js
 ```
 
-This approach:
-1. Builds the application using your normal user permissions
-2. Uses the existing build files without attempting to rebuild
-3. Avoids permission errors by not trying to clean the dist folder
-4. Is the fastest way to start the app locally
+### 4. Full Production Build
 
-## Building the Electron App
+This creates a packaged Electron application:
 
-To build the Electron application for distribution:
-
-```
-cd electron
+```bash
+# From project root
 npm run build
+./build-electron.sh  # or build-electron.bat on Windows
 ```
-
-This will create distributable packages in the `release` directory.
 
 ## Troubleshooting
 
-- If you encounter errors about missing modules, run the setup script again.
-- If Electron can't connect to the web server, make sure the web server is running on port 5000.
-- For issues with building, check that electron-builder is installed correctly.
+- If you see port binding errors when starting the dev server, try running with the standalone mode instead.
+- On macOS, if you encounter permission issues when building, try running the commands with sudo or adjust permissions in your project directory.
+- If Electron can't connect to the server, check that the server is actually running and that there are no firewalls blocking access to port 5000.
 
-## File Structure
+## Environment Variables
 
-- `main.js` - Main Electron process
-- `preload.js` - Preload script for secure IPC communication
-- `start-electron.js` - Script for development mode with web server
-- `standalone.js` - Script for standalone mode (builds app if needed)
-- `run-standalone.js` - Script for using existing built files
-- `run-electron.js` - Script for running with the web server
-- `build-electron.js` - Script for building the distributable app
-- `setup-local.sh` - Script for setting up local development
-- `electron-builder.json` - Configuration for electron-builder
+- `ELECTRON_STANDALONE=true` - Forces Electron to run in standalone mode without a server
+- `ELECTRON_IS_DEV=1` - Forces development mode (opens DevTools)
+
+## Command Line Arguments 
+
+- `--standalone` - Alternative way to enable standalone mode

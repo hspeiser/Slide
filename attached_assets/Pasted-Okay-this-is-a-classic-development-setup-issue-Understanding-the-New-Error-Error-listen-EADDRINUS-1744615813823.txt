@@ -1,0 +1,134 @@
+Okay, this is a classic development setup issue!
+Understanding the New Error
+Error: listen EADDRINUSE: address already in use :::5000
+EADDRINUSE: This means "Address Already In Use". The operating system is telling Node.js that another process is already listening on port 5000, so your server script cannot bind to it.
+:::5000: Indicates the address (:: is IPv6 shorthand for "any address") and port (5000) that are occupied.
+The Cause: Running the Server Twice
+Looking at the full picture now, especially the dev:electron script you added:
+dev:electron Script: This script first runs npm run dev using spawn('npm', ['run', 'dev'], ...) to start your Express/Vite web server.
+waitOn: It then waits for http://localhost:5000 to become available.
+Electron Start: Once the server is confirmed running, it starts the Electron application using spawn(electronPath, [path.join(__dirname, 'main.js')], ...).
+main.js (Electron Main Process): Crucially, your main.js file also contains the entire Express server setup code within the (async () => { ... })(); block. When Electron starts main.js, this code executes again, trying to start another server on port 5000.
+This is why you get EADDRINUSE. The first server started by npm run dev (via the dev:electron script) successfully binds to port 5000. Then, the Electron main process starts and also tries to bind to port 5000, leading to the conflict.
+The Solution: Remove Server Logic from Electron Main (main.js)
+In your development setup (dev:electron), the server should run as a separate process, and Electron should simply connect to it. The Electron main process (main.js) should not try to start the server itself when running in this development mode.
+Steps to Fix:
+Modify main.js: Remove the Express server initialization and listening code from your Electron main process file (main.js). You only need the Electron-specific logic there (creating the window, handling IPC, etc.).
+Delete this entire block from main.js:
+// DELETE THIS ENTIRE BLOCK FROM main.js /////////////////////////
+import express, { type Request, Response, NextFunction } from "express";
+import { registerRoutes } from "./routes"; // Adjust path if needed
+import { setupVite, serveStatic, log } from "./vite"; // Adjust path if needed
+
+const app = express(); // electron's app is required above, rename this one perhaps? (though deleting is better)
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  const path = req.path;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
+  };
+
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
+
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
+      log(logLine);
+    }
+  });
+
+  next();
+});
+
+(async () => {
+  // NOTE: You likely need to adjust the paths './routes' and './vite'
+  // if main.js is not in the same directory as server/index.ts
+  const server = await registerRoutes(app); // Use the express app instance
+
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    res.status(status).json({ message });
+    // Consider not throwing here in Electron main, maybe just log
+    // throw err;
+    console.error("Server Error:", err);
+  });
+
+  // This logic needs to be adapted for Electron environment
+  // You might rely on isDev from 'electron-is-dev'
+  const electronIsDev = require('electron-is-dev');
+  if (electronIsDev) {
+     // Assuming setupVite works correctly when run from main.js context
+     // You'll need the 'server' object returned by registerRoutes
+    await setupVite(app, server);
+  } else {
+    serveStatic(app); // Needs correct path relative to main.js
+  }
+
+  const port = 5000;
+
+  if (process.platform === 'darwin') {
+    server.listen(port, () => {
+      log(`serving on port ${port} (macOS mode - Electron Main)`);
+    });
+  } else {
+    server.listen({
+      port,
+      host: '0.0.0.0',
+    }, () => {
+      log(`serving on 0.0.0.0:${port} (Electron Main)`);
+    });
+  }
+})();
+// END OF BLOCK TO DELETE ///////////////////////////////////////
+Use code with caution.
+JavaScript
+Keep Electron Logic in main.js: Ensure the rest of main.js remains, specifically:
+require('electron') imports
+require('path'), url, fs
+isDev check
+createWindow function (it correctly sets startUrl to http://127.0.0.1:5000 in dev mode)
+app.whenReady()
+Window lifecycle event handlers (window-all-closed, activate)
+IPC handlers (ipcMain.handle)
+Ensure server/index.ts is Correct: Your separate server file (server/index.ts) which is run by npm run dev should contain the Express setup and server.listen() call. The version you posted before adding the dev:electron script looks correct for this purpose (with the reusePort fix applied previously).
+Stop Any Lingering Processes: Before running again, make sure no old server processes are stuck using port 5000.
+macOS / Linux:
+lsof -i :5000
+# Find the PID (Process ID) in the output
+kill -9 <PID>
+Use code with caution.
+Bash
+Windows (Command Prompt):
+netstat -ano | findstr :5000
+# Find the PID listening on 5000
+taskkill /PID <PID> /F
+Use code with caution.
+Cmd
+Windows (PowerShell):
+Get-Process -Id (Get-NetTCPConnection -LocalPort 5000).OwningProcess | Stop-Process -Force
+Use code with caution.
+Powershell
+Run Again: Execute your development script (e.g., npm run dev:electron or whatever command runs the dev:electron.js script).
+Now, the flow should be:
+dev:electron.js starts npm run dev (which runs server/index.ts).
+server/index.ts starts the Express server and successfully binds to port 5000.
+dev:electron.js waits for the server.
+dev:electron.js starts Electron, running the modified main.js.
+main.js creates the window and loads http://127.0.0.1:5000, connecting to the already running server.
+No EADDRINUSE error occurs because only one process tries to bind the port.
