@@ -20,31 +20,56 @@ const highlightLineEffect = StateEffect.define<number | null>();
 const highlightState = StateField.define<DecorationSet>({
   create: () => Decoration.none,
   update(highlights, tr) {
-    highlights = Decoration.none;
+    // Start with an empty decoration set
+    let decorations = [];
     
+    // Check for highlight effects
     for (let effect of tr.effects) {
-      if (effect.is(highlightLineEffect) && effect.value !== null) {
-        const line = effect.value;
+      if (effect.is(highlightLineEffect)) {
+        // If null, don't highlight anything
+        if (effect.value === null) {
+          return Decoration.none;
+        }
+        
+        // Get the line number (1-based in the UI, but 0-based internally)
+        const lineNumber = effect.value;
+        
         // Make sure the line exists in the document
-        if (line >= 0 && line < tr.state.doc.lines) {
-          const lineObj = tr.state.doc.line(line + 1);
-          
-          // Use a line background decoration instead of a line decoration
-          // This allows clicking anywhere on the line to position the cursor
-          const deco = Decoration.line({
-            attributes: { class: "highlighted-line" },
-            // Important: Set this to false to allow clicks to pass through to the editor
-            inclusive: false
-          });
-          
-          highlights = highlights.update({
-            add: [deco.range(lineObj.from)]
-          });
+        if (lineNumber >= 0 && lineNumber < tr.state.doc.lines) {
+          try {
+            // Get the line from the doc
+            const line = tr.state.doc.line(lineNumber + 1);
+            
+            // Create a widget that appears behind text but doesn't interfere with clicking
+            // This is CRUCIAL - using a widget with no DOM element allows clicks to pass through
+            decorations.push(Decoration.widget({
+              widget: {
+                toDOM() {
+                  const span = document.createElement('span');
+                  span.className = 'error-line-marker';
+                  span.style.display = 'none'; // Make it invisible
+                  return span;
+                },
+                ignoreEvent() { return true; } // Ignore all events
+              },
+              side: -1
+            }).range(line.from));
+            
+            // Also add a line background decoration 
+            decorations.push(Decoration.line({
+              attributes: { 
+                class: "highlighted-line",
+                "data-line-number": String(lineNumber + 1)
+              }
+            }).range(line.from));
+          } catch (e) {
+            console.error("Error highlighting line:", e);
+          }
         }
       }
     }
     
-    return highlights;
+    return Decoration.set(decorations);
   },
   provide: (field) => EditorView.decorations.from(field)
 });
@@ -167,8 +192,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           EditorState.allowMultipleSelections.of(true),
           // Enable line wrapping, but use pre-wrap to handle spaces correctly
           EditorView.lineWrapping,
-          // Keep auto-brackets for parentheses but disable most other auto features
-          javascript({ jsx: false }),
+          // Completely remove language features that might cause auto-brackets/auto-parentheses
+          // javascript({ jsx: false }), - removed to prevent auto-parentheses
           // Hide gutters using CSS instead of direct configuration
           EditorView.theme({ 
             ".cm-gutters": { display: "none" },
@@ -256,8 +281,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         EditorState.allowMultipleSelections.of(true),
         // Enable line wrapping, but use pre-wrap to handle spaces correctly
         EditorView.lineWrapping,
-        // Keep auto-brackets for parentheses but disable most other auto features
-        javascript({ jsx: false }),
+        // Completely remove language features that might cause auto-brackets/auto-parentheses
+        // javascript({ jsx: false }), - removed to prevent auto-parentheses
         // Hide gutters using CSS instead of direct configuration
         EditorView.theme({ 
           ".cm-gutters": { display: "none" },
