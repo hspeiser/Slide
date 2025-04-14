@@ -13,11 +13,13 @@ const WELCOME_MESSAGE = `// Welcome to Slide
 // A powerful scientific calculator
 
 // QUICK TUTORIAL:
-// - Basic math: 2+3*4, (10-5)^2
-// - Variables: x = 10, y = 20, x+y
-// - Trig: sin(45 deg), tan(π/4 rad)
-// - Engineering: 10 || 20, parallel(5,10)
-// - Conversion: 100 km to miles, 212 °F to °C
+2+3*4 // Basic Math
+x = 10 // Variable Storage
+y = 20
+x+y // Use variables in calculations
+sin(45 deg) // Trig with angle units
+10 || 20 // Parallel resistors calculation
+100 km to miles // Unit conversion
 
 `;
 
