@@ -5,9 +5,9 @@
     "output": "release/"
   },
   "files": [
-    "dist/**/*",
+    "dist/public/**/*",
     "electron/**/*",
-    "node_modules/**/*"
+    "electron/node_modules/**/*"
   ],
   "mac": {
     "target": ["dmg", "zip"],

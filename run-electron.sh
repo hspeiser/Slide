@@ -5,4 +5,4 @@
 set -e
 
 echo "Starting Electron app..."
-node --loader=tsx electron/run-electron.js
+node electron/run-electron.js

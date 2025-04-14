@@ -1,13 +1,9 @@
 // Electron main process
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
-import path from 'path';
-import url from 'url';
-import isDev from 'electron-is-dev';
-import fs from 'fs';
-import { fileURLToPath } from 'url';
-
-// Get __dirname equivalent in ES modules
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const path = require('path');
+const url = require('url');
+const isDev = require('electron-is-dev');
+const fs = require('fs');
 
 // Keep a global reference of the window object to avoid garbage collection
 let mainWindow;

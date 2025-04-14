@@ -1,16 +1,13 @@
 // Script to run the Electron app in development mode
-import { spawn } from 'child_process';
-import waitOn from 'wait-on';
-import electron from 'electron';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const { spawn } = require('child_process');
+const waitOn = require('wait-on');
+const electron = require('electron');
+const path = require('path');
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Start the web server
+// Start the web server - use npm run dev instead of direct tsx call
 console.log('Starting the web server...');
-const serverProcess = spawn('node', ['--loader=tsx', '../server/index.ts'], {
-  env: { ...process.env, NODE_ENV: 'development' },
+const serverProcess = spawn('npm', ['run', 'dev'], {
+  env: { ...process.env },
   stdio: 'inherit',
   shell: true
 });

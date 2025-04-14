@@ -1,10 +1,6 @@
 // Script to build the Electron app
-import { spawn } from 'child_process';
-import { exec } from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const { spawn, exec } = require('child_process');
+const path = require('path');
 
 // Build the web app first
 console.log('Building the web application...');

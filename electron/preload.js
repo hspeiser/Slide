@@ -2,7 +2,7 @@
 // This is executed in the renderer process before the web page loads
 // Used to safely expose Electron and Node.js APIs to the renderer
 
-import { contextBridge, ipcRenderer } from 'electron';
+const { contextBridge, ipcRenderer } = require('electron');
 
 // Expose protected methods that allow the renderer process to use
 // IPC communication without exposing the entire Electron API

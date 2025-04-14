@@ -5,4 +5,4 @@
 set -e
 
 echo "Building Electron app..."
-node --loader=tsx electron/build-electron.js
+node electron/build-electron.js
