@@ -58,19 +58,32 @@ npm run build
 
 ### macOS Compatibility Issues
 
-If you encounter crashes or strange behavior on macOS (especially newer versions like Ventura or Sonoma), try using the macOS compatibility mode:
+If you encounter crashes or strange behavior on macOS (especially newer versions like Ventura or Sonoma), try using the simplified macOS compatibility mode:
 
 ```bash
 # From project root
 ./run-electron-macos.sh
 ```
 
-This mode disables GPU acceleration and applies several fixes specifically for modern macOS systems. Common issues fixed by compatibility mode:
+This mode disables hardware acceleration via the Electron API rather than using multiple command-line flags, which can cause conflicts and Mach port rendezvous failures.
+
+#### What the Simplified Approach Fixes
 
 - Application crashes on startup (SIGTRAP errors)
-- White or black screen instead of application content
-- Visual glitches or rendering issues
-- Window transparency problems
+- Mach port rendezvous failures (`ERROR:mach_port_rendezvous.cc` messages)
+- App termination due to missing parent process
+- Window rendering issues
+
+#### How It Works
+
+The simplified compatibility approach:
+
+1. Disables hardware acceleration through a single official API call (`app.disableHardwareAcceleration()`)
+2. Avoids using multiple conflicting GPU flags
+3. Uses a simplified window configuration with no transparency or vibrancy effects
+4. Eliminates the sandbox modifications that can cause IPC issues
+
+Unlike the previous approach that used multiple flags, this method targets the specific issue with macOS 15.3+ and Electron by using only the officially supported method to disable GPU acceleration.
 
 ## Environment Variables
 

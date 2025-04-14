@@ -1,10 +1,11 @@
 #!/bin/bash
-# Special script for modern macOS systems with compatibility fixes
-# This script is specifically designed for macOS 15.3+ (Ventura, Sonoma)
-# where the standard Electron app might crash with SIGTRAP errors
+# Simplified compatibility script for macOS 15.3+ (Ventura, Sonoma)
+# This script launches Electron with minimal configuration to avoid
+# conflicts between flags that may cause Mach port rendezvous failures
 
-echo "Starting Electron with macOS compatibility mode..."
-echo "This mode uses special settings for macOS 15.3+ compatibility"
+echo "Starting Electron with simplified macOS compatibility mode..."
+echo "This uses hardware acceleration disabling via API instead of flags"
+echo "to fix crashes on macOS 15.3+"
 
 # Ensure we're in the project root
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -13,5 +14,6 @@ cd "$SCRIPT_DIR"
 # Make sure the compatibility script is executable
 chmod +x electron/run-macos-compat.js
 
-# Launch with compatibility mode
+# Launch with minimal compatible settings
+# The main fixes now happen in macos-app-config.js
 cd electron && node run-macos-compat.js

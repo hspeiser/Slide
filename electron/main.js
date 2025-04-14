@@ -47,22 +47,10 @@ function createWindow() {
     // These settings are designed to avoid crashes on modern macOS
     const macOSSettings = getMacOSWindowSettings();
     
-    // Special handling for versions with crash issues
-    if (process.env.DISABLE_GPU === 'true') {
-      // Use simplified non-transparent settings for better compatibility
-      Object.assign(windowSettings, {
-        transparent: false,
-        backgroundColor: '#2e2c29', // Dark background color
-        titleBarStyle: 'default',   // Standard title bar
-        vibrancy: undefined,        // Disable vibrancy effects
-        roundedCorners: false       // Disable rounded corners
-      });
-      console.log('Using simplified macOS window settings for compatibility');
-    } else {
-      // Use normal macOS settings
-      Object.assign(windowSettings, macOSSettings);
-      console.log('Using standard macOS window settings');
-    }
+    // Always use our simplified macOS settings since hardware acceleration
+    // is disabled via app.disableHardwareAcceleration()
+    Object.assign(windowSettings, macOSSettings);
+    console.log('Using macOS window settings with hardware acceleration disabled');
   }
   
   // Create the browser window with appropriate settings

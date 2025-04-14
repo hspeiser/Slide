@@ -7,29 +7,15 @@
 function configureForMacOS(app) {
   // Must be called before app is ready
   if (!app.isReady()) {
-    // Basic GPU settings
-    app.commandLine.appendSwitch('disable-gpu-compositing');
-    app.commandLine.appendSwitch('disable-gpu');
+    console.log('Applying macOS-specific app configuration...');
     
-    // Disable hardware acceleration - helps with crashes on macOS 15+
+    // Primary way to disable GPU - this is the main fix for macOS 15.3+ crashes
+    // Use ONLY this method to avoid conflicts
     app.disableHardwareAcceleration();
+    console.log('Hardware acceleration disabled via API');
     
-    // Disable the remote module which can cause issues
-    app.commandLine.appendSwitch('disable-remote-module');
-    
-    // Set the app category for macOS
+    // Set app identity
     app.setAppUserModelId('com.electron.scientific-calculator');
-    
-    // Additional V8 options to prevent crashes
-    app.commandLine.appendSwitch('js-flags', '--max-old-space-size=4096');
-    
-    // Prevent issues with Swift/Objective-C interop
-    app.commandLine.appendSwitch('disable-features', 'OutOfBlinkCors');
-    
-    // Check if we're running a newer Electron version
-    if (parseInt(process.versions.electron) >= 28) {
-      app.commandLine.appendSwitch('enable-macos-layers-ui-compositing');
-    }
     
     console.log('Applied macOS-specific app configuration');
   } else {
@@ -40,22 +26,18 @@ function configureForMacOS(app) {
 // BrowserWindow settings for macOS
 function getMacOSWindowSettings() {
   return {
-    titleBarStyle: 'hiddenInset',       // Better style on macOS 
-    vibrancy: 'under-window',           // Modern macOS look
-    backgroundColor: '#00000000',       // Transparent background 
-    roundedCorners: true,               // Modern macOS rounded corners
-    visualEffectState: 'active',        // Keep visual effects active
-    trafficLightPosition: { x: 10, y: 10 }, // Fix traffic light positioning
-    // Additional settings for stability
-    hasShadow: false,                   // Disable window shadow
-    transparent: false,                 // Disable transparency for now
-    fullscreenable: false,              // Disable fullscreen to avoid issues
-    webPreferences: {
-      contextIsolation: true,           // Security best practice 
-      enableRemoteModule: false,        // Disable remote for stability
-      experimentalFeatures: false,      // Disable experimental features
-      nodeIntegrationInWorker: false    // Disable node in workers
-    }
+    // Use simplified settings for better compatibility with HW acceleration disabled
+    titleBarStyle: 'default',           // Standard title bar
+    backgroundColor: '#2e2c29',         // Solid dark background color
+    vibrancy: undefined,                // Disable vibrancy effects
+    
+    // Basic window properties
+    roundedCorners: true,               // Keep macOS rounded corners
+    
+    // Limit potentially problematic effects
+    transparent: false,                 // Disable transparency
+    hasShadow: true,                    // Re-enable standard window shadow
+    fullscreenable: true                // Re-enable standard fullscreen
   };
 }
 
