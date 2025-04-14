@@ -6,6 +6,9 @@ const fs = require('fs');
 
 let mainWindow;
 
+// // Disable hardware acceleration to potentially avoid crashes
+// app.disableHardwareAcceleration();
+
 function createWindow() {
   console.log('Creating window with minimal settings...');
   
@@ -14,6 +17,7 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
+      // sandbox: false, // ! DANGER: Re-enable sandbox
       contextIsolation: true,
       preload: path.join(__dirname, 'electron', 'preload.js')
     }

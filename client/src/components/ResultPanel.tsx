@@ -1,12 +1,14 @@
 import { useRef, useEffect, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
+import { LineWrapInfo } from './EditorPanel';
 
 interface ResultPanelProps {
   results: any[];
   onHighlightLine?: (index: number | null) => void;
+  wrapInfo?: LineWrapInfo;
 }
 
-const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
+const ResultPanel = ({ results, onHighlightLine, wrapInfo = {} }: ResultPanelProps) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -101,16 +103,17 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
     });
   };
   
-  // Calculate if a line will wrap based on length
-  const isMultiline = (text: string): boolean => {
-    return text.length > 30; // This is a simple heuristic, you might need to refine
-  };
-  
   return (
     <div className="w-full h-full flex flex-col overflow-hidden result-panel">
       <div 
         ref={panelRef}
         className="flex-1 overflow-auto h-full"
+        style={{
+          fontFamily: "'Fira Code', 'JetBrains Mono', 'Roboto Mono', monospace",
+          fontSize: "15px",
+          lineHeight: "1.6",
+          letterSpacing: "0.3px",
+        }}
       >
         <div className="p-4 h-full">
           {/* Empty line at the top to match CodeMirror spacing */}
@@ -118,24 +121,29 @@ const ResultPanel = ({ results, onHighlightLine }: ResultPanelProps) => {
           
           {results.map((result, index) => {
             const displayValue = getDisplayValue(result);
-            const willWrap = displayValue ? isMultiline(displayValue) : false;
             
-            // Always create an empty div to maintain alignment
+            // Determine the height based on wrapInfo from the editor
+            const visualLines = wrapInfo[index] || 1; // Default to 1 line if no info
+            const minHeight = `${visualLines * 1.6}rem`; // Calculate height based on visual lines (1.6rem is default line height)
+            
             return (
               <div 
                 key={index} 
-                className={`result-line ${willWrap ? 'min-h-[3.2rem] h-auto' : 'min-h-[1.6rem] h-[1.6rem]'} 
-                  flex justify-end items-center overflow-x-auto px-2 ${
+                className={`result-line flex justify-end items-start overflow-x-auto px-2 ${
                   copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
                 }`}
-                style={{ paddingTop: '0.15rem', paddingBottom: '0.15rem' }}
+                style={{
+                   minHeight: minHeight, // Set dynamic min-height
+                   paddingTop: '0.15rem', // Match editor line padding
+                   paddingBottom: '0.15rem' // Match editor line padding
+                 }}
               >
                 {displayValue && (
                   <span 
                     className={`result-value ml-auto px-2 py-0.5 rounded-md cursor-pointer
                               text-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result))] 
                               hover:text-[hsl(var(--editor-bg))] transition-all duration-200
-                              ${willWrap ? 'multiline whitespace-pre-wrap' : 'whitespace-nowrap'}`}
+                              whitespace-nowrap`} // Always nowrap result, container handles height
                     onClick={() => copyToClipboard(result, index)}
                     onMouseEnter={() => onHighlightLine?.(index)}
                     onMouseLeave={() => onHighlightLine?.(null)}

@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import CalculatorHeader from "@/components/CalculatorHeader";
 import CalculatorFooter from "@/components/CalculatorFooter";
-import EditorPanel from "@/components/EditorPanel";
+import EditorPanel, { LineWrapInfo } from "@/components/EditorPanel";
 import ResultPanel from "@/components/ResultPanel";
 import HelpModal from "@/components/HelpModal";
 import SettingsModal from "@/components/SettingsModal";
@@ -35,6 +35,7 @@ const Calculator = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [decimalPlaces, setDecimalPlaces] = useState(3);
   const [highlightedLine, setHighlightedLine] = useState<number | null>(null);
+  const [wrapInfo, setWrapInfo] = useState<LineWrapInfo>({});
 
   // Calculate results whenever content, angle mode, or decimal places change
   useEffect(() => {
@@ -355,6 +356,7 @@ const Calculator = () => {
               content={content}
               onChange={setContent}
               highlightedLine={highlightedLine}
+              onWrapInfoChange={setWrapInfo}
             />
           </div>
 
@@ -363,6 +365,7 @@ const Calculator = () => {
             <ResultPanel
               results={results}
               onHighlightLine={setHighlightedLine}
+              wrapInfo={wrapInfo}
             />
           </div>
         </div>

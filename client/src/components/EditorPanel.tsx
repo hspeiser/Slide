@@ -5,6 +5,7 @@ import {
   Decoration,
   DecorationSet,
   highlightSpecialChars,
+  ViewUpdate,
 } from "@codemirror/view";
 import { EditorState, StateField, StateEffect } from "@codemirror/state";
 import { basicSetup } from "codemirror";
@@ -19,10 +20,16 @@ import {
 } from "@codemirror/commands";
 import { useTheme } from "./ui/theme-provider";
 
+// Type for wrap information (line index -> number of visual lines)
+export interface LineWrapInfo {
+  [lineIndex: number]: number;
+}
+
 interface EditorPanelProps {
   content: string;
   onChange: (value: string) => void;
   highlightedLine?: number | null;
+  onWrapInfoChange: (wrapInfo: LineWrapInfo) => void;
 }
 
 // Define a highlight line effect
@@ -131,10 +138,61 @@ const EditorPanel = ({
   content,
   onChange,
   highlightedLine,
+  onWrapInfoChange,
 }: EditorPanelProps) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const editorViewRef = useRef<EditorView | null>(null);
   const { theme } = useTheme();
+  const lastReportedWrapInfo = useRef<LineWrapInfo>({});
+
+  // Function to measure and report line heights/wraps
+  const measureAndReportLineHeights = (view: EditorView) => {
+    const wrapInfo: LineWrapInfo = {};
+    let changed = false;
+    const currentLines = view.state.doc.lines;
+
+    if (currentLines === 0) {
+        if (Object.keys(lastReportedWrapInfo.current).length !== 0) {
+            changed = true; // Changed if previously had info but now empty
+        } else {
+             return; // No lines and no previous info, nothing to do
+        }
+    }
+    else {
+        const defaultLineHeight = view.defaultLineHeight;
+        if (defaultLineHeight <= 0) return; // Avoid division by zero if editor not ready
+
+        for (let i = 1; i <= currentLines; i++) {
+          try {
+            const lineBlock = view.lineBlockAt(view.state.doc.line(i).from);
+            // Calculate visual lines, ensuring at least 1
+            const visualLines = Math.max(1, Math.round(lineBlock.height / defaultLineHeight));
+            wrapInfo[i - 1] = visualLines; // Store 0-indexed
+            if (lastReportedWrapInfo.current[i - 1] !== visualLines) {
+              changed = true;
+            }
+          } catch (e) {
+            // Ignore errors if lineBlockAt fails transiently
+            // console.warn(`Error getting line block for line ${i}:`, e);
+            wrapInfo[i - 1] = 1; // Default to 1 line on error
+             if (lastReportedWrapInfo.current[i - 1] !== 1) {
+               changed = true;
+             }
+          }
+        }
+        // Check if the number of lines changed
+        if (Object.keys(lastReportedWrapInfo.current).length !== currentLines) {
+          changed = true;
+        }
+    }
+
+
+    if (changed) {
+    //   console.log("Reporting wrap info:", wrapInfo); // Debugging
+      onWrapInfoChange(wrapInfo);
+      lastReportedWrapInfo.current = wrapInfo; // Update cache
+    }
+  };
 
   // Auto-focus effect - runs once on mount
   useEffect(() => {
@@ -222,9 +280,14 @@ const EditorPanel = ({
             { key: "Mod-Shift-z", run: redo, preventDefault: true },
             // No custom space handler needed - CodeMirror's default works correctly
           ]),
-          EditorView.updateListener.of((update) => {
+          EditorView.updateListener.of((update: ViewUpdate) => {
             if (update.docChanged) {
               onChange(update.state.doc.toString());
+            }
+            
+            // Measure and report heights if doc, geometry, or viewport changed
+            if (update.docChanged || update.geometryChanged || update.viewportChanged) {
+              measureAndReportLineHeights(update.view);
             }
           }),
         ],
@@ -233,6 +296,13 @@ const EditorPanel = ({
       editorViewRef.current = new EditorView({
         state: startState,
         parent: editorRef.current,
+      });
+
+      // Initial measurement after editor is created
+      requestAnimationFrame(() => {
+          if (editorViewRef.current) {
+            measureAndReportLineHeights(editorViewRef.current);
+          }
       });
     }
 
@@ -310,9 +380,14 @@ const EditorPanel = ({
           { key: "Mod-Shift-z", run: redo, preventDefault: true },
           // No custom space handler needed - CodeMirror's default works correctly
         ]),
-        EditorView.updateListener.of((update) => {
+        EditorView.updateListener.of((update: ViewUpdate) => {
           if (update.docChanged) {
             onChange(update.state.doc.toString());
+          }
+          
+          // Measure and report heights if doc, geometry, or viewport changed
+          if (update.docChanged || update.geometryChanged || update.viewportChanged) {
+            measureAndReportLineHeights(update.view);
           }
         }),
       ],
@@ -331,6 +406,12 @@ const EditorPanel = ({
         changes: { from: 0, to: currentContent.length, insert: content },
       });
       editorViewRef.current.dispatch(transaction);
+      // Trigger measurement after external update
+      requestAnimationFrame(() => {
+        if (editorViewRef.current) {
+          measureAndReportLineHeights(editorViewRef.current);
+        }
+      });
     }
   }, [content]);
 
