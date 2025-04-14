@@ -1,8 +1,13 @@
 // Electron main process
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import url from 'url';
 import isDev from 'electron-is-dev';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// Get __dirname equivalent in ES modules
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Keep a global reference of the window object to avoid garbage collection
 let mainWindow;
@@ -13,9 +18,9 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      // preload: path.join(__dirname, 'preload.js')
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
     },
     title: 'Scientific Calculator',
     icon: path.join(__dirname, 'icon.png'),
@@ -60,5 +65,38 @@ app.on('activate', () => {
   }
 });
 
-// Handle IPC messages here if needed
-// ipcMain.on('some-event', (event, arg) => {...});
+// Handle IPC Messages
+
+// Save File Dialog
+ipcMain.handle('save-file', async (event, content, defaultPath) => {
+  try {
+    const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+      title: 'Save Calculation Results',
+      defaultPath: defaultPath || 'slide-export.txt',
+      filters: [
+        { name: 'Text Files', extensions: ['txt'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
+    
+    if (!canceled && filePath) {
+      fs.writeFileSync(filePath, content);
+      return { success: true, filePath };
+    } else {
+      return { success: false, reason: 'cancelled' };
+    }
+  } catch (error) {
+    console.error('Error saving file:', error);
+    return { success: false, reason: 'error', message: error.message };
+  }
+});
+
+// Get app version
+ipcMain.handle('get-version', () => {
+  return app.getVersion();
+});
+
+// Get app path
+ipcMain.handle('get-app-path', () => {
+  return app.getAppPath();
+});

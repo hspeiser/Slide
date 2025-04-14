@@ -254,7 +254,7 @@ const Calculator = () => {
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     // Create a text file with content and results
     const lines = content.split("\n");
     const exportContent = lines
@@ -267,16 +267,32 @@ const Calculator = () => {
     if (isElectron) {
       // In Electron, we can use the dialog API for a better native experience
       try {
-        // We'll use window.electron to communicate with the main process
-        // This would need to be properly set up in a preload script
+        // Use the exposed electronAPI from preload script
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const defaultPath = `slide-export-${timestamp}.txt`;
         
-        // For demonstration - in actual implementation we'd use ipcRenderer
-        // or preload to access Electron's dialog API
-        console.log('Saving file using Electron APIs - defaultPath:', defaultPath);
+        // Check if we have access to the Electron API
+        if (window.electronAPI) {
+          // Call the saveFile method exposed by our preload script
+          const result = await window.electronAPI.saveFile(
+            exportContent, 
+            defaultPath
+          );
+          
+          if (result && result.success) {
+            console.log('File saved successfully to:', result.filePath);
+            return; // Exit early as the file has been saved
+          } else if (result && !result.success && result.reason === 'cancelled') {
+            console.log('File save cancelled by user');
+            return; // User cancelled, no need to fallback
+          }
+          // If we reach here, something went wrong with the Electron save
+          console.warn('Electron save failed, falling back to browser download');
+        } else {
+          console.warn('Running in Electron but API not available, falling back to browser download');
+        }
         
-        // For now, fallback to the web method even in Electron
+        // Fallback to browser download if Electron API is not available
         const blob = new Blob([exportContent], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -288,6 +304,17 @@ const Calculator = () => {
         URL.revokeObjectURL(url);
       } catch (err) {
         console.error('Error using Electron save dialog:', err);
+        
+        // Fallback to browser download method if Electron save fails
+        const blob = new Blob([exportContent], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "slide-export.txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
       }
     } else {
       // Web browser download
