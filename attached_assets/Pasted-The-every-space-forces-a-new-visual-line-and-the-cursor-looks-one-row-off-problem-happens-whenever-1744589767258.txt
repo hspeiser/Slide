@@ -1,0 +1,56 @@
+The “every space forces a new visual line and the cursor looks one row off” problem happens whenever a CodeMirror line is allowed to wrap in the DOM while the editor still thinks it’s a single, un‑wrapped line.
+Two things in your theme are still forcing that wrap:
+
+culprit	why it breaks hit‑testing
+white-space: pre-wrap on .cm-content (and sometimes on .cm-line)	lets the browser wrap at every space; CM expects white-space: pre
+word-break / overflow-wrap: normal on .cm-content	allows additional automatic breaks
+The minimal, reliable fix
+Revert the white‑space rules to CodeMirror’s default (pre).
+
+Remove word‑break / overflow‑wrap so the browser never inserts its own line breaks.
+
+Keep each .cm-line a plain block element (no display:flex, no margins).
+
+diff
+Copy
+Edit
+const editorTheme = EditorView.theme({
+  ".cm-line": {
+     textShadow: "0 0 0.5px hsla(var(--editor-text) / 0.1)",
+     minHeight: "1.6rem",
+-    /* display: "flex",                 ← remove  */
+-    /* whiteSpace: "pre-wrap",          ← remove  */
+     cursor: "text",
+     position: "relative",
+     zIndex: "5"
+  },
+
+  ".cm-content": {
+     padding: "4px 0",
+-    whiteSpace: "pre-wrap",            /* REMOVE */
+-    wordBreak: "normal",               /* REMOVE */
+-    overflowWrap: "normal"             /* REMOVE */
++    /* leave CodeMirror’s default: white-space: pre; no word‑break rules */
+  }
+});
+If you still want soft‑wrapping
+Use CodeMirror’s own EditorView.lineWrapping extension (you already include it).
+That extension changes the editor’s internal measurement so clicks, selections, and cursor motion keep working even when a long logical line wraps.
+
+About showing spaces
+Your custom highlightSpecialChars({ addSpecialChars: /\s/ }) inserts a <span> for every space, which also encourages the browser to wrap unexpectedly. If you don’t need visible normal spaces, switch back to the default:
+
+js
+Copy
+Edit
+const showSpaces = highlightSpecialChars();   // shows only TAB and NBSP
+(Or restrict it to \u00A0 if you really want NBSP glyphs.)
+
+After applying the patch
+Hitting Space no longer creates phantom visual lines.
+
+The caret stays on the correct row and click‑to‑move works everywhere.
+
+Undo/redo, selections, and highlighted lines behave normally.
+
+Save, hot‑reload, and the editor should feel solid again.

@@ -73,8 +73,6 @@ const editorTheme = EditorView.theme({
     minHeight: "1.6rem",
     paddingTop: "0.15rem",
     paddingBottom: "0.15rem",
-    // Leave the default display:block and white-space:pre
-    // CodeMirror's own line-wrapping extension handles wrapping safely
     cursor: "text",     // Always show text cursor for better UX
     position: "relative",
     zIndex: "5"
@@ -152,7 +150,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           // Custom minimal setup with only what we need
           EditorState.tabSize.of(2),
           EditorState.allowMultipleSelections.of(true),
-          // Enable line wrapping, but use pre-wrap to handle spaces correctly
+          // Enable CodeMirror's own line wrapping - it properly handles hit testing and cursor positioning
           EditorView.lineWrapping,
           // Keep auto-brackets for parentheses but disable most other auto features
           javascript({ jsx: false }),
@@ -241,7 +239,7 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         // Custom minimal setup with only what we need
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
-        // Enable line wrapping, but use pre-wrap to handle spaces correctly
+        // Enable CodeMirror's own line wrapping - it properly handles hit testing and cursor positioning
         EditorView.lineWrapping,
         // Keep auto-brackets for parentheses but disable most other auto features
         javascript({ jsx: false }),
