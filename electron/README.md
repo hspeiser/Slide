@@ -56,6 +56,22 @@ npm run build
 - On macOS, if you encounter permission issues when building, try running the commands with sudo or adjust permissions in your project directory.
 - If Electron can't connect to the server, check that the server is actually running and that there are no firewalls blocking access to port 5000.
 
+### macOS Compatibility Issues
+
+If you encounter crashes or strange behavior on macOS (especially newer versions like Ventura or Sonoma), try using the macOS compatibility mode:
+
+```bash
+# From project root
+./run-electron-macos.sh
+```
+
+This mode disables GPU acceleration and applies several fixes specifically for modern macOS systems. Common issues fixed by compatibility mode:
+
+- Application crashes on startup (SIGTRAP errors)
+- White or black screen instead of application content
+- Visual glitches or rendering issues
+- Window transparency problems
+
 ## Environment Variables
 
 - `ELECTRON_STANDALONE=true` - Forces Electron to run in standalone mode without a server

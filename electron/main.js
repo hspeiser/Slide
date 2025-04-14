@@ -9,7 +9,23 @@ const fs = require('fs');
 let mainWindow;
 
 function createWindow() {
-  // Create the browser window
+  // Set macOS-specific app settings for compatibility with newer versions
+  if (process.platform === 'darwin') {
+    // Prevent issues with translucency on modern macOS
+    app.commandLine.appendSwitch('disable-gpu-compositing');
+    
+    // Add transparency settings that help with newer macOS versions
+    if (parseInt(process.versions.electron) >= 28) {
+      app.commandLine.appendSwitch('enable-macos-layers-ui-compositing');
+    }
+    
+    // Disable hardware acceleration if we detect issues
+    if (process.env.DISABLE_GPU === 'true') {
+      app.disableHardwareAcceleration();
+    }
+  }
+
+  // Create the browser window with platform-specific settings
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -20,6 +36,15 @@ function createWindow() {
     },
     title: 'Scientific Calculator',
     icon: path.join(__dirname, 'icon.png'),
+    // macOS-specific settings
+    ...(process.platform === 'darwin' ? {
+      titleBarStyle: 'hiddenInset', // Better style on macOS
+      vibrancy: 'under-window',     // Modern macOS look
+      backgroundColor: '#00000000', // Transparent background
+      roundedCorners: true,         // Modern macOS rounded corners
+      visualEffectState: 'active',  // Keep visual effects active
+      trafficLightPosition: { x: 10, y: 10 } // Fix traffic light positioning
+    } : {})
   });
 
   // Load the app
