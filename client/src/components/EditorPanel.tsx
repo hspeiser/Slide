@@ -75,10 +75,12 @@ const editorTheme = EditorView.theme({
     paddingBottom: "0.15rem", 
     display: "flex",
     alignItems: "center",
-    whiteSpace: "pre",  // Preserve spaces exactly as typed
+    whiteSpace: "pre-wrap",  // Use pre-wrap for better space handling
     cursor: "text",     // Always show text cursor for better UX
     position: "relative",
-    zIndex: "5"
+    zIndex: "5", 
+    wordBreak: "normal",
+    overflowWrap: "normal"
   },
   // Add a subtle hover effect to make lines more interactive
   ".cm-line:hover": {
@@ -108,7 +110,9 @@ const editorTheme = EditorView.theme({
   // Make content area match the right panel with proper overflow handling
   ".cm-content": {
     padding: "4px 0",
-    whiteSpace: "nowrap"
+    whiteSpace: "pre-wrap",  // Use pre-wrap to handle spaces better
+    wordBreak: "normal",
+    overflowWrap: "normal"
   },
   // Make scrollbar match design and handle horizontal overflow
   ".cm-scroller": {
@@ -161,8 +165,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
           // Custom minimal setup with only what we need
           EditorState.tabSize.of(2),
           EditorState.allowMultipleSelections.of(true),
-          // Disable automatic line wrapping to prevent spaces causing new lines
-          // EditorView.lineWrapping,
+          // Enable line wrapping, but use pre-wrap to handle spaces correctly
+          EditorView.lineWrapping,
           // Keep auto-brackets for parentheses but disable most other auto features
           javascript({ jsx: false }),
           // Hide gutters using CSS instead of direct configuration
@@ -250,8 +254,8 @@ const EditorPanel = ({ content, onChange, highlightedLine }: EditorPanelProps) =
         // Custom minimal setup with only what we need
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
-        // Disable automatic line wrapping to prevent spaces causing new lines
-        // EditorView.lineWrapping,
+        // Enable line wrapping, but use pre-wrap to handle spaces correctly
+        EditorView.lineWrapping,
         // Keep auto-brackets for parentheses but disable most other auto features
         javascript({ jsx: false }),
         // Hide gutters using CSS instead of direct configuration
