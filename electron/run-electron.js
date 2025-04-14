@@ -38,7 +38,7 @@ const serverProcess = spawn('npm', ['run', 'dev'], {
 
 // Wait for the web server to be available
 waitOn({
-  resources: ['http://localhost:5000'],
+  resources: ['http://127.0.0.1:5000'],
   timeout: 30000,
 })
   .then(() => {

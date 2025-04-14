@@ -75,8 +75,8 @@ function createWindow() {
       console.log('Running in production mode with local files');
     } else {
       // Fallback to development server
-      startUrl = 'http://localhost:5000';
-      console.log('No build found, falling back to development server');
+      startUrl = 'http://127.0.0.1:5000';
+      console.log('No build found, falling back to development server at', startUrl);
     }
   }
 
