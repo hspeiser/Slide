@@ -61,14 +61,21 @@ app.use((req, res, next) => {
   // It is the only port that is not firewalled.
   const port = 5000;
   
-  // For macOS, use 127.0.0.1 instead of 0.0.0.0 to avoid ENOTSUP errors
-  const host = process.platform === 'darwin' ? '127.0.0.1' : '0.0.0.0';
-  
-  server.listen({
-    port,
-    host,
-    reusePort: true,
-  }, () => {
-    log(`serving on ${host}:${port}`);
-  });
+  // Try different binding approaches for macOS
+  // Some macOS versions have issues with specific binding addresses
+  if (process.platform === 'darwin') {
+    // For macOS, just specify the port without a host binding
+    server.listen(port, () => {
+      log(`serving on port ${port} (macOS mode)`);
+    });
+  } else {
+    // For other platforms, use the 0.0.0.0 binding
+    server.listen({
+      port,
+      host: '0.0.0.0',
+      reusePort: true,
+    }, () => {
+      log(`serving on 0.0.0.0:${port}`);
+    });
+  }
 })();

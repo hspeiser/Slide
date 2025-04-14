@@ -60,9 +60,17 @@ function createWindow() {
       });
       console.log('Running in standalone development mode');
     } else {
-      // Use the development server
-      startUrl = 'http://127.0.0.1:5000';
+      // Use the development server - try multiple possible addresses
+      const possibleServers = [
+        'http://127.0.0.1:5000',
+        'http://localhost:5000',
+        'http://[::1]:5000'
+      ];
+      
+      // We'll start with the first server and let the app try connecting
+      startUrl = possibleServers[0];
       console.log('Running with development server at', startUrl);
+      console.log('If connection fails, try these alternatives:', possibleServers.slice(1).join(', '));
     }
   } else {
     // Production mode always uses built files
