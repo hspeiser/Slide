@@ -73,7 +73,7 @@ app.use((req, res, next) => {
     server.listen({
       port,
       host: '0.0.0.0',
-      reusePort: true,
+      // reusePort: true,  // Removed as it causes ENOTSUP errors on some platforms
     }, () => {
       log(`serving on 0.0.0.0:${port}`);
     });

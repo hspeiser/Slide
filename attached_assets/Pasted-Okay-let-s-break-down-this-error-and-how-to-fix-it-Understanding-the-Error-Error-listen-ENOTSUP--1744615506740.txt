@@ -1,0 +1,49 @@
+Okay, let's break down this error and how to fix it.
+Understanding the Error
+Error: listen ENOTSUP: operation not supported on socket 127.0.0.1:5000
+ENOTSUP: This kernel error code means "Operation not supported".
+listen: The error occurs when the Node.js net.Server tries to start listening for incoming connections using the listen() system call.
+operation not supported on socket: The specific combination of options used when trying to listen (like the host address, port, and potentially other socket options) is not supported by your operating system or Node.js environment for the specified address 127.0.0.1.
+The Likely Culprit: reusePort: true
+The most common reason for ENOTSUP during server.listen is the use of the reusePort: true option. This option corresponds to the SO_REUSEPORT socket option at the OS level.
+Purpose: SO_REUSEPORT allows multiple sockets (processes) to bind to the exact same IP address and port combination. This is often used for load balancing across multiple Node.js processes (like with the cluster module).
+Problem: Support for SO_REUSEPORT varies significantly across operating systems (Linux, macOS, Windows) and even different versions. It might not be supported, or it might behave differently, especially when combined with specific binding addresses like 0.0.0.0 or 127.0.0.1. Your specific OS/environment combination seems not to support it with the 0.0.0.0 binding specified in your non-macOS code block.
+How to Fix
+The simplest solution is to remove the reusePort: true option, as it's often not strictly necessary unless you are explicitly using Node.js clustering in a way that requires it (which doesn't seem to be the case here).
+Modify the server.listen block in your server/index.ts like this:
+// ALWAYS serve the app on port 5000
+  // this serves both the API and the client.
+  // It is the only port that is not firewalled.
+  const port = 5000;
+
+  // Try different binding approaches for macOS
+  // Some macOS versions have issues with specific binding addresses
+  if (process.platform === 'darwin') {
+    // For macOS, just specify the port without a host binding
+    // This typically binds to 0.0.0.0 or :: (all interfaces) depending on Node/OS version
+    server.listen(port, () => {
+      log(`serving on port ${port} (macOS mode)`);
+    });
+  } else {
+    // For other platforms (Linux, Windows, etc.), explicitly use 0.0.0.0
+    // REMOVED reusePort: true
+    server.listen({
+      port,
+      host: '0.0.0.0',
+      // reusePort: true, // <--- REMOVE OR COMMENT OUT THIS LINE
+    }, () => {
+      log(`serving on 0.0.0.0:${port}`);
+    });
+  }
+})(); // End of async IIFE
+Use code with caution.
+TypeScript
+Explanation of Changes
+Removed reusePort: true: This eliminates the potentially unsupported socket option, which is the most likely cause of the ENOTSUP error.
+Kept host: '0.0.0.0': Binding to 0.0.0.0 makes the server listen on all available IPv4 network interfaces on the machine. This is standard practice for servers that need to be accessible from the network (or from localhost/127.0.0.1 on the same machine).
+Kept macOS distinction: While binding to 0.0.0.0 often works on macOS too, the original code had a specific reason for treating macOS differently. Removing reusePort from the non-macOS branch is the targeted fix for the error you encountered, so we leave the macOS logic as it was for now.
+Next Steps
+Make the code change above in your server/index.ts file.
+Save the file.
+Run npm run dev again.
+The server should now start without the ENOTSUP error. Your Electron app, when running in development mode, should still be able to connect to http://127.0.0.1:5000 because a server listening on 0.0.0.0 will accept connections directed to any of its IP addresses, including the loopback address 127.0.0.1.
