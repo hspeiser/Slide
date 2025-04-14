@@ -11,21 +11,25 @@ const electronPath = require('electron');
 console.log('Starting Electron with macOS compatibility mode...');
 
 // Launch Electron with special flags for macOS compatibility
+// NOTE: Key difference is we're setting DISABLE_GPU environment variable
+//       which will be detected BEFORE the app.ready event
 const electronProcess = spawn(electronPath, [
-  path.join(__dirname, 'main.js'),
-  '--disable-gpu-compositing',
-  '--disable-gpu',
-  '--disable-software-rasterizer'
+  // Add these arguments before the main script to ensure they take effect
+  '--no-sandbox',                  // Remove sandbox which can cause issues with modern macOS
+  '--disable-gpu',                 // Completely disable GPU hardware acceleration
+  '--disable-gpu-compositing',     // Disable GPU compositing
+  '--disable-gpu-rasterization',   // Disable GPU rasterization
+  '--disable-software-rasterizer', // Use minimal software drawing
+  path.join(__dirname, 'main.js')  // This must come after all the flags
 ], {
   stdio: 'inherit',
   env: {
     ...process.env,
     // Force various compatibility settings
-    ELECTRON_IS_DEV: "1",
-    DISABLE_GPU: "true",
-    // Use a safe software rendering path
-    ELECTRON_DISABLE_GPU_COMPOSITING: "1",
-    ELECTRON_ENABLE_LOGGING: "1"
+    ELECTRON_IS_DEV: "1",         // Enable dev mode to see errors
+    DISABLE_GPU: "true",          // This is detected early in main.js before app.ready
+    ELECTRON_ENABLE_LOGGING: "1", // Enable full electron logging
+    ELECTRON_STANDALONE: "true",  // Use standalone mode for better reliability
   }
 });
 

@@ -5,28 +5,31 @@ const url = require('url');
 const isDev = require('electron-is-dev');
 const fs = require('fs');
 
+// Import macOS-specific configuration helpers
+const { configureForMacOS, getMacOSWindowSettings } = 
+  process.platform === 'darwin' ? require('./macos-app-config') : { 
+    configureForMacOS: () => console.log('Not on macOS, skipping configuration'),
+    getMacOSWindowSettings: () => ({})
+  };
+
+// Apply macOS-specific configuration if needed
+// This must happen BEFORE app is ready
+if (process.platform === 'darwin') {
+  console.log('Detected macOS platform, applying special configuration');
+  configureForMacOS(app);
+}
+
 // Keep a global reference of the window object to avoid garbage collection
 let mainWindow;
 
 function createWindow() {
-  // Set macOS-specific app settings for compatibility with newer versions
+  // Additional macOS window configuration
   if (process.platform === 'darwin') {
-    // Prevent issues with translucency on modern macOS
-    app.commandLine.appendSwitch('disable-gpu-compositing');
-    
-    // Add transparency settings that help with newer macOS versions
-    if (parseInt(process.versions.electron) >= 28) {
-      app.commandLine.appendSwitch('enable-macos-layers-ui-compositing');
-    }
-    
-    // Disable hardware acceleration if we detect issues
-    if (process.env.DISABLE_GPU === 'true') {
-      app.disableHardwareAcceleration();
-    }
+    console.log('Configuring for macOS platform');
   }
 
-  // Create the browser window with platform-specific settings
-  mainWindow = new BrowserWindow({
+  // Prepare window settings based on platform
+  const windowSettings = {
     width: 1200,
     height: 800,
     webPreferences: {
@@ -36,16 +39,34 @@ function createWindow() {
     },
     title: 'Scientific Calculator',
     icon: path.join(__dirname, 'icon.png'),
-    // macOS-specific settings
-    ...(process.platform === 'darwin' ? {
-      titleBarStyle: 'hiddenInset', // Better style on macOS
-      vibrancy: 'under-window',     // Modern macOS look
-      backgroundColor: '#00000000', // Transparent background
-      roundedCorners: true,         // Modern macOS rounded corners
-      visualEffectState: 'active',  // Keep visual effects active
-      trafficLightPosition: { x: 10, y: 10 } // Fix traffic light positioning
-    } : {})
-  });
+  };
+  
+  // Apply macOS-specific window settings if needed
+  if (process.platform === 'darwin') {
+    // Get optimized macOS settings from our helper module
+    // These settings are designed to avoid crashes on modern macOS
+    const macOSSettings = getMacOSWindowSettings();
+    
+    // Special handling for versions with crash issues
+    if (process.env.DISABLE_GPU === 'true') {
+      // Use simplified non-transparent settings for better compatibility
+      Object.assign(windowSettings, {
+        transparent: false,
+        backgroundColor: '#2e2c29', // Dark background color
+        titleBarStyle: 'default',   // Standard title bar
+        vibrancy: undefined,        // Disable vibrancy effects
+        roundedCorners: false       // Disable rounded corners
+      });
+      console.log('Using simplified macOS window settings for compatibility');
+    } else {
+      // Use normal macOS settings
+      Object.assign(windowSettings, macOSSettings);
+      console.log('Using standard macOS window settings');
+    }
+  }
+  
+  // Create the browser window with appropriate settings
+  mainWindow = new BrowserWindow(windowSettings);
 
   // Load the app
   let startUrl;
