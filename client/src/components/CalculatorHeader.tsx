@@ -18,8 +18,9 @@ const CalculatorHeader = ({ angleMode, toggleAngleMode, onShowHelp, onShowSettin
 
   return (
     <header className="border-b border-gray-700 flex justify-between items-center p-2 sticky top-0 bg-[hsl(var(--editor-bg))] z-10">
-      <div className="flex items-center">
-        <h1 className="text-lg font-semibold">Bitwise</h1>
+      <div className="flex items-center space-x-2">
+        <img src="/logo.png" alt="01 Logo" className="h-8 w-auto" />
+        <h1 className="text-lg font-semibold">01 Calculator</h1>
       </div>
       
       <div className="flex items-center space-x-3">
