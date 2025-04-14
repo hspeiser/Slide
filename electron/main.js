@@ -26,7 +26,7 @@ function createWindow() {
   const startUrl = isDev
     ? 'http://localhost:5000' // Development server URL
     : url.format({
-        pathname: path.join(__dirname, '../dist/public/index.html'),
+        pathname: path.join(__dirname, '../dist/index.html'),
         protocol: 'file:',
         slashes: true,
       });

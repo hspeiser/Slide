@@ -1,8 +1,32 @@
 // Script to run the Electron app in development mode
 const { spawn } = require('child_process');
 const waitOn = require('wait-on');
-const electron = require('electron');
 const path = require('path');
+const fs = require('fs');
+
+// Find electron in node_modules
+let electronPath;
+try {
+  electronPath = require('electron');
+} catch (error) {
+  // If not found directly, try to find it in node_modules
+  const possiblePaths = [
+    path.join(__dirname, '..', 'node_modules', '.bin', 'electron'),
+    path.join(__dirname, '..', 'node_modules', 'electron', 'dist', 'electron')
+  ];
+  
+  for (const testPath of possiblePaths) {
+    if (fs.existsSync(testPath)) {
+      electronPath = testPath;
+      break;
+    }
+  }
+  
+  if (!electronPath) {
+    console.error('Electron executable not found. Make sure it is installed.');
+    process.exit(1);
+  }
+}
 
 // Start the web server - use npm run dev instead of direct tsx call
 console.log('Starting the web server...');
@@ -21,7 +45,7 @@ waitOn({
     console.log('Web server is up! Starting Electron...');
     
     // Start Electron app
-    const electronProcess = spawn(electron, [path.join(__dirname, 'main.js')], {
+    const electronProcess = spawn(electronPath, [path.join(__dirname, 'main.js')], {
       stdio: 'inherit'
     });
 

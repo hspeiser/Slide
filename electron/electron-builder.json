@@ -5,10 +5,12 @@
     "output": "release/"
   },
   "files": [
-    "dist/public/**/*",
-    "electron/**/*",
-    "electron/node_modules/**/*"
+    "dist/**/*",
+    "electron/**/*"
   ],
+  "extraMetadata": {
+    "main": "electron/main.js"
+  },
   "mac": {
     "target": ["dmg", "zip"],
     "category": "public.app-category.utilities"
