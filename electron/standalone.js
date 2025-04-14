@@ -38,13 +38,41 @@ try {
 // Check if we need to build the app first
 if (!fs.existsSync(path.join(__dirname, '..', 'dist', 'index.html'))) {
   console.log('Dist folder not found. Building the application first...');
+  
+  // First, check if dist folder exists and has permission issues
+  const distPath = path.join(__dirname, '..', 'dist');
+  if (fs.existsSync(distPath)) {
+    console.log('Existing dist folder found. Checking if we have write permissions...');
+    
+    try {
+      // Create a test file to check write permissions
+      const testFile = path.join(distPath, 'permission-test.txt');
+      fs.writeFileSync(testFile, 'testing permissions');
+      fs.unlinkSync(testFile);
+      console.log('We have write permissions to the dist folder.');
+    } catch (error) {
+      console.error('Permission issues with the dist folder. Please run:');
+      console.error(`sudo chmod -R 755 "${distPath}"`);
+      console.error('Or run this script with sudo privileges.');
+      process.exit(1);
+    }
+  }
+  
+  // Try to build the app with higher permissions if supported
   try {
-    const buildResult = require('child_process').execSync('npm run build', {
+    console.log('Building the application...');
+    const buildCmd = process.platform === 'darwin' || process.platform === 'linux' 
+      ? 'NODE_ENV=production npx vite build' 
+      : 'set NODE_ENV=production && npx vite build';
+    
+    require('child_process').execSync(buildCmd, {
       cwd: path.join(__dirname, '..'),
       stdio: 'inherit'
     });
   } catch (error) {
-    console.error('Failed to build the application:', error);
+    console.error('Failed to build the application. Try running:');
+    console.error('sudo npm run build');
+    console.error('And then run this script again.');
     process.exit(1);
   }
 }
