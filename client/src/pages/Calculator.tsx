@@ -3,7 +3,6 @@ import CalculatorHeader from "@/components/CalculatorHeader";
 import CalculatorFooter from "@/components/CalculatorFooter";
 import EditorPanel, { LineWrapInfo } from "@/components/EditorPanel";
 import ResultPanel from "@/components/ResultPanel";
-import HelpModal from "@/components/HelpModal";
 import SettingsModal from "@/components/SettingsModal";
 import { evaluate } from "@/lib/calculator";
 import * as math from "mathjs";
@@ -28,16 +27,25 @@ sin(45 deg) // Trig
 const Calculator = () => {
   const { isElectron } = usePlatform();
   const [content, setContent] = useState(WELCOME_MESSAGE);
+  const [editorContent, setEditorContent] = useState(WELCOME_MESSAGE);
   const [results, setResults] = useState<(string | null)[]>([]);
   const [variables, setVariables] = useState<Record<string, any>>({});
   const [angleMode, setAngleMode] = useState<"DEG" | "RAD">("DEG");
-  const [showHelp, setShowHelp] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [decimalPlaces, setDecimalPlaces] = useState(3);
   const [highlightedLine, setHighlightedLine] = useState<number | null>(null);
   const [wrapInfo, setWrapInfo] = useState<LineWrapInfo>({});
 
-  // Calculate results whenever content, angle mode, or decimal places change
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const prevContentRef = useRef<string>(content);
+  const prevCalculationStateRef = useRef<{ results: (string | null)[]; variables: Record<string, any> }>({ results: [], variables: {} });
+
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => setContent(editorContent), 120);
+    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
+  }, [editorContent]);
+
   useEffect(() => {
     const lines = content.split("\n");
     const newResults: (string | null)[] = [];
@@ -245,13 +253,18 @@ const Calculator = () => {
 
     setResults(newResults);
     setVariables(newVariables);
+    prevContentRef.current = content;
+    prevCalculationStateRef.current = { results: newResults, variables: newVariables };
   }, [content, angleMode, decimalPlaces]);
 
   const handleClear = () => {
     if (window.confirm("Are you sure you want to clear all calculations?")) {
+      setEditorContent("");
       setContent("");
       setResults([]);
       setVariables({});
+      prevContentRef.current = "";
+      prevCalculationStateRef.current = { results: [], variables: {} };
     }
   };
 
@@ -335,33 +348,25 @@ const Calculator = () => {
     setAngleMode((prev) => (prev === "DEG" ? "RAD" : "DEG"));
   };
 
-  return (
-    <div className="min-h-screen flex flex-col bg-[hsl(var(--editor-bg))] text-[hsl(var(--editor-text))] font-mono">
-      <CalculatorHeader
-        angleMode={angleMode}
-        toggleAngleMode={toggleAngleMode}
-        onShowHelp={() => setShowHelp(true)}
-        onShowSettings={() => setShowSettings(true)}
-      />
+  // Calculate total lines based on the immediate editor content
+  const totalLines = editorContent.split('\n').length;
 
-      <main className="flex-1 flex overflow-hidden">
-        {/* Use a simple flex layout with fixed percentages, no vertical bar */}
-        <div
-          className="flex flex-row h-full w-full overflow-hidden"
-          style={{ display: "grid", gridTemplateColumns: "70% 30%" }}
-        >
-          {/* Input panel - always takes 70% of available space */}
-          <div className="h-full min-h-[200px] relative">
+  return (
+    <div className="h-screen flex flex-col bg-[hsl(var(--editor-bg))] text-[hsl(var(--editor-text))] font-mono">
+      <CalculatorHeader />
+      
+      <main className="flex-1 overflow-hidden flex">
+        <div className="flex flex-row w-full h-full">
+          <div className="w-[70%] h-full relative flex-shrink-0">
             <EditorPanel
-              content={content}
-              onChange={setContent}
+              content={editorContent}
+              onChange={setEditorContent}
               highlightedLine={highlightedLine}
               onWrapInfoChange={setWrapInfo}
             />
           </div>
 
-          {/* Output panel - always takes 30% of available space */}
-          <div className="h-full overflow-auto">
+          <div className="flex-1 w-[30%] h-full overflow-y-auto">
             <ResultPanel
               results={results}
               onHighlightLine={setHighlightedLine}
@@ -372,13 +377,14 @@ const Calculator = () => {
       </main>
 
       <CalculatorFooter
-        variableCount={Object.keys(variables).length}
         angleMode={angleMode}
-        onClear={handleClear}
+        toggleAngleMode={toggleAngleMode}
         onExport={handleExport}
+        onShowSettings={() => setShowSettings(true)}
+        onClear={handleClear}
+        totalLines={totalLines}
       />
 
-      {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
       {showSettings && (
         <SettingsModal
           onClose={() => setShowSettings(false)}

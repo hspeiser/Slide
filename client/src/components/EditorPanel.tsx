@@ -132,6 +132,34 @@ const editorTheme = EditorView.theme({
     overflowX: "auto",
     overflowY: "auto",
   },
+
+  // --- ADD CURSOR STYLES HERE ---
+  ".cm-cursor": {
+    borderLeftWidth: "4px", // Increased thickness further
+    borderLeftColor: "hsl(var(--editor-cursor))",
+    animation: "blink 1.1s cubic-bezier(0.5, 0, 0.5, 1) infinite",
+    transition: "left 0.1s ease-out, top 0.1s ease-out",
+    height: "1.8em !important", // Increased height further
+    minHeight: "1.8em !important",
+    boxShadow: "0 0 5px hsla(var(--editor-cursor) / 0.6)", // Slightly stronger shadow
+    position: "relative",
+    zIndex: "10",
+  },
+  // Special background for empty lines (can stay here or move, placement less critical)
+  ".cm-line:empty::before": {
+      content: "' '",
+      position: "absolute",
+      left: 0, right: 0, top: 0, bottom: 0,
+      backgroundColor: "hsla(var(--editor-active-line) / 0.25)",
+      borderRadius: "2px",
+      pointerEvents: "none",
+      zIndex: "0",
+  },
+  "@keyframes blink": {
+    "0%, 100%": { opacity: 1 },
+    "50%": { opacity: 0.7 },
+  },
+  // --- END CURSOR STYLES ---
 });
 
 const EditorPanel = ({
@@ -216,7 +244,6 @@ const EditorPanel = ({
   useEffect(() => {
     if (!editorRef.current) return;
 
-    // Create editor only once
     if (!editorViewRef.current) {
       const startState = EditorState.create({
         doc: content,
@@ -238,38 +265,6 @@ const EditorPanel = ({
           editorTheme,
           // Show spaces with visible dots
           showSpaces,
-          // Simpler, less glowy cursor with smooth transitions
-          EditorView.theme({
-            ".cm-cursor": {
-              borderLeftWidth: "2px",
-              borderLeftColor: "hsl(var(--editor-cursor))",
-              animation: "blink 1.2s ease-in-out infinite",
-              transition: "left 0.1s ease-out, top 0.1s ease-out",
-              height: "auto !important",
-              minHeight: "1.2em",
-              boxShadow: "0 0 3px hsla(var(--editor-cursor) / 0.4)",
-              position: "relative",
-              zIndex: "10",
-            },
-            // Special background for empty lines
-            ".cm-line:empty::before": {
-              content: "' '",
-              position: "absolute",
-              left: 0,
-              right: 0,
-              top: 0,
-              bottom: 0,
-              backgroundColor: "hsla(var(--editor-active-line) / 0.25)",
-              borderRadius: "2px",
-              pointerEvents: "none",
-              zIndex: "0",
-            },
-            "@keyframes blink": {
-              "0%, 100%": { opacity: 1 },
-              "50%": { opacity: 0.7 },
-            },
-          }),
-          // Add history support for undo/redo
           history(),
           keymap.of([
             ...defaultKeymap,
@@ -318,83 +313,31 @@ const EditorPanel = ({
   // Update editor theme when theme changes
   useEffect(() => {
     if (!editorViewRef.current) return;
-
+    // This effect RECREATES the state. It MUST include editorTheme
+    // which now correctly contains the cursor styles.
     const newState = EditorState.create({
       doc: editorViewRef.current.state.doc,
       extensions: [
-        // Custom minimal setup with only what we need
+        // ... (Copy ALL necessary extensions from the initial setup here)
         EditorState.tabSize.of(2),
         EditorState.allowMultipleSelections.of(true),
-        // Enable line wrapping with default space handling
         EditorView.lineWrapping,
-        // Keep auto-brackets for parentheses but disable most other auto features
         javascript({ jsx: false }),
-        // Hide gutters using CSS instead of direct configuration
-        EditorView.theme({
-          ".cm-gutters": { display: "none" },
-          ".cm-content": { marginLeft: "4px" },
-        }),
-        theme === "dark" ? oneDark : [],
+        EditorView.theme({ ".cm-gutters": { display: "none" }, ".cm-content": { marginLeft: "4px" } }),
+        theme === "dark" ? oneDark : [], // Apply correct theme
         highlightState,
-        // Show spaces with visible dots
+        editorTheme, // Apply the main theme (contains cursor styles)
         showSpaces,
-        // Simpler, less glowy cursor with smooth transitions
-        EditorView.theme({
-          ".cm-cursor": {
-            borderLeftWidth: "2px",
-            borderLeftColor: "hsl(var(--editor-cursor))",
-            animation: "blink 1.2s ease-in-out infinite",
-            transition: "left 0.1s ease-out, top 0.1s ease-out",
-            height: "auto !important",
-            minHeight: "1.2em",
-            boxShadow: "0 0 3px hsla(var(--editor-cursor) / 0.4)",
-            position: "relative",
-            zIndex: "10",
-          },
-          // Special background for empty lines
-          ".cm-line:empty::before": {
-            content: "' '",
-            position: "absolute",
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-            backgroundColor: "hsla(var(--editor-active-line) / 0.25)",
-            borderRadius: "2px",
-            pointerEvents: "none",
-            zIndex: "0",
-          },
-          "@keyframes blink": {
-            "0%, 100%": { opacity: 1 },
-            "50%": { opacity: 0.7 },
-          },
-        }),
-        // Add history support for undo/redo
         history(),
-        keymap.of([
-          ...defaultKeymap,
-          ...historyKeymap,
-          // Additional keybindings for undo/redo with higher precedence
-          { key: "Mod-z", run: undo, preventDefault: true },
-          { key: "Mod-y", run: redo, preventDefault: true },
-          { key: "Mod-Shift-z", run: redo, preventDefault: true },
-          // No custom space handler needed - CodeMirror's default works correctly
-        ]),
-        EditorView.updateListener.of((update: ViewUpdate) => {
-          if (update.docChanged) {
-            onChange(update.state.doc.toString());
-          }
-          
-          // Measure and report heights if doc, geometry, or viewport changed
-          if (update.docChanged || update.geometryChanged || update.viewportChanged) {
-            measureAndReportLineHeights(update.view);
-          }
+        keymap.of([ ...defaultKeymap, ...historyKeymap, { key: "Mod-z", run: undo, preventDefault: true }, { key: "Mod-y", run: redo, preventDefault: true }, { key: "Mod-Shift-z", run: redo, preventDefault: true } ]), 
+        EditorView.updateListener.of((update: ViewUpdate) => { 
+            if (update.docChanged) { onChange(update.state.doc.toString()); } 
+            if (update.docChanged || update.geometryChanged || update.viewportChanged) { measureAndReportLineHeights(update.view); } 
         }),
       ],
     });
-
     editorViewRef.current.setState(newState);
-  }, [theme]);
+  }, [theme]); // This was the culprit - theme change overwrote styles!
 
   // Update editor content if it changes externally
   useEffect(() => {
@@ -425,7 +368,7 @@ const EditorPanel = ({
   }, [highlightedLine]);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden h-full">
+    <div className="flex-1 flex flex-col h-full overflow-hidden">
       <div
         ref={editorRef}
         className="editor-container flex-1 h-full overflow-auto p-4 focus:outline-none"

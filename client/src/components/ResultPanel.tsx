@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { LineWrapInfo } from './EditorPanel';
-import { motion } from 'framer-motion';
 
 interface ResultPanelProps {
   results: any[];
@@ -89,7 +88,7 @@ const ResultPanel = ({ results, onHighlightLine, wrapInfo = {} }: ResultPanelPro
       toast({
         title: "Copied!",
         description: "Result copied to clipboard",
-        duration: 1500,
+        duration: 800,
       });
       
       // Highlight the corresponding editor line
@@ -100,7 +99,7 @@ const ResultPanel = ({ results, onHighlightLine, wrapInfo = {} }: ResultPanelPro
       setTimeout(() => {
         onHighlightLine?.(null);
         setCopiedIndex(null);
-      }, 1000);
+      }, 500);
     });
   };
   
@@ -131,7 +130,7 @@ const ResultPanel = ({ results, onHighlightLine, wrapInfo = {} }: ResultPanelPro
               <div 
                 key={index} 
                 className={`result-line flex justify-end items-start overflow-x-auto px-2 
-                  transition-colors duration-200 ease-in-out ${
+                  transition-colors duration-100 ease-in-out ${
                   copiedIndex === index ? 'bg-[hsl(var(--editor-selection))] opacity-90' : ''
                 }`}
                 style={{
@@ -140,23 +139,19 @@ const ResultPanel = ({ results, onHighlightLine, wrapInfo = {} }: ResultPanelPro
                    paddingBottom: '0.15rem' // Match editor line padding
                  }}
               >
-                {/* Animate result value presence and change */}
+                {/* Display result value without animation for better performance */}
                 {displayValue && (
-                  <motion.span 
-                    key={`${index}-${displayValue}`}
+                  <span 
                     className={`result-value ml-auto px-2 py-0.5 rounded-md cursor-pointer
                               text-[hsl(var(--editor-result))] hover:bg-[hsl(var(--editor-result))] 
-                              hover:text-[hsl(var(--editor-bg))] transition-all duration-200 ease-in-out
+                              hover:text-[hsl(var(--editor-bg))] transition-colors duration-50 ease-in-out
                               whitespace-nowrap`}
                     onClick={() => copyToClipboard(result, index)}
                     onMouseEnter={() => onHighlightLine?.(index)}
                     onMouseLeave={() => onHighlightLine?.(null)}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
                   >
                     {displayValue}
-                  </motion.span>
+                  </span>
                 )}
               </div>
             );

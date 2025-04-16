@@ -40,6 +40,8 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    frame: false,
+    titleBarStyle: 'hidden',
     webPreferences: {
       // sandbox: false, // Keep sandbox enabled unless absolutely needed
       contextIsolation: true,
